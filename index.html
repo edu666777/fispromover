@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Índice Geral Física - Promover</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- VARIÁVEIS DE TEMA --- */
+        :root {
+            --bg-color: #F8F9FA;
+            --text-color: #2D3748;
+            --border-color: #000000;
+            --white: #FFFFFF;
+
+            /* Cores das Categorias - Tema Física */
+            --color-fund: #607D8B; /* Azul Cinzentado - Base */
+            --bg-fund: #CFD8DC;
+            
+            --color-cine: #E65100; /* Laranja - Movimento */
+            --bg-cine: #FFE0B2;
+            
+            --color-dina: #b71c1c; /* Vermelho Escuro - Força */
+            --bg-dina: #ffcdd2;
+
+            --color-ener: #FBC02D; /* Amarelo - Energia */
+            --bg-ener: #FFF9C4;
+
+            --color-feno: #8E24AA; /* Roxo - Fenômenos/Ondas */
+            --bg-feno: #E1BEE7;
+
+            --color-elet: #0277BD; /* Azul - Eletricidade */
+            --bg-elet: #B3E5FC;
+
+            --color-simu: #333333; /* Chumbo - Prática */
+            --bg-simu: #E0E0E0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding-bottom: 80px;
+            overflow-x: hidden;
+        }
+
+        /* --- HEADER --- */
+        .logo-header {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            justify-content: center;
+            padding: 30px 0 20px 0; 
+        }
+        .logo-img {
+            max-height: 130px; 
+            width: auto;
+            display: block;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            text-align: center;
+            font-weight: 900;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        .subtitle {
+            text-align: center;
+            color: #555;
+            margin-bottom: 25px;
+            font-size: 0.9rem;
+        }
+
+        /* --- BARRA DE PESQUISA --- */
+        .search-container {
+            position: relative;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px 20px 15px 50px;
+            border: 2px solid var(--border-color);
+            border-radius: 50px;
+            background-color: var(--white);
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-color);
+            box-shadow: 4px 4px 0px var(--border-color);
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        .search-input:focus {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px var(--border-color);
+        }
+        .search-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+            opacity: 0.6;
+        }
+
+        /* --- BADGES DE CATEGORIA --- */
+        .category-header {
+            display: flex;
+            align-items: center;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        .badge {
+            padding: 8px 16px;
+            color: white;
+            font-weight: 700;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            box-shadow: 3px 3px 0px rgba(0,0,0,0.2);
+        }
+        .badge-fund { background-color: var(--color-fund); }
+        .badge-cine { background-color: var(--color-cine); }
+        .badge-dina { background-color: var(--color-dina); }
+        .badge-ener { background-color: var(--color-ener); color: #000; } 
+        .badge-feno { background-color: var(--color-feno); }
+        .badge-elet { background-color: var(--color-elet); }
+        .badge-simu { background-color: var(--color-simu); }
+
+        /* --- BOTÕES DOS TÓPICOS --- */
+        .topic-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-decoration: none;
+            color: var(--text-color);
+            padding: 16px 20px;
+            background-color: var(--white);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            box-shadow: 4px 4px 0px var(--border-color);
+            transition: all 0.1s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .topic-btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px var(--border-color);
+            background-color: #FAFAFA;
+        }
+
+        .topic-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px var(--border-color);
+        }
+
+        .topic-btn::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 10px;
+            border-right: 2px solid var(--border-color);
+        }
+
+        /* Cores das laterais por categoria */
+        .btn-fund::before { background-color: var(--bg-fund); }
+        .btn-cine::before { background-color: var(--bg-cine); }
+        .btn-dina::before { background-color: var(--bg-dina); }
+        .btn-ener::before { background-color: var(--bg-ener); }
+        .btn-feno::before { background-color: var(--bg-feno); }
+        .btn-elet::before { background-color: var(--bg-elet); }
+        .btn-simu::before { background-color: var(--bg-simu); }
+
+        .arrow { font-weight: 900; color: #CBD5E0; }
+        .topic-btn:hover .arrow { color: var(--text-color); }
+
+        /* Mensagem de Não Encontrado */
+        #no-results {
+            text-align: center;
+            color: #888;
+            margin-top: 30px;
+            font-weight: 600;
+            display: none;
+        }
+
+        footer {
+            margin-top: 50px;
+            font-size: 0.8rem;
+            color: #888;
+            text-align: center;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="logo-header">
+        <img src="logo.png" alt="Logo Promover" class="logo-img">
+    </div>
+
+    <div class="container">
+        <h1>Índice Geral Física</h1>
+        <p class="subtitle">Foco Estratégico IFCE</p>
+
+        <div class="search-container">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" class="search-input" placeholder="Pesquisar conteúdo de Física...">
+        </div>
+
+        <div class="content-group">
+            <div class="category-header"><span class="badge badge-fund">📐 Fundamentos Básicos</span></div>
+            <a href="introducao-fisica.html" class="topic-btn btn-fund">O que é Física e Método Científico <span class="arrow">➜</span></a>
+            <a href="sistema-internacional.html" class="topic-btn btn-fund">Sistema Internacional (SI) e Conversões <span class="arrow">➜</span></a>
+            <a href="grandezas-fisicas.html" class="topic-btn btn-fund">Grandezas Escalares vs. Vetoriais <span class="arrow">➜</span></a>
+        </div>
+
+        <div class="content-group">
+            <div class="category-header"><span class="badge badge-cine">🏃‍♂️ Cinemática</span></div>
+            <a href="conceitos-movimento.html" class="topic-btn btn-cine">Referencial, Trajetória e Deslocamento <span class="arrow">➜</span></a>
+            <a href="velocidade-media.html" class="topic-btn btn-cine">Velocidade Escalar Média <span class="arrow">➜</span></a>
+            <a href="mru.html" class="topic-btn btn-cine">Movimento Retilíneo Uniforme (MRU) <span class="arrow">➜</span></a>
+            <a href="mruv.html" class="topic-btn btn-cine">Movimento Retilíneo Uniformemente Variado (MRUV) <span class="arrow">➜</span></a>
+            <a href="graficos-cinematica.html" class="topic-btn btn-cine">Interpretação de Gráficos (V x T) <span class="arrow">➜</span></a>
+        </div>
+
+        <div class="content-group">
+            <div class="category-header"><span class="badge badge-dina">🏋️ Dinâmica</span></div>
+            <a href="conceito-forca.html" class="topic-btn btn-dina">Conceito de Força e Inércia <span class="arrow">➜</span></a>
+            <a href="leis-newton.html" class="topic-btn btn-dina">As 3 Leis de Newton (Aplicações) <span class="arrow">➜</span></a>
+            <a href="massa-peso.html" class="topic-btn btn-dina">Massa vs. Peso (Diferença Definitiva) <span class="arrow">➜</span></a>
+            <a href="forca-atrito.html" class="topic-btn btn-dina">Força de Atrito (Visão Geral) <span class="arrow">➜</span></a>
+        </div>
+
+        <div class="content-group">
+            <div class="category-header"><span class="badge badge-ener">⚡ Energia e Trabalho</span></div>
+            <a href="trabalho-fisica.html" class="topic-btn btn-ener">O que é Trabalho em Física <span class="arrow">➜</span></a>
+            <a href="energia-cinetica.html" class="topic-btn btn-ener">Energia Cinética (Relação com Velocidade) <span class="arrow">➜</span></a>
+            <a href="energia-potencial.html" class="topic-btn btn-ener">Energia Potencial Gravitacional <span class="arrow">➜</span></a>
+            <a href="conservacao-energia.html" class="topic-btn btn-ener">Conservação da Energia Mecânica <span class="arrow">➜</span></a>
+        </div>
+
+        <div class="content-group">
+            <div class="category-header"><span class="badge badge-feno">🌡️ Termologia, Ondas e Óptica</span></div>
+            <a href="calor-temperatura.html" class="topic-btn btn-feno">Calor vs. Temperatura (Escalas Termométricas) <span class="arrow">➜</span></a>
+            <a href="propagacao-calor.html" class="topic-btn btn-feno">Propagação: Condução, Convecção e Irradiação <span class="arrow">➜</span></a>
+            <a href="fundamentos-ondas.html" class="topic-btn btn-feno">Ondas Mecânicas (Som) vs. Eletromagnéticas (Luz) <span class="arrow">➜</span></a>
+            <a href="reflexao-refracao.html" class="topic-btn btn-feno">Princípios Básicos de Reflexão e Refração <span class="arrow">➜</span></a>
+        </div>
+
+        <div class="content-group">
+            <div class="category-header"><span class="badge badge-elet">💡 Eletrodinâmica Básica</span></div>
+            <a href="tensao-corrente.html" class="topic-btn btn-elet">Tensão, Corrente e Resistência <span class="arrow">➜</span></a>
+            <a href="lei-ohm.html" class="topic-btn btn-elet">A 1ª Lei de Ohm <span class="arrow">➜</span></a>
+            <a href="circuitos-serie-paralelo.html" class="topic-btn btn-elet">Circuitos em Série e Paralelo (Prática) <span class="arrow">➜</span></a>
+        </div>
+
+        <div class="content-group">
+            <div class="category-header"><span class="badge badge-simu">🎯 Prática e Simulados</span></div>
+            <a href="banco-questoes.html" class="topic-btn btn-simu">Banco de Questões IFCE <span class="arrow">➜</span></a>
+            <a href="flashcards-conceitos.html" class="topic-btn btn-simu">Flashcards de Revisão Teórica <span class="arrow">➜</span></a>
+            <a href="simulados-completos.html" class="topic-btn btn-simu">Simulados Completos (Natureza) <span class="arrow">➜</span></a>
+        </div>
+
+        <div id="no-results">
+            <p>😕 Nenhum tópico encontrado com esse nome.</p>
+        </div>
+
+    </div>
+
+    <footer>
+        © 2026 Promover Educação
+    </footer>
+
+    <script>
+        // Lógica de Pesquisa com normalização de acentos
+        const searchInput = document.getElementById('searchInput');
+        const contentGroups = document.querySelectorAll('.content-group');
+        const noResultsMsg = document.getElementById('no-results');
+
+        searchInput.addEventListener('keyup', function(e) {
+            const term = e.target.value.toLowerCase();
+            const termNormalized = term.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            let totalVisibleGroups = 0;
+
+            contentGroups.forEach(group => {
+                const links = group.querySelectorAll('.topic-btn');
+                let hasVisibleLink = false;
+
+                links.forEach(link => {
+                    const text = link.textContent.toLowerCase();
+                    const textNormalized = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    
+                    if (textNormalized.includes(termNormalized)) {
+                        link.style.display = 'flex';
+                        hasVisibleLink = true;
+                    } else {
+                        link.style.display = 'none';
+                    }
+                });
+
+                if (hasVisibleLink) {
+                    group.style.display = 'block';
+                    totalVisibleGroups++;
+                } else {
+                    group.style.display = 'none';
+                }
+            });
+
+            if (totalVisibleGroups === 0) {
+                noResultsMsg.style.display = 'block';
+            } else {
+                noResultsMsg.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
