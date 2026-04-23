@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Física: As Leis de Ohm - Promover</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* --- VARIÁVEIS DE COR E TEMA: MATERIAIS & RESISTÊNCIA (Esmeralda e Índigo) --- */
+        :root {
+            --bg-color: #F0FDF4; /* Verde Esmeralda 50 */
+            --text-color: #064E3B; /* Verde Esmeralda 950 */
+            --border-color: #047857; /* Verde Esmeralda 700 */
+            --white: #FFFFFF;
+            
+            --theme-light: #D1FAE5; /* Verde Esmeralda 100 */
+            --theme-medium: #10B981; /* Verde Esmeralda 500 */
+            --theme-dark: #059669; /* Verde Esmeralda 600 */
+            --theme-contrast: #6366F1; /* Índigo 500 */
+            --theme-accent: #F59E0B; /* Âmbar */
+            --theme-text-active: #FFFFFF;
+            
+            --correct-bg: #ECFCCB;
+            --correct-border: #16A34A;
+            --wrong-bg: #FFE4E6;
+            --wrong-border: #E11D48;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 15px 120px 15px;
+            background-image: radial-gradient(var(--theme-medium) 1px, transparent 1.5px);
+            background-size: 30px 30px;
+        }
+
+        /* --- ANIMAÇÕES --- */
+        @keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1) rotate(-5deg); color: var(--theme-contrast); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+        .pulse-effect { animation: pulse 2s infinite; display: inline-block; }
+        .shake-effect { animation: shake 0.4s ease-in-out; }
+
+        /* --- LAYOUT PRINCIPAL --- */
+        .container { width: 100%; max-width: 650px; display: flex; flex-direction: column; gap: 25px; }
+        .logo-header { display: flex; flex-direction: column; align-items: center; padding: 15px 0 25px 0; text-align: center; }
+        .css-logo { font-size: 1.5rem; font-weight: 900; color: var(--theme-text-active); text-transform: uppercase; letter-spacing: -1px; border: 3px solid var(--border-color); padding: 8px 24px; border-radius: 12px; background: var(--theme-dark); box-shadow: 4px 4px 0px var(--theme-contrast); margin-bottom: 15px; transform: rotate(-2deg); }
+        h1 { font-size: 2rem; font-weight: 900; color: var(--text-color); text-transform: uppercase; letter-spacing: -0.5px; line-height: 1.1; }
+        .subtitle { font-size: 1rem; color: var(--white); font-weight: 700; margin-top: 5px; background: var(--theme-contrast); padding: 4px 12px; border-radius: 8px; border: 2px solid var(--border-color); }
+
+        /* --- NAVEGAÇÃO --- */
+        .toggle-container { background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 6px; display: flex; box-shadow: 4px 4px 0px var(--border-color); position: sticky; top: 15px; z-index: 50; }
+        .toggle-btn { flex: 1; border: none; background: none; padding: 12px 0; border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.05rem; color: var(--text-color); cursor: pointer; transition: all 0.2s ease; }
+        .toggle-btn.active { background-color: var(--theme-dark); color: var(--theme-text-active); border: 2px solid var(--border-color); box-shadow: 2px 2px 0px var(--border-color); }
+
+        .view-section { display: none; animation: fadeIn 0.3s ease; flex-direction: column; gap: 35px; }
+        .view-section.active { display: flex; }
+
+        /* --- PESQUISA --- */
+        .search-container { position: relative; width: 100%; }
+        .search-input { width: 100%; padding: 16px 20px 16px 55px; border: 3px solid var(--border-color); border-radius: 12px; background-color: var(--white); font-family: 'Poppins', sans-serif; font-size: 1.05rem; font-weight: 600; color: var(--text-color); box-shadow: 4px 4px 0px var(--border-color); outline: none; transition: all 0.2s ease; }
+        .search-input:focus { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--theme-contrast); border-color: var(--theme-dark); }
+        .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 1.4rem; }
+        #no-results { text-align: center; color: var(--wrong-border); font-weight: 800; display: none; background: var(--wrong-bg); padding: 15px; border: 3px solid var(--wrong-border); border-radius: 8px; }
+
+        /* --- TEORIA --- */
+        .content-group { display: flex; flex-direction: column; position: relative; padding-top: 15px; }
+        .section-badge { display: inline-flex; align-items: center; gap: 10px; background-color: var(--theme-dark); color: var(--white); font-size: 1.1rem; font-weight: 800; padding: 8px 20px; border-radius: 8px; border: 3px solid var(--border-color); box-shadow: 3px 3px 0px var(--theme-contrast); text-transform: uppercase; position: absolute; top: -5px; left: 15px; z-index: 10; transform: rotate(-1.5deg); }
+        .theory-box { display: flex; flex-direction: column; padding: 35px 25px 25px 35px; border-radius: 12px; background-color: var(--white); border: 3px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); font-weight: 500; font-size: 1rem; line-height: 1.7; position: relative; overflow: hidden; gap: 20px; border-left: 14px solid var(--theme-medium); }
+        .theory-box h3 { font-size: 1.35rem; font-weight: 900; color: var(--theme-dark); margin-bottom: 5px; display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px; }
+        
+        .visual-area { background: #F8FAFC; border: 3px dashed var(--theme-medium); border-radius: 12px; padding: 25px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; width: 100%; }
+        .highlight-box { background-color: #EEF2FF; border: 3px solid var(--theme-contrast); border-left: 8px solid var(--theme-contrast); padding: 18px 20px; border-radius: 8px; font-size: 0.95rem; color: #312E81; font-weight: 600; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); }
+
+        /* NOVO: GLOSSÁRIO DIDÁTICO DE VARIÁVEIS */
+        .var-list { list-style: none; display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 10px; }
+        .var-list li { background: var(--bg-color); padding: 12px 15px; border-radius: 8px; border: 2px solid var(--theme-light); font-size: 0.95rem; display: flex; align-items: center; gap: 12px; }
+        .var-badge { display: flex; align-items: center; justify-content: center; background: var(--theme-dark); color: var(--white); min-width: 36px; height: 36px; border-radius: 8px; font-weight: 900; font-size: 1.1rem; border: 2px solid var(--border-color); flex-shrink: 0; box-shadow: 2px 2px 0px var(--theme-contrast); }
+        .unit-badge { display: inline-block; background: var(--theme-light); color: var(--theme-dark); padding: 2px 8px; border-radius: 6px; font-weight: 800; font-size: 0.8rem; border: 2px solid var(--theme-medium); margin-top: 4px; }
+        .var-text { display: flex; flex-direction: column; }
+        .var-text strong { color: var(--text-color); font-size: 1rem; }
+        .var-text span { font-size: 0.85rem; color: #475569; line-height: 1.3; margin-top: 2px; }
+
+        /* --- QUIZ UI --- */
+        .difficulty-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; border: 2px solid var(--border-color); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
+        .dif-facil { background: #D1FAE5; color: #065F46; }
+        .dif-medio { background: #FEF08A; color: #713F12; }
+        .dif-dificil { background: #FECACA; color: #7F1D1D; }
+
+        .question-map { display: flex; gap: 8px; overflow-x: auto; padding: 10px 5px; margin-bottom: 20px; white-space: nowrap; scroll-behavior: smooth; }
+        .question-map::-webkit-scrollbar { display: none; }
+        .map-dot { min-width: 38px; height: 38px; border: 2px solid var(--border-color); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; color: var(--theme-dark); background: white; cursor: pointer; transition: all 0.2s; }
+        .map-dot.active { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); transform: scale(1.15); }
+        .map-dot.answered-correct { background-color: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .map-dot.answered-wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .quiz-question-card { border: 4px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); padding: 30px; border-radius: 16px; background: var(--white); }
+        .quiz-question-counter { font-size: 0.85rem; font-weight: 900; color: var(--theme-dark); letter-spacing: 1px; }
+        .quiz-question-text { font-size: 1.15rem; margin-top: 8px; color: var(--text-color); font-weight: 800; line-height: 1.5; margin-bottom: 25px;}
+
+        .option-btn { display: flex; align-items: center; width: 100%; padding: 18px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.1s ease; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 600; text-align: left; color: var(--text-color); }
+        .option-btn:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px var(--theme-contrast); }
+        .opt-circle { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--border-color); margin-right: 15px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.05rem; flex-shrink: 0; background: var(--theme-light); color: var(--theme-dark); }
+        .option-btn.correct { background-color: var(--correct-bg); border-color: var(--correct-border); box-shadow: 3px 3px 0px var(--correct-border); }
+        .option-btn.correct .opt-circle { background-color: var(--correct-border); color: white; border-color: var(--correct-border); }
+        .option-btn.wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); opacity: 0.9; }
+        .option-btn.wrong .opt-circle { background-color: var(--wrong-border); color: white; border-color: var(--wrong-border); }
+        .option-btn.disabled { pointer-events: none; opacity: 0.7; }
+
+        /* --- FEEDBACK DA QUESTÃO --- */
+        .feedback-box { display: block; margin-top: 25px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 25px; animation: slideUp 0.3s ease-out; box-shadow: 5px 5px 0px rgba(0,0,0,0.1); }
+        .feedback-title { font-weight: 900; text-transform: uppercase; font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .feedback-item { margin-bottom: 10px; font-size: 0.95rem; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); line-height: 1.5; font-weight: 500; }
+        .feedback-item.correct-opt { background: var(--correct-bg); border-color: var(--correct-border); color: #064E3B; font-weight: 700; box-shadow: 3px 3px 0px var(--correct-border); }
+        .feedback-item.wrong-opt { background: #FFE4E6; border-color: #BE123C; color: #7F1D1D; border-style: dashed; margin-top: 8px; }
+
+        /* --- RESULTADOS --- */
+        .result-card { background: white; border: 4px solid var(--border-color); border-radius: 16px; padding: 40px 20px; box-shadow: 8px 8px 0px var(--border-color); margin-bottom: 30px; text-align: center; }
+        .stars-container { font-size: 2.5rem; margin: 15px 0; letter-spacing: 5px; }
+        .percentage-big { font-size: 5rem; font-weight: 900; color: var(--theme-dark); line-height: 1; margin: 15px 0; text-shadow: 4px 4px 0px var(--theme-contrast); }
+        
+        .result-summary-box { padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 3px solid; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); }
+        .result-summary-box.success { background: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .result-summary-box.error { background: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+        .error-log-item { margin-bottom: 15px; padding: 20px; background: var(--theme-light); border-radius: 12px; border: 3px dashed var(--theme-medium); text-align: left;}
+
+        /* --- RODAPÉ --- */
+        .quiz-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--white); border-top: 3px solid var(--border-color); padding: 15px 20px; display: none; justify-content: center; gap: 20px; z-index: 100; box-shadow: 0px -4px 10px rgba(0,0,0,0.05); }
+        .nav-btn { padding: 15px 30px; border-radius: 12px; font-weight: 900; border: 3px solid var(--border-color); cursor: pointer; box-shadow: 3px 3px 0px var(--border-color); font-family: 'Poppins', sans-serif; text-transform: uppercase; background: white; transition: transform 0.1s; color: var(--text-color); }
+        .nav-btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 0px 0px 0px transparent; }
+        .btn-next { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); }
+        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+        
+        .btn-action { width: 100%; padding: 20px; background-color: var(--theme-dark); color: white; border: 3px solid var(--border-color); border-radius: 12px; font-size: 1.15rem; font-weight: 900; cursor: pointer; box-shadow: 6px 6px 0px var(--theme-contrast); transition: all 0.1s; text-transform: uppercase; margin-top: 10px; }
+        .btn-action:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0px var(--theme-contrast); }
+
+        /* Fórmulas (Ajuste para melhorar a didática visual) */
+        .g-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; width: 100%; margin-top: 10px; }
+        .g-card { flex: 1 1 calc(50% - 15px); min-width: 130px; border-radius: 12px; padding: 20px 15px; text-align: center; border: 3px solid var(--border-color); display: flex; flex-direction: column; align-items: center; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); background-color: var(--white); transition: transform 0.2s; }
+        .g-card.full-width { flex: 1 1 100%; max-width: 100%; }
+        .g-icon { font-size: 2.5rem; margin-bottom: 8px; line-height: 1; }
+        .g-title { font-size: 1.1rem; font-weight: 900; margin-bottom: 8px; text-transform: uppercase; color: var(--theme-dark); border-bottom: 2px solid var(--theme-light); padding-bottom: 5px; width: 100%; }
+        .g-formula { font-size: 1.35rem; font-weight: 900; color: var(--white); margin-bottom: 8px; line-height: 1.2; background: var(--theme-contrast); padding: 8px 16px; border-radius: 8px; border: 3px solid var(--border-color); letter-spacing: 1px; box-shadow: 2px 2px 0px var(--border-color); }
+        .g-desc { font-size: 0.9rem; font-weight: 600; color: var(--text-color); margin-top: 10px; line-height: 1.4; text-align: left; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <header class="logo-header">
+            <div class="css-logo"><span class="pulse-effect">🧱</span> PROMOVER</div>
+            <h1>Física / 9º Ano</h1>
+            <p class="subtitle">Eletrodinâmica: As Leis de Ohm</p>
+        </header>
+
+        <div class="toggle-container">
+            <button class="toggle-btn active" id="btnExp" onclick="changeApplicationView('explanation')">📘 Teoria</button>
+            <button class="toggle-btn" id="btnPrac" onclick="changeApplicationView('practice')">🧠 Prática (30)</button>
+        </div>
+
+        <!-- VISTA: TEORIA -->
+        <main id="viewExplanation" class="view-section active">
+            
+            <div class="search-container">
+                <span class="search-icon" aria-hidden="true">🔍</span>
+                <input type="text" id="searchInput" class="search-input" placeholder="Pesquisar variável... (ex: Volts, Resistividade)">
+            </div>
+            <div id="no-results"><p>😕 Termo físico não encontrado.</p></div>
+
+            <section class="content-group">
+                <div class="section-badge">📈 1. A 1ª Lei de Ohm</div>
+                <article class="theory-box search-target">
+                    <h3>A Proporção Perfeita</h3>
+                    <p>O físico Georg Ohm descobriu a regra de ouro dos circuitos: a força que empurra a eletricidade e a quantidade de eletricidade que realmente flui estão <strong>diretamente ligadas</strong> pela resistência da peça.</p>
+                    
+                    <div class="highlight-box" style="margin-top: 10px; background-color: var(--white);">
+                        <strong style="color: var(--theme-dark); font-size: 1.1rem; text-transform: uppercase;">O que significa cada Letra?</strong>
+                        <ul class="var-list">
+                            <li>
+                                <div class="var-badge">U</div>
+                                <div class="var-text">
+                                    <strong>Tensão Elétrica (DDP) <span class="unit-badge">Medida em: Volts (V)</span></strong>
+                                    <span>É o "empurrão" da bateria ou da tomada. Sem <strong>U</strong>, os eletrões não se movem.</span>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="var-badge">R</div>
+                                <div class="var-text">
+                                    <strong>Resistência Elétrica <span class="unit-badge">Medida em: Ohms (Ω)</span></strong>
+                                    <span>É o obstáculo físico do fio. Quanto maior o <strong>R</strong>, mais difícil é para a energia passar.</span>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="var-badge">i</div>
+                                <div class="var-text">
+                                    <strong>Corrente Elétrica <span class="unit-badge">Medida em: Ampères (A)</span></strong>
+                                    <span>É o fluxo real de eletrões que passa. É o resultado do empurrão (U) a lutar contra o obstáculo (R).</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="visual-area">
+                        <span style="font-size: 0.85rem; font-weight: 700; color: var(--theme-dark); text-transform: uppercase;">Gráfico de um Resistor Ôhmico</span>
+                        <svg viewBox="0 0 250 150" width="100%" height="auto" style="max-width: 250px; margin-top: 10px;">
+                            <line x1="30" y1="130" x2="230" y2="130" stroke="#0F172A" stroke-width="3" marker-end="url(#arrow)"/>
+                            <line x1="30" y1="130" x2="30" y2="10" stroke="#0F172A" stroke-width="3" marker-end="url(#arrow)"/>
+                            
+                            <text x="235" y="135" font-size="12" font-weight="bold" fill="#0F172A">i (Ampères)</text>
+                            <text x="15" y="10" font-size="12" font-weight="bold" fill="#0F172A">U (Volts)</text>
+                            <text x="15" y="145" font-size="12" font-weight="bold" fill="#0F172A">0</text>
+
+                            <line x1="30" y1="130" x2="190" y2="30" stroke="#6366F1" stroke-width="4"/>
+                            
+                            <line x1="30" y1="80" x2="110" y2="80" stroke="#94A3B8" stroke-dasharray="4" stroke-width="2"/>
+                            <line x1="110" y1="130" x2="110" y2="80" stroke="#94A3B8" stroke-dasharray="4" stroke-width="2"/>
+                            <circle cx="110" cy="80" r="4" fill="#047857"/>
+
+                            <defs>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#0F172A"/></marker>
+                            </defs>
+                        </svg>
+                    </div>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">📏 2. A 2ª Lei de Ohm</div>
+                <article class="theory-box search-target">
+                    <h3>A Anatomia do Fio</h3>
+                    <p>A resistência (R) não cai do céu. Ela depende da <strong>geometria</strong> do fio e do <strong>material</strong> químico de que ele é feito. É isso que a 2ª Lei nos ensina.</p>
+                    
+                    <div class="highlight-box" style="margin-top: 10px; background-color: var(--white);">
+                        <strong style="color: var(--theme-dark); font-size: 1.1rem; text-transform: uppercase;">As 3 Variáveis do Fio</strong>
+                        <ul class="var-list">
+                            <li>
+                                <div class="var-badge" style="background-color: var(--theme-contrast);">ρ</div>
+                                <div class="var-text">
+                                    <strong>Resistividade (Rô) <span class="unit-badge">Medida em: Ω.m</span></strong>
+                                    <span>É a "identidade química" do material. O Cobre tem um <strong>ρ</strong> baixo (deixa passar), a Borracha tem um <strong>ρ</strong> gigante.</span>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="var-badge" style="background-color: var(--theme-contrast);">L</div>
+                                <div class="var-text">
+                                    <strong>Comprimento <span class="unit-badge">Medido em: metros (m)</span></strong>
+                                    <span>O tamanho da viagem. Um fio muito comprido (grande <strong>L</strong>) significa mais colisões = <strong>Mais Resistência</strong>.</span>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="var-badge" style="background-color: var(--theme-contrast);">A</div>
+                                <div class="var-text">
+                                    <strong>Área da Secção <span class="unit-badge">Medida em: mm² ou m²</span></strong>
+                                    <span>É a grossura do fio. Um fio muito grosso (grande <strong>A</strong>) é um túnel largo = <strong>Menos Resistência</strong> (passa fácil).</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="visual-area">
+                        <span style="font-size: 0.85rem; font-weight: 700; color: var(--theme-dark); text-transform: uppercase;">Comparação Geométrica</span>
+                        <svg viewBox="0 0 300 140" width="100%" height="auto" style="max-width: 300px; margin-top: 10px;">
+                            <!-- Fio 1: Curto e Grosso -->
+                            <rect x="20" y="20" width="100" height="30" fill="#F59E0B" stroke="#B45309" stroke-width="2" rx="4"/>
+                            <text x="70" y="40" text-anchor="middle" font-size="11" font-weight="bold" fill="#422006">Curto(L) e Grosso(A)</text>
+                            <text x="70" y="70" text-anchor="middle" font-size="12" font-weight="bold" fill="#059669">R Pequeno (Boa Corrente)</text>
+                            <line x1="0" y1="35" x2="15" y2="35" stroke="#2563EB" stroke-width="4" marker-end="url(#arr-azul)"/>
+
+                            <!-- Fio 2: Longo e Fino -->
+                            <rect x="20" y="90" width="240" height="10" fill="#F59E0B" stroke="#B45309" stroke-width="2" rx="2"/>
+                            <text x="140" y="85" text-anchor="middle" font-size="11" font-weight="bold" fill="#422006">Longo(L) e Fino(A)</text>
+                            <text x="140" y="115" text-anchor="middle" font-size="12" font-weight="bold" fill="#E11D48">R Grande (Trava a Corrente)</text>
+                            <line x1="0" y1="95" x2="15" y2="95" stroke="#2563EB" stroke-width="2" marker-end="url(#arr-azul)"/>
+
+                            <defs>
+                                <marker id="arr-azul" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2563EB"/></marker>
+                            </defs>
+                        </svg>
+                    </div>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">🔥 3. O Formulário Padrão</div>
+                <article class="theory-box search-target">
+                    <h3>Matemática e Efeito Joule</h3>
+                    <p>Ao bater nos átomos do fio devido à Resistência, os eletrões libertam <strong>Calor</strong>. A isto chama-se <strong>Efeito Joule</strong>. Fios finos ou compridos aquecem mais porque têm mais Resistência.</p>
+                    
+                    <div class="g-grid">
+                        <div class="g-card full-width">
+                            <div class="g-icon">⚖️</div>
+                            <div class="g-title">Fórmula: 1ª Lei de Ohm</div>
+                            <div class="g-formula">U = R . i</div>
+                            <div class="g-desc">
+                                <ul style="list-style: none; padding-left: 0; line-height: 1.8;">
+                                    <li><strong>U</strong> = Tensão (em Volts - V)</li>
+                                    <li><strong>R</strong> = Resistência (em Ohms - Ω)</li>
+                                    <li><strong>i</strong> = Corrente (em Ampères - A)</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="g-card full-width">
+                            <div class="g-icon">📏</div>
+                            <div class="g-title">Fórmula: 2ª Lei de Ohm</div>
+                            <div class="g-formula">R = ρ . L / A</div>
+                            <div class="g-desc">
+                                <ul style="list-style: none; padding-left: 0; line-height: 1.8;">
+                                    <li><strong>R</strong> = Resistência (em Ohms - Ω)</li>
+                                    <li><strong>ρ</strong> = Resistividade do material (Ω.m)</li>
+                                    <li><strong>L</strong> = Comprimento do fio (em m)</li>
+                                    <li><strong>A</strong> = Área de secção / Espessura (em m²)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <button class="btn-action" onclick="changeApplicationView('practice')">
+                Iniciar Avaliação: Leis de Ohm ➜
+            </button>
+        </main>
+
+        <!-- VISTA: PRÁTICA -->
+        <main id="viewPractice" class="view-section">
+            <div style="margin-bottom: 20px; background-color: var(--white); padding: 15px; border-radius: 12px; border: 3px solid var(--border-color); box-shadow: 4px 4px 0px var(--border-color);">
+                <h2 style="color:var(--theme-dark); font-weight:900; margin-bottom: 5px;">A Prova de Fogo - IFCE</h2>
+                <p style="color: var(--theme-contrast); font-size: 0.95rem; font-weight:600;">
+                    30 questões exclusivas sobre <strong>a 1ª e a 2ª Leis de Ohm e Análise de Gráficos</strong>. Presta atenção ao que cada letra significa. Acerta <strong>80% (24/30)</strong>.
+                </p>
+            </div>
+            
+            <div class="question-map" id="qMap"></div>
+            <div id="quizContainer"></div>
+        </main>
+
+        <!-- VISTA: RESULTADOS -->
+        <main id="viewResult" class="view-section">
+            <div class="result-card">
+                <h2 style="font-weight:900; text-transform:uppercase;">Relatório de Desempenho</h2>
+                <div class="stars-container" id="finalStars">⭐⭐⭐</div>
+                <div class="percentage-big" id="finalPercent">0%</div>
+                <p id="finalScoreText" style="font-size:1.2rem; font-weight: 700; color: #555;"></p>
+                <div id="review-container" style="text-align: left; margin-top: 25px;"></div>
+            </div>
+            <div id="action-buttons"></div>
+        </main>
+    </div>
+
+    <footer class="quiz-footer" id="quizFooter">
+        <button class="nav-btn btn-prev" id="btnPrev" onclick="navigateQuestion(-1)">Anterior</button>
+        <button class="nav-btn btn-next" id="btnNext" onclick="navigateQuestion(1)">Próxima</button>
+    </footer>
+
+<script>
+    /* --- ESTRUTURA DE DADOS: LEIS DE OHM (1ª e 2ª), Gráficos e Efeito Joule --- */
+    const questionsDatabase = [
+        // 1ª LEI DE OHM E CONCEITOS
+        {
+            level: "Fácil",
+            text: "De acordo com a Primeira Lei de Ohm (U = R.i), para um resistor de resistência fixa, a Tensão Elétrica (U) aplicada e a Corrente Elétrica (i) gerada são grandezas:",
+            options: ["Inversamente proporcionais.", "Diretamente proporcionais.", "Exponencialmente dependentes.", "Independentes uma da outra."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "Se o resistor (R) mantém a sua resistência constante (Ohmico), duplicar a Tensão (U) forçará a Corrente (i) a duplicar também. Elas crescem de forma alinhada e diretamente proporcional.",
+                otherOptions: ["Se fossem inversas, uma aumentaria e a outra diminuiria.", "", "Isso faria o gráfico ser uma parábola curva, não uma reta.", "Obviamente afetam-se mutuamente."]
+            }
+        },
+        {
+            level: "Fácil",
+            text: "Um resistor elétrico ideal é submetido a uma Tensão de 10 V (Volts), o que gera uma Corrente de 2 A (Ampères). Se substituirmos a bateria por uma de 20 V, mantendo a mesma peça, o que acontecerá à Corrente?",
+            options: ["Cairá para 1 A.", "Ficará bloqueada a 0 A.", "Mantém-se em 2 A.", "Aumentará para 4 A."],
+            correctIndex: 3,
+            explanation: {
+                correctText: "Como a tensão (U) dobrou (de 10 para 20V), a corrente (i) também é obrigada a dobrar (de 2A para 4A), pois o resistor é uma peça física com resistência (R) fixa.",
+                otherOptions: ["Só cairia se diminuíssemos a tensão.", "Só zero se o circuito abrisse.", "Para manter 2A, precisarias da antiga bateria de 10V.", ""]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Cálculo Básico 1ª Lei: Tens um resistor que declara ter 15 Ω (Ohms) de Resistência (R). Ligas esse resistor aos polos de uma bateria de carro que gera uma Tensão de 12 V (Volts). Que valor esperarás ler no teu amperímetro que mede a Corrente (i)?",
+            options: ["180 A", "0,8 A", "1,25 A", "27 A"],
+            correctIndex: 1,
+            explanation: {
+                correctText: "Fórmula: U = R.i. Isolando a corrente (i): i = U / R. Portanto, i = 12 / 15 = 0,8 Ampères.",
+                otherOptions: ["180 seria multiplicar (12x15).", "", "1,25 seria a divisão invertida (15/12).", "27 seria a soma irrealística (12+15)."]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Cálculo Inverso: Numa oficina, um mecânico nota que uma lâmpada está a puxar uma Corrente de exatamente 4 A (Ampères) de um circuito ligado à tomada principal de 220 V (Volts). Qual é a Resistência (R) elétrica do filamento desta lâmpada em Ohms?",
+            options: ["880 Ω", "100 Ω", "55 Ω", "0,018 Ω"],
+            correctIndex: 2,
+            explanation: {
+                correctText: "Fórmula U = R.i. Para achar a Resistência (R), dividimos a Tensão (U) pela Corrente (i): R = U / i. Logo, R = 220 / 4 = 55 Ohms.",
+                otherOptions: ["880 é a multiplicação bruta (errado).", "100 é um chute cego.", "", "0,018 é a divisão contrária (4/220)."]
+            }
+        },
+        {
+            level: "Difícil",
+            text: "Um estudante fez uma experiência num fio. Ao aplicar uma Tensão de 6 V, mediu uma Corrente de 0,5 A. Depois aplicou 12 V e mediu 1,0 A. Por fim, aplicou 24 V e mediu 2,0 A. Qual é a Resistência (R) deste fio e como ele se classifica na física?",
+            options: ["R = 3 Ohms; Material Não-Ohmico.", "R = 12 Ohms; Material Ohmico.", "R = 0,08 Ohms; Material Eletrostático.", "R = 12 Ohms; Material Não-Ohmico."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "Calcula o R (R = U/i) para qualquer par: 6/0.5 = 12 Ω. 12/1.0 = 12 Ω. Como a Resistência se manteve CONSTANTE (12 Ω) em todos os testes mesmo subindo os Volts, o material cumpriu a 1ª lei perfeitamente e classifica-se como Resistor Ôhmico.",
+                otherOptions: ["A matemática está errada.", "", "Cálculo errado.", "Se o R é constante, ele É Ôhmico."]
+            }
+        },
+        
+        // GRÁFICOS U x i
+        {
+            level: "Fácil",
+            text: "Ao fazer um gráfico Cartesiano com a Tensão (U) no eixo vertical e a Corrente (i) no eixo horizontal, deparaste-te com uma linha curva que parece a letra 'C'. O que significa fisicamente esta curva para o Resistor?",
+            options: ["A peça atua como um Resistor Ôhmico Perfeito.", "O circuito está em curto-circuito mortal.", "A Tensão é constante independentemente dos Ampères.", "A Resistência (R) da peça não é constante, está a alterar-se. Trata-se de um dispositivo Não-Ôhmico."],
+            correctIndex: 3,
+            explanation: {
+                correctText: "Num dispositivo Ôhmico, a relação tem de ser uma reta estrita. Se o gráfico curva, significa que o valor dos 'Ohms' daquela peça se alterou (geralmente porque a peça aqueceu demasiado). Se o R varia, é 'Não-Ôhmico'.",
+                otherOptions: ["Ôhmico exige uma Reta perfeita.", "Curto-circuito faria a corrente disparar na base da reta.", "Tensão constante seria uma linha horizontal perfeitamente reta.", ""]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Olhando para o Gráfico Cartesiano Tensão vs Corrente ($U \\times i$) de um Resistor Ôhmico (uma linha reta diagonal partindo do zero), o que nos diz a 'inclinação' (o quão deitada ou em pé está a reta) dessa linha?",
+            options: ["Indica o valor da Resistência (R) da peça. Quanto mais em pé estiver (mais íngreme no eixo dos Volts), maior a Resistência.", "Indica o tempo (t) em segundos que a bateria esteve ligada.", "Indica a Área (A) e o peso físico do condutor.", "Indica a Resistividade (Rô) do ar na sala."],
+            correctIndex: 0,
+            explanation: {
+                correctText: "Se a reta estiver muito 'em pé', significa que precisas de aplicar MUITOS Volts de Tensão para conseguir gerar uma Corrente minúscula no eixo em baixo. Isso prova matematicamente que o material tem uma Resistência (Ohms) Altíssima.",
+                otherOptions: ["", "O tempo não entra neste gráfico bifásico.", "O peso do condutor não é medido por este gráfico Uxi.", "O ar não entra aqui."]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Sobre os ideais teóricos dos Resistores Ôhmicos na Física, é correto afirmar que:",
+            options: ["A sua Resistência (R) varia radicalmente quando os Volts aumentam.", "O seu gráfico Tensão x Corrente é uma parábola voltada para baixo.", "Mantêm uma Resistência (R) fixa e cravada, independentemente de quanta Tensão lhes seja aplicada, produzindo um gráfico de linha reta perfeita.", "Eles têm Resistência zero, sendo 100% eficientes."],
+            correctIndex: 2,
+            explanation: {
+                correctText: "A definição central de material Ôhmico é ser escravo leal à 1ª Lei de Ohm: possui um R blindado e fixo que assegura a proporcionalidade linear (reta) nas fórmulas.",
+                otherOptions: ["Isso é um resistor Não-Ôhmico.", "A curva parabólica seria Não-Ôhmico.", "", "Isso seria um supercondutor ideal, que não é um resistor (que por definição resiste)."]
+            }
+        },
+        {
+            level: "Difícil",
+            text: "Tens dois fios num gráfico U x i. A reta do Fio 1 está bastante 'em pé' (íngreme). A reta do Fio 2 está bastante 'deitada' (perto do eixo da Corrente i). Qual dos dois Fios permitirá passar mais Ampères de Corrente se os ligares a uma tomada de 12V?",
+            options: ["O Fio 1 deixa passar mais Corrente.", "O Fio 2 deixa passar mais Corrente.", "Deixam passar ambos a mesma Corrente.", "O Fio 1 fará curto-circuito instantâneo."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "Uma reta 'deitada' perto do eixo da corrente (i) significa que precisas de poucos Volts para obter muitos Ampères. Logo, a sua Resistência (R) é MUITO BAIXA. Como R é pequeno, o Fio 2 permite a passagem livre de uma torrente brutal de eletrões.",
+                otherOptions: ["A reta 'em pé' significa que o fio 1 é um forte obstáculo (alta resistência em Ohms).", "", "R's diferentes geram i's diferentes.", "Reta inclinada significa resistor, não curto-circuito."]
+            }
+        },
+        {
+            level: "Fácil",
+            text: "Nas questões que envolvem o obstáculo da Resistência (R), é fundamental lembrar da energia desperdiçada. Qual é o nome do Efeito físico que liberta Calor sempre que os eletrões chocam com os átomos no fio?",
+            options: ["Efeito de Ohm.", "Efeito Doppler sonoro.", "Efeito Joule.", "Efeito de Eletro-Fricção."],
+            correctIndex: 2,
+            explanation: {
+                correctText: "Quando a corrente elétrica (eletrões) força passagem pelos átomos do resistor, a 'fricção' produz libertação de Energia Térmica (Calor). A isto chama-se Efeito Joule, o princípio por detrás dos aquecedores de parede e chuveiros elétricos.",
+                otherOptions: ["Não existe 'efeito' de Ohm com esse nome.", "Doppler é sobre ondas sonoras em movimento.", "", "Termo fictício."]
+            }
+        },
+        
+        // 2ª LEI DE OHM E FATORES GEOMÉTRICOS
+        {
+            level: "Fácil",
+            text: "A 2ª Lei de Ohm ($R = \\rho \\cdot L / A$) diz-nos que a Resistência final não é mágica, depende da física da peça. De qual variável a Resistência (R) de um cabo NÃO depende?",
+            options: ["Do Comprimento (L) do fio condutor.", "Da Espessura ou Área (A) de secção do fio.", "Do Tipo de Material Químico do fio (A Resistividade ρ).", "Da cor exterior do plástico de isolamento que reveste o cabo."],
+            correctIndex: 3,
+            explanation: {
+                correctText: "As únicas variáveis internas que atrapalham o eletrão na fórmula são: a Resistividade do material (ρ), o Comprimento (L) da viagem e a Área (A) do túnel. O plástico colorido atua fora da equação, apenas para isolar a peça das nossas mãos.",
+                otherOptions: ["Comprimento (L) dita quantos choques ocorrem na viagem toda.", "Área (A) dita a largura do túnel para os eletrões passarem lado a lado.", "Material (ρ) dita a composição nativa do obstáculo.", ""]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Analisando a letra 'L' (Comprimento) na 2ª Lei de Ohm: O que dita a matemática se o teu cabo da televisão for muito mais LONGO que o original?",
+            options: ["A Resistência (R) cai para metade.", "A Resistência (R) fica inalterada se a tomada for a mesma.", "A Resistência (R) AUMENTA. Mais comprimento significa que os eletrões têm um caminho maior de colisões atómicas pela frente.", "O cabo converte a Corrente (i) em Tensão (U)."],
+            correctIndex: 2,
+            explanation: {
+                correctText: "Na fórmula $R = \\rho \\cdot L / A$, a Resistência (R) está em linha direta com o Comprimento (L). Mais distância = viagem mais exaustiva = maior Resistência no total, o que vai acabar por roubar tensão por Efeito Joule.",
+                otherOptions: ["Cairia se usasses um cabo mais curto.", "O L afeta o R, independentemente da tomada externa.", "", "Fios não convertem correntes em Volts mágicos."]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Analisando a letra 'A' (Área de secção / Grossura) na 2ª Lei de Ohm: Se substituíres um cabo fininho por um cabo extremamente GROSSO, mantendo o mesmo comprimento e metal, o que acontece à Resistência (R)?",
+            options: ["A Resistência (R) AUMENTA de forma dramática.", "A Resistência (R) DIMINUI. O fio grosso atua como um corredor muito largo, facilitando o trânsito massivo de eletrões em paralelo.", "A Tensão (U) anula-se no interior do cobre grosso.", "O Efeito Joule sobe e o fio derrete imediatamente."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "A Área (A) está em baixo na divisão da fórmula ($R = \\rho \\cdot L / A$). Logo, ela é Inversamente Proporcional ao R. Dividir por um 'A' enorme (fio grosso) resulta numa Resistência (R) muito pequena. Passa mais corrente e aquece menos.",
+                otherOptions: ["Seria verdade se o fio ficasse mais fino.", "", "Tensão não se anula por causa do fio largo.", "Fios grossos aquecem muito MENOS (têm menos Ohms)."]
+            }
+        },
+        {
+            level: "Difícil",
+            text: "Problema Algébrico com a 2ª Lei: Um engenheiro mede a resistência de um pedaço de fio e obtém R = 20 Ohms (Ω). Um ajudante desastrado corta esse fio de cobre exatamente ao MEIO, reduzindo o seu Comprimento (L) para metade. Qual é a nova Resistência desse pedaço cortado?",
+            options: ["20 Ω (permanece intacta).", "40 Ω (o dobro).", "10 Ω (metade).", "0 Ω."],
+            correctIndex: 2,
+            explanation: {
+                correctText: "O Comprimento (L) e a Resistência (R) são diretamente proporcionais na parte de cima da fração. Se cortas a viagem dos eletrões pela metade (L/2), então os 'obstáculos totais' também caem para a metade do valor inicial. Logo, R = 10 Ω.",
+                otherOptions: ["Toda a alteração física muda o valor Ohmico final.", "40Ω seria se ele juntasse dois cabos dobrando o caminho longo.", "", "0Ω só ocorreria num supercondutor mágico sem atrito."]
+            }
+        },
+        {
+            level: "Difícil",
+            text: "Outro problema de raciocínio da 2ª Lei de Ohm: Tens um fio de 50 Ohms (Ω). Sabendo que Resistência e Área são Inversamente Proporcionais, qual seria o novo valor de Ohms (R) se a fábrica produzisse o fio com o DOBRO exato da Área/Espessura de túnel (2A)?",
+            options: ["Saltaria para 100 Ohms.", "Cairia para METADE, ou seja, R = 25 Ohms.", "Ficaria estagnado em 50 Ohms.", "Cairia a pique para 0 Ohms limpos."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "Na fórmula $R = \\rho \\cdot L / A$, o 'A' está no denominador. Se a Área (A) cresce para o dobro (2A), estás a dividir o resultado da equação por 2. Fio duas vezes mais largo = Metade do 'aperto' resistivo para os eletrões. (R = 50 / 2 = 25 Ω).",
+                otherOptions: ["100Ω aconteceria se o fio ficasse ainda mais FINO e espremido.", "", "Mudanças de área mudam o R final.", "Nunca chega a zero só por ser mais grosso."]
+            }
+        },
+        {
+            level: "Fácil",
+            text: "Na fórmula clássica da 2ª Lei de Ohm ($R = \\rho \\cdot L / A$), a letra grega Rô (ρ) dita a lei atómica. O que representa esta variável 'ρ'?",
+            options: ["A Radiação térmica dissipada em Watts.", "O Raio geométrico do cilindro do fio.", "A Resistividade química do material. Identifica que o Ouro, por natureza atómica, resiste menos à corrente que o Ferro ou a Borracha.", "A Reação magnética do cabo isolado."],
+            correctIndex: 2,
+            explanation: {
+                correctText: "O 'ρ' (Resistividade - medida em $\\Omega.m$) é a identidade e o ADN do material. Informa na equação se o material base em si é um bom condutor (ρ muito baixo, como a Prata) ou um péssimo condutor (ρ alto), independentemente de o moldarmos longo ou grosso.",
+                otherOptions: ["Watts mede potência.", "Para raio, usaria-se um simples 'r' dentro do cálculo da Área (A=πr²), mas o 'ρ' da fórmula inteira não é o raio geométrico.", "", "Invenção teórica."]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Aplicando a 2ª Lei de Ohm ao Mundo Real: O chuveiro elétrico tem uma chave seletora para a posição 'INVERNO' (água muito quente a ferver). Para aquecer muito, o chuveiro precisa que os eletrões gerem um Efeito Joule brutal e veloz. O que a máquina altera fisicamente no Resistor interno lá no teto?",
+            options: ["Acrescenta Comprimento (L) ao fio para bloquear a água fria.", "Desliga o fio da DDP para arrefecer o metal.", "Seleciona um pedaço muito mais CURTO (menor L) do fio resistor. Isto diminui o 'R', abrindo os portões para uma Corrente (Ampères) gigante que ferve a água de imediato ao passar na resistência baixa.", "Usa um plástico de alto Rô (ρ) para isolar o chuveiro."],
+            correctIndex: 2,
+            explanation: {
+                correctText: "Para ter muito Calor (Potência), a Resistência de passagem precisa de ser BAIXA para que os eletrões passem todos de vez numa torrente de Ampères. Para baixar o R, a máquina usa a 2ª Lei de Ohm e corta eletronicamente o Comprimento (L) do fio da Resistência.",
+                otherOptions: ["Fio longo tem R muito Alto, o que bloqueia a corrente e aquece pouco (modo de Verão).", "Sem DDP (Volts) não há aquecimento Joule.", "", "Isolante parava a máquina."]
+            }
+        },
+        {
+            level: "Difícil",
+            text: "O Engenheiro de Poste: De acordo com a equação $R = \\rho \\cdot L / A$, se quiseres fabricar o CABO PERFEITO com a MENOR Resistência (R) física do mundo (para os eletrões correrem sem qualquer oposição), como terás de fabricar esse cabo?",
+            options: ["Teria de ser um fio Muito Longo, Muito Fino, e de um metal de Alta Resistividade (ρ alto).", "Teria de ser um fio Muito Curto (menor L), Muito Grosso e Largo (maior A), e de um metal Nobre de Baixíssima Resistividade (ρ quase zero, como a Prata).", "Teria de ser Longo (L alto) e com muita Área (A alto).", "Não importa, o R depende só dos Volts (U) da rua."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "Para achatar o R ao mínimo, o numerador da equação tem de cair e o denominador subir. L Curto = menor caminho de sofrimento. A Largo = túnel gigante para os eletrões. $\\rho$ Baixo = átomo escorregadio e sem oposição de condutividade.",
+                otherOptions: ["Este cenário geraria o pior R do universo (corrente não passaria).", "", "O L longo estragaria o benefício da Área larga.", "A Tensão da rua atua sobre a 1ª Lei, mas a Resistência física do fio em si dita-se pelas réguas da 2ª Lei (Geometria)."]
+            }
+        },
+        {
+            level: "Fácil",
+            text: "O corpo humano também atua como um Resistor vivo. Se tentares tocar num fio descarnado com as mãos ensopadas de água com sabão, o que acontece aos Ohms de Resistência do teu corpo face à 1ª Lei de Ohm?",
+            options: ["A Resistência da tua pele AUMENTA radicalmente, defendendo o coração do choque de Volts.", "A Resistência DIMINUI agressivamente. O líquido atua como um atalho químico, e pela fórmula $i = U/R$, o teu R baixo atrai um pico de Corrente (Ampères) fatal e brutal em direção ao coração.", "A Resistência corporal é de betão inalterável, não muda com água ou seca.", "A água congela os eletrões na fonte."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "A pele seca isola e tem alta Resistência em Ohms. A água, repleta de sais, anula essa defesa de seco. Com um R corporal na lama da resistência nula, a Divisão Ohmica (Corrente i = DDP / Ohms) gera um choque de alta corrente que fibrila o corpo e queima a carne humana por efeito Joule.",
+                otherOptions: ["Água não defende, mata a blindagem elétrica do nosso Rô químico celular.", "", "A Pele varia em Ohms dependendo dos líquidos.", "Incorreto."]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Um fio de filamento de Níquel-Cromo (Cromoníquel) tem uma Resistividade Química ($\\rho$) nativa altíssima. Em que cenário doméstico será genial aplicar um pedaço deste tipo de material específico?",
+            options: ["Nos quilómetros de Fios Longos para distribuir o Wi-Fi e Eletricidade nas paredes, exigindo condutores velozes.", "Dentro da grelha de um Aquecedor ou Forno Elétrico. O elevado $\\rho$ garante um forte bloqueio (alto R), obrigando os eletrões a gerarem um imenso e descontrolado Efeito Joule térmico radiante de chamas sem derreter o arame.", "Nas borrachas exteriores dos chinelos e sapatos de segurança.", "Num Amperímetro de Laboratório para testes a frio sem DDP."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "Metais com enorme Rô (ρ), como o Tungsténio ou o Cromoníquel, têm como papel na Terra criar um R agressivo para combater a corrente no arame (efeito Joule máximo) para aquecer fornos, secadores ou emitir radiação luminosa vermelha em segurança de ignição.",
+                otherOptions: ["Nas paredes queres exatamente o oposto: um Rô mínimo e limpo de Cobre para não perder a luz em calores fúteis ao longo dos quilómetros de distribuição da 2ª lei.", "", "A borracha tem um Rô infinito para isolamento elétrico total do utilizador, não de metal quente radiante.", "Amperímetros precisam de R = zero."]
+            }
+        },
+        
+        // MISTURA GERAL E CÁLCULO
+        {
+            level: "Difícil",
+            text: "Desafio 1ª + 2ª Lei: Um cabo de secção reta de cobre puro foi fabricado e possui uma Resistência de 12 Ohms (Ω). Um engenheiro resolve amarrar dois desses cabos iguaizinhos seguidos em linha reta, dobrando o Comprimento total (2L) do caminho de fio de cobre até ao telhado da torre. De seguida liga o sistema a uma bateria de 48 Volts (V). Qual a Corrente (i) lida em Ampères?",
+            options: ["i = 4 A", "i = 2 A", "i = 24 A", "i = 0 A"],
+            correctIndex: 1,
+            explanation: {
+                correctText: "Se ele dobrou o 'L' (Caminho) na 2ª Lei, o 'R' dobrou em obstáculo. (R antigo 12 Ω vira R novo de 24 Ω). Com a Resistência Fixada em 24 Ω, pegamos a 1ª Lei ($i = U/R$). Logo: 48 Volts a dividir pelos severos 24 Ohms do cabo duplo = 2 Ampères de Marcha.",
+                otherOptions: ["4A seria o resultado de Corrente se ele nunca tivesse soldado o segundo cabo e usado os míseros 12 Ω iniciais na fórmula.", "", "24A seria erro grotesco na inversão da fórmula.", "Zero A seria se os dois cabos não fechassem a ponte de circuito da 1ª lei na ponta isolada."]
+            }
+        },
+        {
+            level: "Fácil",
+            text: "O que diz fisicamente a fórmula $U = R \cdot i$ sobre a Unidade de Tensão, vulgarmente apelidada de Voltagem e simbolizada por U?",
+            options: ["Que a Tensão empurra a matéria mecânica para longe dos ímanes.", "Que a Tensão não sofre ação do material mas dita o peso da condutividade.", "A Tensão atua como uma 'Bomba de Pressão Elétrica' essencial. Se U for zero (0 Volts), a fórmula cai matematicamente. Se a bomba cessa, a corrente zera e nada se desloca.", "Tensão só serve para derreter plásticos em laboratório sem correntes."],
+            correctIndex: 2,
+            explanation: {
+                correctText: "O U é a causa inicial, o pai do movimento da Equação da 1ª Lei de Ohm. A bateria DDP levanta os eletrões do mar de letargia. Se U = 0, i = 0. A Física é refém desta pressão atómica.",
+                otherOptions: ["Mecânica Newtoniana.", "A Tensão não mede pesos.", "", "Fios derretem pela Corrente de Ampéres via R Joule, e não por Voltagens Estáticas num ecrã limpo."]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Se tiveres de identificar qual é a letra correta num Resistor Didático escolar (o cilindro com faixas coloridas pintadas na cerâmica de eletrónica) qual o Símbolo e a Unidade correspondente ao obstáculo elétrico (R) na Eletrodinâmica de Georg Ohm?",
+            options: ["A letra é W e mede Potência em Watts.", "A letra é R e a unidade de medição do obstáculo é avaliada em Volts (V).", "A letra C e é ditada em Coulombs Eletrostáticos puros soltos da Bateria.", "A Letra é R e a medida de oposição é classificada em Ohms, representado pela ferradura da letra grega Ómega (Ω)."],
+            correctIndex: 3,
+            explanation: {
+                correctText: "Em honra aos esforços exímios de Ohm em 1827 nas equações da Física dos Materiais Sólidos Metálicos, o símbolo é R e a contagem da Resistividade Cilíndrica e Oposição Friccional Interna é o Ohm (Ω).",
+                otherOptions: ["Watt mede Calor/Energia de iluminação dissipado por segundo, não a Oposição de metal Ohmica.", "Volts medem apenas o Empurrão Tensão DDP U.", "Coulomb é apenas uma medida agregada de Eletrões e Cargas Estáticas em número isolado (Q).", ""]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Uma analogia comum em Eletrodinâmica: Na 2ª Lei, um Fio com 'Área/Espessura A' super Larga assemelha-se a uma Autoestrada gigante com 10 vias de trânsito em vez de um Beco sinuoso fininho. O que é que isto evita no circuito do carro em casa (1ª Lei e Calor de Joule)?",
+            options: ["A autoestrada causa Curto-Circuitos nucleares no capot.", "A área super fina fininha arrefeceria a Tensão total.", "Evita que haja demasiada Resistência Atómica. Menos atrito na 'Via Larga' significa uma menor libertação inútil de Temperatura Fervente Joule nas paredes do circuito enquanto a Corrente de Eletrões entra no teu carregador Turbo USB no banco e o arrefece limpo.", "Causa atritos que congelam eletrões em Ampères duplos."],
+            correctIndex: 2,
+            explanation: {
+                correctText: "Áreas 'A' mais amplas mitigam o terror da 2ª Lei nas perdas térmicas. Cablagens de chuveiros e tomadas robustas não estouram com Correntes de pico de 30 A (Ampères) porque o seu design grosso oferece um R irrisório que contorna o Efeito Friccional Joule desnecessário de fogo vivo na calha da parede.",
+                otherOptions: ["Curto-circuito requer união paralela livre, e não a forma de A espessura do cobre isolado base.", "Área fina causa Terror em Aquecimento Efeito Joule (Fricção e Trânsito) aumentando Resistencia severa R.", "", "Termodinâmica não estuda congelamento Ampérico."]
+            }
+        },
+        {
+            level: "Difícil",
+            text: "Como se articula o fenómeno Resistividade (letra $\\rho$ da 2ª Lei) com a temperatura do quarto ambiente? Numa lâmpada de incandescência da época de Thomas Edison ligada a uma Tensão (U) de 220V em regime de laboratório contínuo, ao esquentar até 2000º Graus Celsius (Calor Branco Fervente de Fogo Joule), o filamento de tungsténio passa a ser considerado Não-Ôhmico porque:",
+            options: ["O filamento converte a Resistência em Ampères Magnéticos e voa.", "A elevada e mortífera Temperatura (Agitação Atómica Severa de Fogo Interno Metálico) altera quimicamente a assinatura do ($\\rho$) Resistividade Base de laboratório, arruinando a estabilidade de 'R'. A Resistência varia com o calor intenso e o gráfico Cartesian Uxi dobra numa Curva falhando na reta.", "Porque R e L não afetam filamentos quentes sob vácuo esférico sem oxigénio na lampada antiga.", "Porque o calor do vidro é um Dielétrico perfeito."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "Os materiais apenas permanecem 'Ôhmicos Perfeitos' e fiéis à primeira lei retilínea se a sua Temperatura For Constante. A agitação severa de Fogo atómico atiça e altera brutalmente o parâmetro Rô ($\\rho$) nos metais refratários como o Tungsténio (elevando o 'R' num gráfico curvo de travagem).",
+                otherOptions: ["Voos magnéticos exigem magnetismo cinemático Newtoniano puro que transcende eletrodinâmica base térmica.", "", "Oxigénio queimaria o filamento em fogo, mas a resistência do tungsténio aumenta e falha à mesma no vácuo sem ar oxidante.", "O Dielétrico é vidro mas não causa o desvio gráfico Non-Ohmico da peça metálica (fio emissor)."]
+            }
+        },
+        {
+            level: "Fácil",
+            text: "As três Fórmulas de Georg Ohm para Desatar Nós Algébricos (Manipulação da 1ª Lei de Ohm U=Ri Escolar): Se tu tiveres um Voltímetro (lê Volts de empurrão U) e um Amperímetro de pulso (lê Ampères de fluxo i), como defines matematicamente a fórmula exata no papiro de física para calcular a Resistência Oculta da Peça de Carvão Resistor no Laboratório de Física Básica?",
+            options: ["R = i + U (Somatória Falsa Isolada).", "R = i / U (Inversão Falsa Proporcional).", "R = U / i (Tensão na Cabeça dividindo a Corrente inferior de passagem).", "R = U * i (Potência Eletrodinâmica de Coulomb Errada)."],
+            correctIndex: 2,
+            explanation: {
+                correctText: "Isolar o R de uma multiplicação requer atirar a letra i que estava a multiplicar do outro lado para a zona de divisão por baixo do gigante U (Tensão). Fica portanto a Divisão Régia Ohms: R = Volts Tensão Máxima a rachar ao meio pelo Fluxo Cego de i Ampères.",
+                otherOptions: ["Tensão não se acopla a correntes de unidade distinta.", "R = i/U geraria um desastre onde R = 0,2 em vez dos Ohms exatos.", "", "A fórmula da última alínea (U*i) gera Watts, a Potência Térmica final Dissipada da luz, que não mede obstáculo Rô hmico."]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Corrente de Pico Oculto e Lógica Matemática Pura: Ao olhares a equação Base de Ohms ($U = R \cdot i$) num sistema fixado nos 12 Volts DDP (U). Se o valor geométrico e teimoso R for atenuado para quase desaparecer na matemática e chegar a zeros teóricos decimais de Ouro Polido ($R \\approx 0.001 \\Omega$)... Qual será a sina do 'i' Ampérico isolado na fórmula limpa ($i = U/R$) ao dividir 12 V por esse Resistor Mínimo R de Arame Curto Limpo?",
+            options: ["O Fio congela e reverte 12 Volts num Efeito Condensador Polarizado.", "O Eletrão desvia para a Tensão zero morta e anula-se no Neutro Padrão do Cobre Terra.", "O Fluxo de 'i' de Corrente de Eletrões sobe astronomicamente para picos altíssimos avassaladores (i = 12000 Ampères Lógicos puros), causando uma torrente perigosa de calor e fúria térmica na calha da rua.", "A Divisão dá Correntes fracionárias de micro-ampères em i."],
+            correctIndex: 2,
+            explanation: {
+                correctText: "Dividir matematicamente um Empurrão DDP de 12 por poeiras minúsculas que não oferecem atrito e que são barreiras inúteis (ex: Resistência do Ouro Cobre $R=0.001$ na 2ª Lei), gera correntes i Colossais ao infinito, causando incêndio e explosão do Disjuntor que monitoriza Segurança (O Famoso Curto-Circuito sem Peça Lâmpada Opositora).",
+                otherOptions: ["Polarização exige Dielétricos não presentes neste condutor vivo bruto.", "Eletrões não somem na física.", "", "Corrente de Mícro Ampère exigia um Isolante Severo e Grosseiro com R na casa de Mega Ohms gigantes na base da divisão ($10^{6} \\Omega$)."]
+            }
+        },
+        {
+            level: "Difícil",
+            text: "Um teste em Sala de Laboratório com Esmeraldas Falsas e Resistor Dielétrico de Teste (Material $\\rho$): Tu seguras um bloco negro cúbico C1 de (Ferro Rô=100) e um cubo branco idêntico na Geometria C2 de (Carvão Rô=3000). A Área A de ambos é 1 Metro quadrado ($1 m^2$) de face brutal e a espessura Comprimento L entre as presilhas de jacaré elétrico são Míseros 10 Centímetros. A Lei de Ohm afirma sem hesitar que:",
+            options: ["O Bloco Carvão ganha Ohms absurdos de oposição puramente pelo Fator Rô Químico de Densidade Interna na Equação. O Ferro domina o combate pela corrente de eletrões soltos na 2ª e 1ª Lei conjuntas ao ligar baterias de Teste 9V.", "A Geometria de Área 1 m² massiva engole e extingue o parâmetro Químico de Rô C2 para lixo cósmico. O bloco de Carvão e Ferro empatam e deixam a mesma Corrente (i) cruzar a bateria escolar 9V de sala Ohms.", "A 2ª Lei perde a utilidade neste sistema tridimensional por causa dos jacarés crocodilos isoladores das Pinças elétricas.", "Nenhum transmite porque blocos Cúbicos bloqueiam Eletrões retilíneos nos vértices matemáticos."],
+            correctIndex: 0,
+            explanation: {
+                correctText: "A variável Rô Química ($\\rho$) na 2ª Lei de Ohm é sagrada. Num empate físico perfeito de L e de A espessura entre dois competidores numa mesa de testes, a vitória na Resistência Menor cai sobre o Rô que for mais humilde. O Ferro ganha na baixa resistência, esmagando o Carvão isolador duro nas medições de Ohmímetro de Volt/Corrente em i.",
+                otherOptions: ["", "A Área atenua, mas não Aniquila as disparidades colossais Químicas Atómicas das densidades de Banda Eletrónica do Carvão face ao Ferro puro na Multiplicação Superior Rô * L.", "Presilhas de metal jacaré são bons condutores usados por Físicos globalmente em Multímetros sem alterar DDP real.", "Eletrões cruzam grelhas 3D amorfas do aço em todos os vértices da DDP atratora na Eletrodinâmica limpa de Fluxo Volume Atómico livre e vetorial."]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Nos Esquemas Geométricos da Eletrodinâmica de Sala Escolar que analisam Fluxo vs Obstáculo na Corrente Básica (U, R, i), quando observas o Desvio do Elétron no Fio desenhado pelo teu colega de Física na folha TPC, qual o caminho verdadeiro assumido pelo Fato Real Físico (Não a Convenção Clássica do Séc XIX)?",
+            options: ["Ele sai do Anodo Vermelho de Pilha (+) desaguando as cargas mágicas protónicas ao Catodo Base Cego Negro (-).", "Ele vibra verticalmente perpendicular como Ondas de Luz C transversal na Fibra da Parede e arrefece Joule para Fora.", "Ele abandona desesperado a Grelha Atómica superlotada do Polo Negativo da DDP (-) com cargas negativas repetitivas fugindo e caça o sossego magnético atrativo natural da escassez Positiva Atómica do Polo Oposto Limpo Base (+).", "O Cobre expele Ouro no Fio e os neutrões batem no Rão R da Lei Ohm."],
+            correctIndex: 2,
+            explanation: {
+                correctText: "Correntes Reais Físicas em Circuitos Ohms (A Eletrodinâmica moderna baseada na Teoria Atómica do Átomo Vivo Condutor Livre): O Eletrão leva em si a essência da carga Negativa (-). Como negativos e negativos rechaçam-se (Repulsão Eletromagnética Severa Coulomb), ele atira-se para fora do Terminal (-) da Bateria rumo à Atratividade Sedutora (+) Positiva em Fluxo 'i'.",
+                otherOptions: ["Este é o Sentido das Setinhas Clássicas (Séc 19) onde a Carga Positiva Mítica flutuava nos Diagramas errados de Kirchhoff Iniciais Falsos Práticos.", "Isso é Onda Eletromagnética de Fótons Radiantes na Óptica, e não Eletrões marchando na Matéria Bruta Densa de Resistência Ohm de 1ª ordem.", "", "Química Impossível de Alquimista e Neutrões inertes sem Cargas em Choques Elétricos na fórmula (Eles não Sentem Volts DDP Atractor em U)."]
+            }
+        },
+        {
+            level: "Fácil",
+            text: "Um detalhe simples mas perigoso no Sistema Internacional que os Examinadores adoram manipular nos Alunos de Física 1ª Lei de Ohms: Se tu observares um Voltímetro medir num motor ($U = 1000 V$) e o Amperímetro num formato não padrão (Miliampère / mA) gritar '$i = 2000 mA$', o que farás com esse 'Mili' antes de inserir o valor assassino na Lei Sagrada '$R = U/i$' a dividir para dar Ohms?",
+            options: ["Uso a fórmula nua e crua R = 1000 / 2000 cegamente perdendo a guerra física nos testes SI universais clássicos gerando 0.5 Ohms Errados de Morte.", "O 'Mili' do Amperímetro indica milésimos (Fração minúscula de 1000). Um valor de 2000 mA é forçosamente convertido limpamente a 2 A Puros Base e limpos de Sistema Internacional de Corrente (i). A divisão sã final fica $R = 1000 / 2$ resultando na Resistência Gloriosa de 500 $\\Omega$.", "Converto o 1000 Volts para Joules Térmicos num Calor de Fricção Joule Ohm e Multiplico por C Coulombs isolados das faixas mili Ampères de Corrente do motor base.", "O 'Mili' Significa Milhão Gigante. Os Ampères ficam em 2 Bilhões Físicos esmagando a Tensão U da casa para Ohms Fracos Extremos no denominador fracional negativo infinito da peça."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "O Prefixo 'mili' minúsculo de submúltiplo Decimal no Sistema Internacional Escolar exige a Redução Atenta dividindo o valor Falso Cego em Ecrã por mil. 2000 miliampères (mA) = Apenas Míseros 2 Ampères A Puros de Marcha Eletrodinâmica Real SI Clássico de Tensão Volt Ohms.",
+                otherOptions: ["Resulta numa Falha Crítica Escolar Omitindo Conversões (O R resultaria falsamente minúsculo em vez de 500 Ohms Quentes da Bobina do Motor Base U/i Real).", "", "Conversões Falsas entre DDP (V) e Calor Direto Isolado W(J) são proibidos na dedução Cega da Unidade i.", "O Milhão gigante seria 'Mega' ('M' Gigante Maiúsculo Padrão) em Ampères de Subestações Físicas EDP de Transformação Massiva do País Real de Ohm Corrente Base e Não 'm' Mili Mínimo."]
+            }
+        }
+    ];
+
+    const quizState = {
+        currentIndex: 0,
+        userAnswers: new Array(questionsDatabase.length).fill(null),
+        confettiAnimationId: null
+    };
+
+    function initializeSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const contentGroups = document.querySelectorAll('.content-group');
+        const noResultsMsg = document.getElementById('no-results');
+
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', function(event) {
+            const searchTerm = normalizeText(event.target.value);
+            let totalVisibleElements = 0;
+            
+            contentGroups.forEach(group => {
+                const groupContent = normalizeText(group.textContent);
+                const isMatch = groupContent.includes(searchTerm);
+                
+                group.style.display = isMatch ? 'flex' : 'none';
+                if (isMatch) totalVisibleElements++;
+            });
+            
+            noResultsMsg.style.display = totalVisibleElements === 0 ? 'block' : 'none';
+        });
+    }
+
+    function normalizeText(text) {
+        return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    function changeApplicationView(viewName) {
+        const views = ['viewExplanation', 'viewPractice', 'viewResult'];
+        
+        views.forEach(viewId => document.getElementById(viewId).classList.remove('active'));
+        
+        const quizFooter = document.getElementById('quizFooter');
+        if (quizFooter) quizFooter.style.display = 'none';
+
+        if (viewName === 'explanation') {
+            document.getElementById('viewExplanation').classList.add('active');
+            document.getElementById('btnExp').classList.add('active');
+            document.getElementById('btnPrac').classList.remove('active');
+        } else if (viewName === 'practice') {
+            document.getElementById('viewPractice').classList.add('active');
+            if (quizFooter) quizFooter.style.display = 'flex';
+            document.getElementById('btnExp').classList.remove('active');
+            document.getElementById('btnPrac').classList.add('active');
+            
+            renderCurrentQuestion();
+            renderNavigationMap();
+        } else if (viewName === 'result') {
+            document.getElementById('viewResult').classList.add('active');
+        }
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function getDifficultyBadgeClass(level) {
+        const mapping = { 'Fácil': 'dif-facil', 'Médio': 'dif-medio', 'Difícil': 'dif-dificil' };
+        return mapping[level] || 'dif-facil';
+    }
+
+    function buildOptionsHTML(question, selectedAnswerIndex) {
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        return question.options.map((optionText, optionIndex) => {
+            let cssClass = '';
+            
+            if (selectedAnswerIndex !== null) {
+                if (optionIndex === question.correctIndex) cssClass = 'correct';
+                else if (optionIndex === selectedAnswerIndex) cssClass = 'wrong';
+                else cssClass = 'disabled';
+            }
+
+            const isDisabled = selectedAnswerIndex !== null ? 'disabled' : '';
+
+            return `
+                <button class="option-btn ${cssClass}" onclick="handleOptionSelection(${optionIndex})" ${isDisabled}>
+                    <div class="opt-circle">${alphabet[optionIndex]}</div>
+                    <div>${optionText}</div>
+                </button>
+            `;
+        }).join('');
+    }
+
+    function buildFeedbackHTML(question, selectedAnswerIndex) {
+        const isCorrect = selectedAnswerIndex === question.correctIndex;
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        const titleClass = isCorrect ? 'success' : 'error';
+        const titleText = isCorrect ? '✅ Fato Físico Validado!' : '❌ Análise Ohmica Incorreta!';
+        
+        const distortionsHTML = question.explanation.otherOptions.map((explanationText, idx) => {
+            if (idx === question.correctIndex || explanationText.trim() === "") return '';
+            return `<div class="feedback-item wrong-opt"><strong>${alphabet[idx]})</strong> ${explanationText}</div>`;
+        }).join('');
+
+        return `
+            <div class="feedback-box show">
+                <div class="feedback-title ${titleClass}" style="color: ${isCorrect ? 'var(--correct-border)' : 'var(--wrong-border)'}">${titleText}</div>
+                <div class="feedback-item correct-opt"><strong>Fórmula e Resposta:</strong> ${question.options[question.correctIndex]}</div>
+                <div style="margin-top:15px;font-size:1rem;color:var(--text-color);margin-bottom:15px;font-weight:600;">${question.explanation.correctText}</div>
+                ${distortionsHTML ? `<div style="margin-top:15px;border-top:2px dashed var(--border-color);padding-top:15px;">
+                    <small style="color:var(--text-color);"><strong>O que os Distratores queriam fazer-te acreditar:</strong></small>
+                    ${distortionsHTML}
+                </div>` : ''}
+            </div>
+        `;
+    }
+
+    function renderCurrentQuestion() {
+        const container = document.getElementById('quizContainer');
+        if (!container) return;
+
+        const question = questionsDatabase[quizState.currentIndex];
+        const selectedAnswerIndex = quizState.userAnswers[quizState.currentIndex];
+        const badgeClass = getDifficultyBadgeClass(question.level);
+        
+        let feedbackHTML = selectedAnswerIndex !== null ? buildFeedbackHTML(question, selectedAnswerIndex) : '';
+
+        container.innerHTML = `
+            <div class="quiz-question-card">
+                <span class="difficulty-badge ${badgeClass}">${question.level}</span>
+                <div style="margin-bottom:25px;">
+                    <span class="quiz-question-counter">QUESTÃO ${quizState.currentIndex + 1} DE ${questionsDatabase.length}</span>
+                    <h2 class="quiz-question-text">${question.text}</h2>
+                </div>
+                <div class="options-list">
+                    ${buildOptionsHTML(question, selectedAnswerIndex)}
+                </div>
+                ${feedbackHTML}
+            </div>
+        `;
+        
+        updateNavigationButtons();
+    }
+
+    function handleOptionSelection(selectedIndex) {
+        if (quizState.userAnswers[quizState.currentIndex] !== null) return;
+        
+        quizState.userAnswers[quizState.currentIndex] = selectedIndex;
+        const isCorrect = selectedIndex === questionsDatabase[quizState.currentIndex].correctIndex;
+        
+        if (isCorrect) startSuccessAnimation();
+        else triggerErrorShakeEffect();
+        
+        renderCurrentQuestion();
+        renderNavigationMap();
+    }
+
+    function triggerErrorShakeEffect() {
+        const container = document.getElementById('quizContainer');
+        if (container) { 
+            container.classList.remove('shake-effect'); 
+            void container.offsetWidth; 
+            container.classList.add('shake-effect'); 
+            setTimeout(() => container.classList.remove('shake-effect'), 500); 
+        }
+    }
+
+    function startSuccessAnimation() {
+        const duration = 1500;
+        const end = Date.now() + duration;
+        
+        stopSuccessAnimation();
+        
+        function animateFrame() {
+            if(window.confetti && typeof confetti === 'function') {
+                const config = { particleCount: 5, spread: 55, colors: ['#10B981', '#6366F1', '#F59E0B', '#059669'] };
+                confetti({ ...config, angle: 60, origin: { x: 0, y: 0.6 } });
+                confetti({ ...config, angle: 120, origin: { x: 1, y: 0.6 } });
+            }
+            if (Date.now() < end) quizState.confettiAnimationId = requestAnimationFrame(animateFrame);
+        }
+        animateFrame();
+    }
+
+    function stopSuccessAnimation() {
+        if (window.confetti && typeof confetti.reset === 'function') confetti.reset(); 
+        if (quizState.confettiAnimationId) {
+            cancelAnimationFrame(quizState.confettiAnimationId);
+            quizState.confettiAnimationId = null;
+        }
+    }
+
+    function renderNavigationMap() {
+        const mapContainer = document.getElementById('qMap');
+        if (!mapContainer) return;
+        
+        mapContainer.innerHTML = questionsDatabase.map((question, index) => {
+            const isCurrent = index === quizState.currentIndex;
+            const userAnswer = quizState.userAnswers[index];
+            const hasAnswered = userAnswer !== null;
+            const isCorrect = userAnswer === question.correctIndex;
+            
+            let cssClass = 'map-dot';
+            if (isCurrent) cssClass += ' active';
+            if (hasAnswered) cssClass += isCorrect ? ' answered-correct' : ' answered-wrong';
+            
+            return `<div class="${cssClass}" onclick="goToQuestion(${index})">${index + 1}</div>`;
+        }).join('');
+        
+        setTimeout(() => { 
+            const activeDot = mapContainer.querySelector('.map-dot.active'); 
+            if (activeDot) activeDot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); 
+        }, 50);
+    }
+
+    function goToQuestion(targetIndex) { 
+        stopSuccessAnimation();
+        quizState.currentIndex = targetIndex; 
+        renderCurrentQuestion(); 
+        renderNavigationMap(); 
+    }
+    
+    function navigateQuestion(directionOffset) { 
+        const nextIndex = quizState.currentIndex + directionOffset; 
+        if (nextIndex >= 0 && nextIndex < questionsDatabase.length) goToQuestion(nextIndex); 
+    }
+
+    function updateNavigationButtons() {
+        const btnPrev = document.getElementById('btnPrev');
+        const btnNext = document.getElementById('btnNext');
+        
+        if (btnPrev) btnPrev.disabled = (quizState.currentIndex === 0);
+        
+        if (btnNext) {
+            const isLastQuestion = quizState.currentIndex === questionsDatabase.length - 1;
+            if (isLastQuestion) { 
+                btnNext.textContent = "Finalizar Avaliação Final"; 
+                btnNext.onclick = finishQuiz; 
+            } else { 
+                btnNext.textContent = "Próxima Questão ➡️"; 
+                btnNext.onclick = () => navigateQuestion(1); 
+            }
+        }
+    }
+
+    function calculateStars(percent) {
+        if (percent === 100) return "⭐⭐⭐⭐⭐";
+        if (percent >= 80) return "⭐⭐⭐⭐";
+        if (percent >= 60) return "⭐⭐⭐";
+        if (percent >= 40) return "⭐⭐";
+        if (percent > 0) return "⭐";
+        return "🌑";
+    }
+
+    function finishQuiz() {
+        const unansweredCount = quizState.userAnswers.filter(answer => answer === null).length;
+        
+        if (unansweredCount > 0) {
+            const confirmMessage = `Existem ${unansweredCount} questões não resolvidas nos cálculos de Ohm. Queres entregar a prova na mesma e zerar o que ficou em branco?`;
+            if (!confirm(confirmMessage)) return;
+        }
+
+        stopSuccessAnimation();
+
+        const correctAnswersCount = quizState.userAnswers.filter((answer, index) => answer === questionsDatabase[index].correctIndex).length;
+        const totalQuestions = questionsDatabase.length;
+        const percentageScore = Math.round((correctAnswersCount / totalQuestions) * 100);
+        const isApproved = percentageScore >= 80;
+        
+        renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved);
+        changeApplicationView('result');
+    }
+
+    function renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved) {
+        document.getElementById('finalPercent').textContent = `${percentageScore}%`;
+        document.getElementById('finalScoreText').textContent = `Acertaste ${correctAnswersCount} de ${totalQuestions}`;
+        document.getElementById('finalStars').textContent = calculateStars(percentageScore);
+        
+        const reviewContainer = document.getElementById('review-container');
+        const actionButtonsContainer = document.getElementById('action-buttons');
+        
+        let summaryHTML = '';
+
+        if (isApproved) {
+            summaryHTML += `
+                <div class="result-summary-box success">
+                    <strong>🎉 DOMÍNIO ABSOLUTO DA RESISTÊNCIA!</strong> Os teus cálculos geométricos para fios condutores e equações da 1ª Lei de Ohm atingiram o nível máximo. Podes ligar o disjuntor.
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 GABARITAR TESTE NOVAMENTE</button>`;
+        } else {
+            summaryHTML += `
+                <div class="result-summary-box error">
+                    <strong>⚠️ COLAPSO NO EFEITO JOULE!</strong> A tua análise ficou abaixo dos 80%. Tens que estudar mais urgentemente como um "fio longo e fino" atua como bloqueador trágico dos teus eletrões na fórmula p.L/A.
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REFAZER O CIRCUITO AVALIATIVO</button>`;
+        }
+        
+        if (correctAnswersCount < totalQuestions) {
+            summaryHTML += '<h4 style="margin-bottom:15px; color:var(--text-color); font-size:1.15rem;">Auditoria Técnica e Relatório de Queda:</h4>';
+            questionsDatabase.forEach((question, index) => {
+                const userAnswerIndex = quizState.userAnswers[index];
+                if (userAnswerIndex !== question.correctIndex) {
+                    const userAnswerText = userAnswerIndex === null ? "Deixado em Branco Cego" : question.options[userAnswerIndex];
+                    const correctAnswerText = question.options[question.correctIndex];
+                    
+                    let plainQuestionText = question.text;
+
+                    summaryHTML += `
+                        <div class="error-log-item">
+                            <strong style="color:var(--theme-dark); font-size:1.05rem; display:block; margin-bottom:8px;">Q${index + 1}: ${plainQuestionText}</strong>
+                            <span style="color:var(--wrong-border); font-weight: 600; display:block; margin-bottom:5px;">O teu erro matemático na ficha: ${userAnswerText}</span>
+                            <span style="color:var(--correct-border); font-weight: 700; display:block;">O Fato Corrigido e Alinhado à Ohm: ${correctAnswerText}</span>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        reviewContainer.innerHTML = summaryHTML;
+    }
+
+    function resetQuiz() { 
+        quizState.userAnswers = new Array(questionsDatabase.length).fill(null); 
+        quizState.currentIndex = 0; 
+        changeApplicationView('practice'); 
+    }
+    
+    // START APPLICATION
+    initializeSearch();
+    changeApplicationView('explanation');
+</script>
+</body>
+</html>

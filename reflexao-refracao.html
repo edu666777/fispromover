@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Física: Reflexão e Refração - Promover</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* --- VARIÁVEIS DE COR E TEMA: ÓPTICA GEOMÉTRICA (Violeta e Esmeralda) --- */
+        :root {
+            --bg-color: #FDFEFA; /* Creme muito claro */
+            --text-color: #1E1B4B; /* Índigo escuro */
+            --border-color: #4338CA; /* Violeta forte */
+            --white: #FFFFFF;
+            
+            --theme-light: #F5F3FF; /* Violeta pastel */
+            --theme-medium: #8B5CF6; /* Violeta vivo */
+            --theme-dark: #6D28D9; /* Roxo profundo */
+            --theme-contrast: #10B981; /* Esmeralda (Luz/Laser) */
+            --theme-accent: #F59E0B; /* Âmbar (Foco) */
+            --theme-text-active: #FFFFFF;
+            
+            --correct-bg: #D1FAE5;
+            --correct-border: #059669;
+            --wrong-bg: #FFE4E6;
+            --wrong-border: #BE123C;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 15px 120px 15px;
+            background-image: radial-gradient(var(--theme-light) 1.5px, transparent 1.5px);
+            background-size: 30px 30px;
+        }
+
+        /* --- ANIMAÇÕES --- */
+        @keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1) rotate(-5deg); color: var(--theme-contrast); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+        .pulse-effect { animation: pulse 2s infinite; display: inline-block; }
+        .shake-effect { animation: shake 0.4s ease-in-out; }
+
+        /* --- LAYOUT PRINCIPAL --- */
+        .container { width: 100%; max-width: 650px; display: flex; flex-direction: column; gap: 25px; }
+        .logo-header { display: flex; flex-direction: column; align-items: center; padding: 15px 0 25px 0; text-align: center; }
+        .css-logo { font-size: 1.5rem; font-weight: 900; color: var(--theme-text-active); text-transform: uppercase; letter-spacing: -1px; border: 3px solid var(--border-color); padding: 8px 24px; border-radius: 12px; background: var(--theme-dark); box-shadow: 4px 4px 0px var(--theme-contrast); margin-bottom: 15px; transform: rotate(-2deg); }
+        h1 { font-size: 2rem; font-weight: 900; color: var(--text-color); text-transform: uppercase; letter-spacing: -0.5px; line-height: 1.1; }
+        .subtitle { font-size: 1rem; color: var(--white); font-weight: 700; margin-top: 5px; background: var(--theme-contrast); padding: 4px 12px; border-radius: 8px; border: 2px solid var(--border-color); }
+
+        /* --- NAVEGAÇÃO --- */
+        .toggle-container { background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 6px; display: flex; box-shadow: 4px 4px 0px var(--border-color); position: sticky; top: 15px; z-index: 50; }
+        .toggle-btn { flex: 1; border: none; background: none; padding: 12px 0; border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.05rem; color: var(--text-color); cursor: pointer; transition: all 0.2s ease; }
+        .toggle-btn.active { background-color: var(--theme-dark); color: var(--theme-text-active); border: 2px solid var(--border-color); box-shadow: 2px 2px 0px var(--border-color); }
+
+        .view-section { display: none; animation: fadeIn 0.3s ease; flex-direction: column; gap: 35px; }
+        .view-section.active { display: flex; }
+
+        /* --- PESQUISA --- */
+        .search-container { position: relative; width: 100%; }
+        .search-input { width: 100%; padding: 16px 20px 16px 55px; border: 3px solid var(--border-color); border-radius: 12px; background-color: var(--white); font-family: 'Poppins', sans-serif; font-size: 1.05rem; font-weight: 600; color: var(--text-color); box-shadow: 4px 4px 0px var(--border-color); outline: none; transition: all 0.2s ease; }
+        .search-input:focus { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--theme-contrast); border-color: var(--theme-dark); }
+        .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 1.4rem; }
+        #no-results { text-align: center; color: var(--wrong-border); font-weight: 800; display: none; background: var(--wrong-bg); padding: 15px; border: 3px solid var(--wrong-border); border-radius: 8px; }
+
+        /* --- TEORIA --- */
+        .content-group { display: flex; flex-direction: column; position: relative; padding-top: 15px; }
+        .section-badge { display: inline-flex; align-items: center; gap: 10px; background-color: var(--theme-dark); color: var(--white); font-size: 1.1rem; font-weight: 800; padding: 8px 20px; border-radius: 8px; border: 3px solid var(--border-color); box-shadow: 3px 3px 0px var(--theme-contrast); text-transform: uppercase; position: absolute; top: -5px; left: 15px; z-index: 10; transform: rotate(-1.5deg); }
+        .theory-box { display: flex; flex-direction: column; padding: 35px 25px 25px 35px; border-radius: 12px; background-color: var(--white); border: 3px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); font-weight: 500; font-size: 1rem; line-height: 1.7; position: relative; overflow: hidden; gap: 20px; border-left: 14px solid var(--theme-medium); }
+        .theory-box h3 { font-size: 1.35rem; font-weight: 900; color: var(--theme-dark); margin-bottom: 5px; display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px; }
+        
+        .visual-area { background: #F8FAFC; border: 3px dashed var(--theme-medium); border-radius: 12px; padding: 25px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; width: 100%; }
+        .highlight-box { background-color: #FEF3C7; border: 3px solid var(--border-color); border-left: 8px solid var(--theme-contrast); padding: 18px 20px; border-radius: 8px; font-size: 0.95rem; color: #78350F; font-weight: 600; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); }
+
+        /* --- QUIZ UI --- */
+        .difficulty-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; border: 2px solid var(--border-color); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
+        .dif-facil { background: #D1FAE5; color: #065F46; }
+        .dif-medio { background: #FEF08A; color: #713F12; }
+        .dif-dificil { background: #FECACA; color: #7F1D1D; }
+
+        .question-map { display: flex; gap: 8px; overflow-x: auto; padding: 10px 5px; margin-bottom: 20px; white-space: nowrap; scroll-behavior: smooth; }
+        .question-map::-webkit-scrollbar { display: none; }
+        .map-dot { min-width: 38px; height: 38px; border: 2px solid var(--border-color); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; color: var(--theme-dark); background: white; cursor: pointer; transition: all 0.2s; }
+        .map-dot.active { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); transform: scale(1.15); }
+        .map-dot.answered-correct { background-color: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .map-dot.answered-wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .quiz-question-card { border: 4px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); padding: 30px; border-radius: 16px; background: var(--white); }
+        .quiz-question-counter { font-size: 0.85rem; font-weight: 900; color: var(--theme-dark); letter-spacing: 1px; }
+        .quiz-question-text { font-size: 1.15rem; margin-top: 8px; color: var(--text-color); font-weight: 800; line-height: 1.5; margin-bottom: 25px;}
+
+        .option-btn { display: flex; align-items: center; width: 100%; padding: 18px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.1s ease; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 600; text-align: left; color: var(--text-color); }
+        .option-btn:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px var(--theme-contrast); }
+        .opt-circle { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--border-color); margin-right: 15px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.05rem; flex-shrink: 0; background: var(--theme-light); color: var(--theme-dark); }
+        .option-btn.correct { background-color: var(--correct-bg); border-color: var(--correct-border); box-shadow: 3px 3px 0px var(--correct-border); }
+        .option-btn.correct .opt-circle { background-color: var(--correct-border); color: white; border-color: var(--correct-border); }
+        .option-btn.wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); opacity: 0.9; }
+        .option-btn.wrong .opt-circle { background-color: var(--wrong-border); color: white; border-color: var(--wrong-border); }
+        .option-btn.disabled { pointer-events: none; opacity: 0.7; }
+
+        /* --- FEEDBACK DA QUESTÃO --- */
+        .feedback-box { display: block; margin-top: 25px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 25px; animation: slideUp 0.3s ease-out; box-shadow: 5px 5px 0px rgba(0,0,0,0.1); }
+        .feedback-title { font-weight: 900; text-transform: uppercase; font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .feedback-item { margin-bottom: 10px; font-size: 0.95rem; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); line-height: 1.5; font-weight: 500; }
+        .feedback-item.correct-opt { background: var(--correct-bg); border-color: var(--correct-border); color: #064E3B; font-weight: 700; box-shadow: 3px 3px 0px var(--correct-border); }
+        .feedback-item.wrong-opt { background: #FFE4E6; border-color: #BE123C; color: #7F1D1D; border-style: dashed; margin-top: 8px; }
+
+        /* --- RESULTADOS --- */
+        .result-card { background: white; border: 4px solid var(--border-color); border-radius: 16px; padding: 40px 20px; box-shadow: 8px 8px 0px var(--border-color); margin-bottom: 30px; text-align: center; }
+        .stars-container { font-size: 2.5rem; margin: 15px 0; letter-spacing: 5px; }
+        .percentage-big { font-size: 5rem; font-weight: 900; color: var(--theme-dark); line-height: 1; margin: 15px 0; text-shadow: 4px 4px 0px var(--theme-contrast); }
+        
+        .result-summary-box { padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 3px solid; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); }
+        .result-summary-box.success { background: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .result-summary-box.error { background: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+        .error-log-item { margin-bottom: 15px; padding: 20px; background: var(--theme-light); border-radius: 12px; border: 3px dashed var(--theme-medium); text-align: left;}
+
+        /* --- RODAPÉ --- */
+        .quiz-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--white); border-top: 3px solid var(--border-color); padding: 15px 20px; display: none; justify-content: center; gap: 20px; z-index: 100; box-shadow: 0px -4px 10px rgba(0,0,0,0.05); }
+        .nav-btn { padding: 15px 30px; border-radius: 12px; font-weight: 900; border: 3px solid var(--border-color); cursor: pointer; box-shadow: 3px 3px 0px var(--border-color); font-family: 'Poppins', sans-serif; text-transform: uppercase; background: white; transition: transform 0.1s; }
+        .nav-btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 0px 0px 0px transparent; }
+        .btn-next { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); }
+        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+        
+        .btn-action { width: 100%; padding: 20px; background-color: var(--theme-dark); color: white; border: 3px solid var(--border-color); border-radius: 12px; font-size: 1.15rem; font-weight: 900; cursor: pointer; box-shadow: 6px 6px 0px var(--theme-contrast); transition: all 0.1s; text-transform: uppercase; margin-top: 10px; }
+        .btn-action:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0px var(--theme-contrast); }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <header class="logo-header">
+            <div class="css-logo"><span class="pulse-effect">✨</span> PROMOVER</div>
+            <h1>Física / 9º Ano</h1>
+            <p class="subtitle">Óptica: Reflexão e Refração</p>
+        </header>
+
+        <div class="toggle-container">
+            <button class="toggle-btn active" id="btnExp" onclick="changeApplicationView('explanation')">📘 Teoria</button>
+            <button class="toggle-btn" id="btnPrac" onclick="changeApplicationView('practice')">🧠 Prática (30)</button>
+        </div>
+
+        <!-- VISTA: TEORIA -->
+        <main id="viewExplanation" class="view-section active">
+            
+            <div class="search-container">
+                <span class="search-icon" aria-hidden="true">🔍</span>
+                <input type="text" id="searchInput" class="search-input" placeholder="Pesquisar conceito... (ex: Espelho, Índice, Lente)">
+            </div>
+            <div id="no-results"><p>😕 Conceito óptico não encontrado.</p></div>
+
+            <section class="content-group">
+                <div class="section-badge">🪞 1. Reflexão da Luz</div>
+                <article class="theory-box search-target">
+                    <h3>O Bate e Volta</h3>
+                    <p>A reflexão ocorre quando a luz atinge uma superfície e regressa ao meio de origem. Existem duas leis fundamentais que regem este fenómeno:</p>
+                    
+                    <div class="visual-area">
+                        <span style="font-size: 0.85rem; font-weight: 700; color: var(--theme-dark); text-transform: uppercase;">Leis da Reflexão</span>
+                        <svg viewBox="0 0 300 160" width="100%" height="auto" style="max-width: 300px;">
+                            <!-- Espelho -->
+                            <rect x="50" y="130" width="200" height="10" fill="#CBD5E1" stroke="#475569" stroke-width="2"/>
+                            <!-- Normal -->
+                            <line x1="150" y1="20" x2="150" y2="130" stroke="#94A3B8" stroke-dasharray="4" stroke-width="2"/>
+                            <text x="155" y="35" font-size="12" font-weight="bold" fill="#64748B">Normal (N)</text>
+                            
+                            <!-- Raio Incidente -->
+                            <line x1="70" y1="50" x2="150" y2="130" stroke="#10B981" stroke-width="3" marker-end="url(#arr-ref)"/>
+                            <text x="50" y="45" font-size="11" font-weight="bold" fill="#059669">Incidente</text>
+                            
+                            <!-- Raio Refletido -->
+                            <line x1="150" y1="130" x2="230" y2="50" stroke="#10B981" stroke-width="3" marker-end="url(#arr-ref)"/>
+                            <text x="210" y="45" font-size="11" font-weight="bold" fill="#059669">Refletido</text>
+                            
+                            <!-- Ângulos -->
+                            <text x="130" y="115" font-size="14" font-weight="bold" fill="#4338CA">i</text>
+                            <text x="162" y="115" font-size="14" font-weight="bold" fill="#4338CA">r</text>
+
+                            <defs>
+                                <marker id="arr-ref" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#10B981"/></marker>
+                            </defs>
+                        </svg>
+                    </div>
+
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li><strong>1ª Lei:</strong> O raio incidente, a reta Normal e o raio refletido estão no mesmo plano.</li>
+                        <li><strong>2ª Lei:</strong> O ângulo de incidência (i) é sempre IGUAL ao ângulo de reflexão (r).</li>
+                        <li><strong>Regular vs. Difusa:</strong> Se a superfície for lisa (espelho), a reflexão é regular. Se for rugosa (parede), a luz espalha-se em várias direções (difusa).</li>
+                    </ul>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">💎 2. Refração da Luz</div>
+                <article class="theory-box search-target">
+                    <h3>A Mudança de Meio</h3>
+                    <p>A refração acontece quando a luz passa de um meio transparente para outro (ex: do ar para a água), sofrendo uma alteração na sua <strong>velocidade</strong>.</p>
+                    
+                    <div class="visual-area">
+                        <span style="font-size: 0.85rem; font-weight: 700; color: var(--theme-dark); text-transform: uppercase;">Desvio na Refração</span>
+                        <svg viewBox="0 0 300 160" width="100%" height="auto" style="max-width: 300px;">
+                            <!-- Meio Ar -->
+                            <rect x="20" y="20" width="260" height="60" fill="#F8FAFC"/>
+                            <text x="30" y="40" font-size="12" font-weight="bold" fill="#64748B">Ar (n=1)</text>
+                            <!-- Meio Água -->
+                            <rect x="20" y="80" width="260" height="60" fill="#E0F2FE"/>
+                            <text x="30" y="100" font-size="12" font-weight="bold" fill="#0369A1">Água (n=1.33)</text>
+                            
+                            <!-- Normal -->
+                            <line x1="150" y1="20" x2="150" y2="140" stroke="#94A3B8" stroke-dasharray="4" stroke-width="2"/>
+                            
+                            <!-- Raio Incidente -->
+                            <line x1="90" y1="30" x2="150" y2="80" stroke="#F59E0B" stroke-width="3"/>
+                            
+                            <!-- Raio Refratado (Desvia para perto da normal) -->
+                            <line x1="150" y1="80" x2="180" y2="140" stroke="#F59E0B" stroke-width="3" marker-end="url(#arr-refr)"/>
+                            
+                            <defs>
+                                <marker id="arr-refr" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#F59E0B"/></marker>
+                            </defs>
+                        </svg>
+                    </div>
+
+                    <div class="highlight-box">
+                        <strong>Regra de Ouro:</strong> Quanto maior o índice de refracção (n), mais "lenta" a luz viaja e mais o raio se aproxima da Normal.
+                    </div>
+                </article>
+            </section>
+
+            <button class="btn-action" onclick="changeApplicationView('practice')">
+                Iniciar Avaliação de Óptica ➜
+            </button>
+        </main>
+
+        <!-- VISTA: PRÁTICA -->
+        <main id="viewPractice" class="view-section">
+            <div style="margin-bottom: 20px; background-color: var(--white); padding: 15px; border-radius: 12px; border: 3px solid var(--border-color); box-shadow: 4px 4px 0px var(--border-color);">
+                <h2 style="color:var(--theme-dark); font-weight:900; margin-bottom: 5px;">A Prova de Fogo - IFCE</h2>
+                <p style="color: var(--theme-contrast); font-size: 0.95rem; font-weight:600;">
+                    30 questões de Óptica. Domina os espelhos e a refração. Acerta <strong>80% (24/30)</strong>.
+                </p>
+            </div>
+            
+            <div class="question-map" id="qMap"></div>
+            <div id="quizContainer"></div>
+        </main>
+
+        <!-- VISTA: RESULTADOS -->
+        <main id="viewResult" class="view-section">
+            <div class="result-card">
+                <h2 style="font-weight:900; text-transform:uppercase;">Relatório de Desempenho</h2>
+                <div class="stars-container" id="finalStars">⭐⭐⭐</div>
+                <div class="percentage-big" id="finalPercent">0%</div>
+                <p id="finalScoreText" style="font-size:1.2rem; font-weight: 700; color: #555;"></p>
+                <div id="review-container" style="text-align: left; margin-top: 25px;"></div>
+            </div>
+            <div id="action-buttons"></div>
+        </main>
+    </div>
+
+    <footer class="quiz-footer" id="quizFooter">
+        <button class="nav-btn btn-prev" id="btnPrev" onclick="navigateQuestion(-1)">Anterior</button>
+        <button class="nav-btn btn-next" id="btnNext" onclick="navigateQuestion(1)">Próxima</button>
+    </footer>
+
+<script>
+    const questionsDatabase = [
+        {
+            level: "Fácil",
+            text: "Um raio de luz atinge um espelho plano com um ângulo de incidência de 35º em relação à reta Normal. Qual será o valor do ângulo de reflexão?",
+            options: ["70º", "35º", "55º", "0º"],
+            correctIndex: 1,
+            explanation: {
+                correctText: "Pela 2ª Lei da Reflexão, o ângulo de incidência é rigorosamente igual ao de reflexão (i = r).",
+                otherOptions: ["O dobro seria se somasses incidência e reflexão.", "", "55º seria o ângulo complementar com a superfície.", "Incorreto."]
+            }
+        },
+        {
+            level: "Fácil",
+            text: "Porque é que conseguimos ler as letras impressas num livro de qualquer ângulo, sem que o papel brilhe como um espelho?",
+            options: ["Devido à Reflexão Regular.", "Devido à Refração Atmosférica.", "Devido à Reflexão Difusa.", "Porque as letras emitem luz própria."],
+            correctIndex: 2,
+            explanation: {
+                correctText: "As fibras do papel são rugosas, espalhando a luz em todas as direções (reflexão difusa), permitindo a leitura de qualquer lado.",
+                otherOptions: ["Regular acontece em espelhos.", "Refração é mudança de meio.", "", "Papel é fonte secundária, não emite luz própria."]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Quando olhas para um peixe dentro de um aquário, ele parece estar numa posição mais rasa (mais perto da superfície) do que realmente está. Qual fenómeno explica isto?",
+            options: ["Reflexão Interna.", "Difração da Água.", "Dispersão Cromática.", "Refração da Luz."],
+            correctIndex: 3,
+            explanation: {
+                correctText: "Ao passar da água (mais densa) para o ar (menos denso), a luz desvia-se, criando uma imagem virtual do peixe acima da sua posição real.",
+                otherOptions: ["Não é reflexão, a luz atravessa o vidro.", "Difração contorna obstáculos.", "Dispersão cria arco-íris.", ""]
+            }
+        },
+        {
+            level: "Médio",
+            text: "O índice de refracção do vidro é n=1,5 e o da água é n=1,33. O que acontece com a velocidade da luz ao passar da água para o vidro?",
+            options: ["Aumenta.", "Diminui.", "Mantém-se constante.", "A luz para completamente."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "Quanto maior o índice de refracção (n), menor a velocidade da luz no meio. Como o vidro (1,5) é mais refringente que a água (1,33), a luz abranda.",
+                otherOptions: ["Aumentaria se o n fosse menor.", "", "A velocidade da luz só é constante no vácuo perfeito.", "A luz não para, apenas perde velocidade."]
+            }
+        },
+        {
+            level: "Difícil",
+            text: "Nas fibras ópticas, a luz viaja quilómetros sem sair do interior do fio de vidro. O princípio físico utilizado para prender a luz lá dentro é:",
+            options: ["Reflexão Difusa Contínua.", "Refração Total.", "Reflexão Interna Total.", "Polarização de Frequência."],
+            correctIndex: 2,
+            explanation: {
+                correctText: "Quando a luz atinge a borda da fibra vindo do interior (meio mais denso) com um ângulo superior ao ângulo limite, ela sofre Reflexão Interna Total e não escapa.",
+                otherOptions: ["Difusa faria o sinal perder-se em todas as direções.", "Refração faria a luz sair da fibra para o ar.", "", "Polarização não aprisiona a luz no cabo."]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Um feixe de luz monocromática passa do Ar para o Diamante. Sabendo que o Diamante tem um dos maiores índices de refracção da natureza, o raio refratado irá:",
+            options: ["Afastar-se muito da Normal.", "Aproximar-se muito da Normal.", "Continuar em linha reta sem desvio.", "Refletir-se de volta 180 graus."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "Ao passar de um meio menos refringente (Ar) para um muito mais refringente (Diamante), a luz sofre um grande desvio em direção à Normal.",
+                otherOptions: ["Afastar-se-ia se fosse para um meio mais leve (índice menor).", "", "Haverá sempre desvio se houver ângulo de incidência oblíquo.", "Isso seria reflexão."]
+            }
+        },
+        {
+            level: "Fácil",
+            text: "As ambulâncias têm a palavra AMBULÂNCIA escrita de forma invertida (espelhada) na parte da frente. Isto deve-se a qual característica dos espelhos planos?",
+            options: ["Inversão de Cores.", "Enantiamorfismo (Simetria Lateral).", "Aumento da Imagem.", "Refração de Bordo."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "Espelhos planos trocam a direita pela esquerda (enantiamorfismo). Assim, o condutor à frente lê corretamente através do seu retrovisor.",
+                otherOptions: ["As cores mantêm-se exatamente as mesmas.", "", "Espelhos planos não aumentam nem diminuem objetos.", "Refração não ocorre em espelhos opacos."]
+            }
+        },
+        {
+            level: "Difícil",
+            text: "O Arco-íris é um espectáculo da natureza que envolve três fenómenos ópticos em simultâneo dentro das gotas de chuva. Quais são eles?",
+            options: ["Reflexão, Difração e Polarização.", "Refração, Reflexão Interna e Dispersão.", "Sombras, Penumbras e Eclipses.", "Reflexão Difusa e Absorção."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "A luz entra na gota (Refração), decompõe-se em cores (Dispersão) e bate no fundo da gota para voltar aos nossos olhos (Reflexão Interna).",
+                otherOptions: ["Difração não cria o espetro de cores sólidas no céu.", "", "Estes são fenómenos de propagação retilínea, não de cor.", "Absorção deixaria o arco-íris escuro."]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Qual é o valor da velocidade da luz no vácuo (aproximadamente)?",
+            options: ["340 m/s", "30.000 km/s", "300.000 km/s", "1.000.000 m/s"],
+            correctIndex: 2,
+            explanation: {
+                correctText: "A velocidade da luz no vácuo é uma das constantes mais importantes do universo: aproximadamente 300.000 km/s (ou 3.10⁸ m/s).",
+                otherOptions: ["340 m/s é a velocidade do som no ar.", "Faltou um zero.", "", "Valor fisicamente impossível."]
+            }
+        },
+        {
+            level: "Fácil",
+            text: "Um objeto está a 2 metros de distância de um espelho plano. Qual será a distância total entre o objeto e a sua imagem?",
+            options: ["2 metros", "0 metros", "4 metros", "1 metro"],
+            correctIndex: 2,
+            explanation: {
+                correctText: "A imagem num espelho plano é simétrica. Se o objeto está a 2m do espelho, a imagem também está a 2m 'para dentro' dele. Distância total = 2 + 2 = 4m.",
+                otherOptions: ["2m é apenas a distância do objeto até à superfície do espelho.", "Impossível.", "", "Isso seria se o objeto estivesse a 0.5m do espelho."]
+            }
+        },
+        { 
+            level: "Médio", 
+            text: "As miragens no asfalto quente ocorrem devido a:", 
+            options: ["Reflexão no alcatrão derretido.", "Refração da luz nas camadas de ar com diferentes temperaturas e densidades.", "Alucinações colectivas.", "Fumos de escape."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "O ar quente perto do solo é menos denso, fazendo a luz do céu sofrer sucessivas refrações até curvar em formato de U, parecendo um reflexo de água no chão.", 
+                otherOptions: ["O asfalto não atua como espelho, é rugoso e opaco.", "", "É um fenómeno puramente físico que pode ser fotografado.", "Fumos não geram imagens do céu no asfalto."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Ao mergulhar uma caneta num copo com água, ela parece 'quebrada' na interface entre o ar e a água. Isto acontece porque:", 
+            options: ["A água dissolve a camada externa do plástico.", "A luz viaja mais rápido na água, antecipando a imagem.", "A luz muda de direção e velocidade ao passar do ar para a água.", "A pressão da água entorta a caneta fisicamente."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "É o efeito clássico da Refração. Os raios de luz desviam-se ao mudar de meio, enganando o nosso cérebro que projeta as retas num local diferente, 'quebrando' a imagem da caneta.", 
+                otherOptions: ["Impossível quimicamente.", "A luz é mais LENTA na água, não mais rápida.", "", "A caneta continua reta, apenas a luz desvia."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "A cor branca, ao passar por um prisma de vidro, divide-se nas cores do arco-íris. Este fenómeno específico chama-se:", 
+            options: ["Fusão Óptica.", "Dispersão da Luz.", "Reflexão Especular.", "Sombra Geométrica."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Cada cor tem uma frequência (e índice de refracção) diferente no vidro. O violeta desvia mais que o vermelho, separando o feixe branco nas suas componentes (Dispersão).", 
+                otherOptions: ["Termo científico inexistente.", "", "Reflexão não tem capacidade para separar cores.", "A sombra não gera espetro de cores visíveis."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Um espelho plano produz uma imagem geométrica que é:", 
+            options: ["Real e invertida.", "Virtual, direita e do mesmo tamanho.", "Real e aumentada.", "Virtual e menor."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Virtual (forma-se 'atrás' do espelho, não pode ser projetada), direita (a cabeça continua em cima) e rigorosamente do mesmo tamanho do objeto real.", 
+                otherOptions: ["Espelhos planos nunca produzem imagens reais.", "", "Espelhos côncavos podem fazer isso, planos não.", "Espelhos convexos reduzem o tamanho, planos não."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "O 'Ângulo Limite' é um conceito crucial na óptica matemática para determinar:", 
+            options: ["O formato de espelhos curvos apenas.", "O ponto a partir do qual ocorre a Reflexão Interna Total.", "A distância exata da sombra de um poste.", "A velocidade de absorção do raio laser."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Se a luz atinge a fronteira de um meio menos denso com um ângulo superior ao limite calculado, ela não refrata (não escapa), sofrendo reflexão total.", 
+                otherOptions: ["Espelhos não precisam de ângulo limite.", "", "Não tem a ver com formação de sombras.", "Absorção é perda de energia por calor."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "As leis matemáticas da reflexão (i = r) aplicam-se a:", 
+            options: ["Apenas espelhos de vidro.", "Qualquer superfície do universo que reflita luz.", "Apenas à luz solar branca.", "Apenas em ambientes de laboratório fechado."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "As leis da física são universais. Quer seja água, metal polido, um ecrã de telemóvel ou plástico, a geometria da reflexão é sempre obedecida: ângulo de entrada = ângulo de saída.", 
+                otherOptions: ["O vidro não tem o monopólio da física.", "", "Qualquer luz (laser, lanterna) obedece à regra.", "A física atua em todo o lado."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "O que é a 'Reta Normal' na física óptica?", 
+            options: ["Uma linha de luz real visível que brilha no espelho.", "Uma linha de referência imaginária, desenhada perpendicularmente (fazendo 90º) à superfície no ponto de impacto.", "O caminho mais curto que a luz faz.", "A moldura que segura a base do espelho."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "É o eixo central e imaginário usado pelos físicos para medir TODOS os ângulos de incidência, reflexão e refração, garantindo cálculos consistentes.", 
+                otherOptions: ["Não é uma luz, é apenas geometria imaginária.", "", "O caminho mais curto é uma reta, mas não se chama Normal.", "Incorreto."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Se um raio de luz incide exatamente SOBRE a reta Normal (ângulo de 0º com a Normal), o que acontece na Refração?", 
+            options: ["A luz reflete 100% de volta para o ar.", "A luz atravessa o meio em linha reta SEM sofrer desvio lateral, mas sofre mudança de velocidade.", "A luz desaparece por absorção molecular.", "A luz ganha energia e velocidade extra infinita."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "A incidência normal (perpendicular à água) é o único caso em que não há desvio de ângulo na refração. Contudo, a refração ACONTECEU na mesma, porque ele mudou de meio e a velocidade foi alterada.", 
+                otherOptions: ["Na refração normal, a luz entra.", "", "A energia não se perde por completo.", "Energia não se cria do nada."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Um raio de luz passa do Vidro (mais denso) para o Ar (menos denso). Pela regra de Snell, o raio refratado irá:", 
+            options: ["Aproximar-se brutalmente da Normal.", "Afastar-se da Normal, pois a velocidade da luz aumentou no Ar.", "Manter rigorosamente a mesma direção.", "Ficar encurralado no vidro para sempre por gravidade."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Sempre que a luz vai do meio 'difícil' para o 'fácil' (Ar), ela encontra menos resistência, acelera e a geometria dita que ela 'abra', afastando-se do eixo Normal.", 
+                otherOptions: ["Isso ocorre se ela entrar no Vidro.", "", "Só mantém se for incidência 0º.", "Gravidade não encurrala luz em janelas normais."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Qual destas superfícies produz a melhor reflexão REGULAR (especular)?", 
+            options: ["Uma folha de papel de alumínio totalmente amassada.", "As águas de um lago perfeitamente calmo e sem vento.", "Uma parede de tijolos por pintar.", "Um tapete de lã grosso."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Superfícies perfeitamente lisas e planas refletem os raios todos em paralelo (regular), permitindo-te ver o teu reflexo nas águas calmas da natureza.", 
+                otherOptions: ["O amasso gera reflexão caótica (difusa).", "", "Tijolo gera reflexão difusa.", "Lã absorve luz e faz difusão."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "A fórmula de Snell-Descartes relaciona grandezas matemáticas essenciais. O que ela conecta na Refração?", 
+            options: ["A Massa da luz com a Energia Térmica.", "Os Ângulos de incidência e refração com os Índices de Refracção de cada meio.", "A Cor (frequência) com a Temperatura do ar.", "As ondas Sonoras com os batimentos cardíacos."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "A equação [ n₁ · sen(i) = n₂ · sen(r) ] é o coração da óptica, equilibrando o índice (densidade óptica) de um meio com a inclinação geométrica do raio que lá viaja.", 
+                otherOptions: ["Isso é Relatividade (E=mc²).", "", "Termodinâmica.", "Acústica."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Na escala dos índices de refracção absolutos, qual é o valor adotado como base (o referencial mais baixo possível) pertencente ao Vácuo?", 
+            options: ["0", "1", "1,5", "Um valor negativo."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "O Vácuo não oferece resistência nenhuma à luz (velocidade máxima c). O índice n = c/v, como no vácuo v=c, fica n=1. Todos os outros materiais densos do universo têm um 'n' maior que 1.", 
+                otherOptions: ["Um índice de 0 implicaria velocidade infinita.", "", "Vidro costuma ter 1,5.", "Índices negativos absolutos não ocorrem nestes materiais."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Um periscópio naval (usado em submarinos para espiar a superfície) utiliza espelhos internos alinhados. Qual fenómeno permite que a luz dobre o tubo e chegue ao olho do capitão?", 
+            options: ["Refração múltipla na água do mar.", "Reflexão perfeitamente regular em dois espelhos planos inclinados a 45º.", "Polarização circular da luz do Sol.", "Efeito Doppler sonoro adaptado à luz."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "A luz entra no periscópio, bate no 1º espelho, reflete 90º para baixo pelo tubo, bate no 2º espelho e reflete 90º para o olho. É a reflexão levada à sua pura eficiência tática.", 
+                otherOptions: ["O tubo está cheio de ar, não usa a refração da água no seu interior.", "", "Filtros não dobram luz.", "Doppler trata de variação de frequências no movimento."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "As lentes dos teus óculos de grau (ou lentes de contacto) funcionam e corrigem a visão baseadas PRINCIPALMENTE em que comportamento óptico da luz?", 
+            options: ["Reflexão da luz para longe dos olhos.", "Refração criteriosa e controlada da luz.", "Absorção total da luz azul.", "Interferência destrutiva das ondas."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "A luz atravessa a curva exata do vidro ou resina da lente e sofre refração controlada. Os raios desviam-se perfeitamente para consertar o ponto de foco exatamente na retina do teu olho.", 
+                otherOptions: ["Se as lentes refletissem, as pessoas à tua volta ver-se-iam nelas e tu não verias nada.", "", "Absorção escurecia a vista e não focava.", "Conceito ondulatório avançado, irrelevante para lentes básicas."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Para compreenderes a óptica mecânica, tens de saber a natureza do objeto estudado. A Luz é classificada na física como uma onda de que tipo?", 
+            options: ["Mecânica e Longitudinal, tal como o som.", "Eletromagnética e Transversal, não precisando de matéria para viajar.", "Sonora, visível apenas em alguns gases.", "Térmica estática, precisando de metal condutor."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "A Luz não precisa de moléculas de ar ou água para vibrar (por isso a luz das estrelas chega à Terra pelo vácuo do espaço). É uma oscilação eletromagnética transversal.", 
+                otherOptions: ["Ondas mecânicas (som) morrem no vácuo.", "", "O som é invísivel.", "O calor em condução é que precisa de metal."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "A Lei de Snell é uma balança. Se aumentares muito o ângulo de incidência (i) de um raio de luz que passa da água para o ar, o que é que a matemática exige que aconteça ao ângulo de refração (r)?", 
+            options: ["Deverá Diminuir para compensar.", "Deverá Aumentar proporcionalmente, podendo até atingir a reflexão total.", "Ficará fixo e inalterado para sempre.", "A luz vai ignorar a física e viajar reta."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Os senos dos ângulos são proporcionais. Se inclinas mais o raio de entrada (aumenta o i), o raio de saída também tem de inclinar mais (aumenta o r), até chegar ao ponto crítico onde não consegue mais refratar.", 
+                otherOptions: ["Eles andam de 'mãos dadas' (proporcionalidade).", "", "Na física nada é inalterado na refração se a incidência varia.", "Luz não ignora as Leis de Descartes."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Uma anomalia de piscinas fundas: Porque é que, ao atirares uma moeda ao fundo do tanque e a olhares a partir da borda fora de água, o fundo do tanque parece estar muito mais perto do que se o tocares com um pau?", 
+            options: ["Por causa da força de pressão hidrostática da água.", "A refração levanta as imagens. Os raios que vêm da moeda afastam-se da normal ao chegar ao ar, e o nosso cérebro projeta uma linha reta visual que coloca a imagem mais acima.", "Porque o cloro e a água dilatam o azulejo real.", "É um efeito mental de medo da água."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Este é o conceito de 'Profundidade Aparente'. O teu olho recebe o raio de luz já dobrado e assume que ele viajou a direito. Isso cria um 'fantasma' (imagem virtual) da moeda mais acima no tanque.", 
+                otherOptions: ["Hidrostática estuda pressões físicas de líquidos parados, não mexe com luz.", "", "Cloro é irrelevante.", "Não é do foro da psicologia."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "A Reta Normal é uma das piores armadilhas nos exames. Um raio luminoso atinge o espelho fazendo 40º COM A SUPERFÍCIE PLANA de vidro. Qual o verdadeiro valor do ângulo de INCIDÊNCIA (i) para a fórmula?", 
+            options: ["40º", "90º", "50º", "180º"], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Se tens 40º do raio até ao chão/espelho, e sabes que a reta Normal faz 90º com o chão, o que sobra é 90 - 40 = 50º. Logo, o i=50º (e o r=50º!).", 
+                otherOptions: ["Cais na esparrela e assumes que a superfície conta.", "A soma total dá 90º, o ângulo não é 90º.", "", "180º seria uma linha reta chapada ao espelho."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "O prisma de Newton prova que luzes diferentes têm índices de refracção ligeiramente diferentes no mesmo pedaço de vidro. Qual cor do espetro visível sofre o MAIOR desvio angular (a que mais 'dobra')?", 
+            options: ["Vermelho, quebra muito pouco.", "Verde, cor média central.", "Amarelo pálido.", "Violeta, que tem alta frequência."], 
+            correctIndex: 3, 
+            explanation: { 
+                correctText: "O Violeta é a cor de maior energia e frequência do espectro visível. Ao entrar no vidro, sofre a maior resistência (o índice para o violeta é ligeiramente maior), logo sofre o maior desvio para perto da base do prisma.", 
+                otherOptions: ["Vermelho é o velocista que menos quebra caminho.", "", "", ""] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "O Teatro de Sombras Chinesas e os Eclipses solares são explicados na óptica por um princípio geométrico muito simples que rege o vazio. Qual é?", 
+            options: ["Princípio da Refração Oblíqua.", "O Princípio da Propagação Retilínea da Luz em meios homogéneos.", "O Princípio da Reversibilidade dos Raios Laser.", "Princípio da Independência dos Raios visuais."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "A luz é rígida. Como viaja em retas perfeitas, se puseres um objeto opaco (como a tua mão ou a Lua) no caminho, a luz não sabe 'fazer a curva' ao redor do objeto, gerando atrás um vazio exato de luz (Sombra).", 
+                otherOptions: ["Não tem a ver com atravessar água.", "", "Tem a ver com trajetórias espelhadas, não com formação de sombras diretas.", "Independência é as luzes não baterem umas nas outras."] 
+            } 
+        }
+    ];
+
+    const quizState = {
+        currentIndex: 0,
+        userAnswers: new Array(questionsDatabase.length).fill(null),
+        confettiAnimationId: null
+    };
+
+    function initializeSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const contentGroups = document.querySelectorAll('.content-group');
+        const noResultsMsg = document.getElementById('no-results');
+
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', function(event) {
+            const searchTerm = normalizeText(event.target.value);
+            let totalVisibleElements = 0;
+            
+            contentGroups.forEach(group => {
+                const groupContent = normalizeText(group.textContent);
+                const isMatch = groupContent.includes(searchTerm);
+                
+                group.style.display = isMatch ? 'flex' : 'none';
+                if (isMatch) totalVisibleElements++;
+            });
+            
+            noResultsMsg.style.display = totalVisibleElements === 0 ? 'block' : 'none';
+        });
+    }
+
+    function normalizeText(text) {
+        return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    function changeApplicationView(viewName) {
+        const views = ['viewExplanation', 'viewPractice', 'viewResult'];
+        
+        views.forEach(viewId => document.getElementById(viewId).classList.remove('active'));
+        
+        const quizFooter = document.getElementById('quizFooter');
+        if (quizFooter) quizFooter.style.display = 'none';
+
+        if (viewName === 'explanation') {
+            document.getElementById('viewExplanation').classList.add('active');
+            document.getElementById('btnExp').classList.add('active');
+            document.getElementById('btnPrac').classList.remove('active');
+        } else if (viewName === 'practice') {
+            document.getElementById('viewPractice').classList.add('active');
+            if (quizFooter) quizFooter.style.display = 'flex';
+            document.getElementById('btnExp').classList.remove('active');
+            document.getElementById('btnPrac').classList.add('active');
+            
+            renderCurrentQuestion();
+            renderNavigationMap();
+        } else if (viewName === 'result') {
+            document.getElementById('viewResult').classList.add('active');
+        }
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function getDifficultyBadgeClass(level) {
+        const mapping = { 'Fácil': 'dif-facil', 'Médio': 'dif-medio', 'Difícil': 'dif-dificil' };
+        return mapping[level] || 'dif-facil';
+    }
+
+    function buildOptionsHTML(question, selectedAnswerIndex) {
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        return question.options.map((optionText, optionIndex) => {
+            let cssClass = '';
+            
+            if (selectedAnswerIndex !== null) {
+                if (optionIndex === question.correctIndex) cssClass = 'correct';
+                else if (optionIndex === selectedAnswerIndex) cssClass = 'wrong';
+                else cssClass = 'disabled';
+            }
+
+            const isDisabled = selectedAnswerIndex !== null ? 'disabled' : '';
+
+            return `
+                <button class="option-btn ${cssClass}" onclick="handleOptionSelection(${optionIndex})" ${isDisabled}>
+                    <div class="opt-circle">${alphabet[optionIndex]}</div>
+                    <div>${optionText}</div>
+                </button>
+            `;
+        }).join('');
+    }
+
+    function buildFeedbackHTML(question, selectedAnswerIndex) {
+        const isCorrect = selectedAnswerIndex === question.correctIndex;
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        const titleClass = isCorrect ? 'success' : 'error';
+        const titleText = isCorrect ? '✅ Análise Óptica Correta!' : '❌ Falha Analítica Geométrica!';
+        
+        const distortionsHTML = question.explanation.otherOptions.map((explanationText, idx) => {
+            if (idx === question.correctIndex || explanationText.trim() === "") return '';
+            return `<div class="feedback-item wrong-opt"><strong>${alphabet[idx]})</strong> ${explanationText}</div>`;
+        }).join('');
+
+        return `
+            <div class="feedback-box show">
+                <div class="feedback-title ${titleClass}" style="color: ${isCorrect ? 'var(--correct-border)' : 'var(--wrong-border)'}">${titleText}</div>
+                <div class="feedback-item correct-opt"><strong>O Fato Óptico:</strong> ${question.options[question.correctIndex]}</div>
+                <div style="margin-top:15px;font-size:1rem;color:var(--text-color);margin-bottom:15px;font-weight:600;">${question.explanation.correctText}</div>
+                ${distortionsHTML ? `<div style="margin-top:15px;border-top:2px dashed var(--border-color);padding-top:15px;">
+                    <small style="color:var(--text-color);"><strong>Análise dos Desvios e Distratores:</strong></small>
+                    ${distortionsHTML}
+                </div>` : ''}
+            </div>
+        `;
+    }
+
+    function renderCurrentQuestion() {
+        const container = document.getElementById('quizContainer');
+        if (!container) return;
+
+        const question = questionsDatabase[quizState.currentIndex];
+        const selectedAnswerIndex = quizState.userAnswers[quizState.currentIndex];
+        const badgeClass = getDifficultyBadgeClass(question.level);
+        
+        let feedbackHTML = selectedAnswerIndex !== null ? buildFeedbackHTML(question, selectedAnswerIndex) : '';
+
+        container.innerHTML = `
+            <div class="quiz-question-card">
+                <span class="difficulty-badge ${badgeClass}">${question.level}</span>
+                <div style="margin-bottom:25px;">
+                    <span class="quiz-question-counter">QUESTÃO ${quizState.currentIndex + 1} DE ${questionsDatabase.length}</span>
+                    <h2 class="quiz-question-text">${question.text}</h2>
+                </div>
+                <div class="options-list">
+                    ${buildOptionsHTML(question, selectedAnswerIndex)}
+                </div>
+                ${feedbackHTML}
+            </div>
+        `;
+        
+        updateNavigationButtons();
+    }
+
+    function handleOptionSelection(selectedIndex) {
+        if (quizState.userAnswers[quizState.currentIndex] !== null) return;
+        
+        quizState.userAnswers[quizState.currentIndex] = selectedIndex;
+        const isCorrect = selectedIndex === questionsDatabase[quizState.currentIndex].correctIndex;
+        
+        if (isCorrect) startSuccessAnimation();
+        else triggerErrorShakeEffect();
+        
+        renderCurrentQuestion();
+        renderNavigationMap();
+    }
+
+    function triggerErrorShakeEffect() {
+        const container = document.getElementById('quizContainer');
+        if (container) { 
+            container.classList.remove('shake-effect'); 
+            void container.offsetWidth; 
+            container.classList.add('shake-effect'); 
+            setTimeout(() => container.classList.remove('shake-effect'), 500); 
+        }
+    }
+
+    function startSuccessAnimation() {
+        const duration = 1500;
+        const end = Date.now() + duration;
+        
+        stopSuccessAnimation();
+        
+        function animateFrame() {
+            if(window.confetti && typeof confetti === 'function') {
+                const config = { particleCount: 5, spread: 55, colors: ['#8B5CF6', '#10B981', '#F59E0B', '#6D28D9'] };
+                confetti({ ...config, angle: 60, origin: { x: 0, y: 0.6 } });
+                confetti({ ...config, angle: 120, origin: { x: 1, y: 0.6 } });
+            }
+            if (Date.now() < end) quizState.confettiAnimationId = requestAnimationFrame(animateFrame);
+        }
+        animateFrame();
+    }
+
+    function stopSuccessAnimation() {
+        if (window.confetti && typeof confetti.reset === 'function') confetti.reset(); 
+        if (quizState.confettiAnimationId) {
+            cancelAnimationFrame(quizState.confettiAnimationId);
+            quizState.confettiAnimationId = null;
+        }
+    }
+
+    function renderNavigationMap() {
+        const mapContainer = document.getElementById('qMap');
+        if (!mapContainer) return;
+        
+        mapContainer.innerHTML = questionsDatabase.map((question, index) => {
+            const isCurrent = index === quizState.currentIndex;
+            const userAnswer = quizState.userAnswers[index];
+            const hasAnswered = userAnswer !== null;
+            const isCorrect = userAnswer === question.correctIndex;
+            
+            let cssClass = 'map-dot';
+            if (isCurrent) cssClass += ' active';
+            if (hasAnswered) cssClass += isCorrect ? ' answered-correct' : ' answered-wrong';
+            
+            return `<div class="${cssClass}" onclick="goToQuestion(${index})">${index + 1}</div>`;
+        }).join('');
+        
+        setTimeout(() => { 
+            const activeDot = mapContainer.querySelector('.map-dot.active'); 
+            if (activeDot) activeDot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); 
+        }, 50);
+    }
+
+    function goToQuestion(targetIndex) { 
+        stopSuccessAnimation();
+        quizState.currentIndex = targetIndex; 
+        renderCurrentQuestion(); 
+        renderNavigationMap(); 
+    }
+    
+    function navigateQuestion(directionOffset) { 
+        const nextIndex = quizState.currentIndex + directionOffset; 
+        if (nextIndex >= 0 && nextIndex < questionsDatabase.length) goToQuestion(nextIndex); 
+    }
+
+    function updateNavigationButtons() {
+        const btnPrev = document.getElementById('btnPrev');
+        const btnNext = document.getElementById('btnNext');
+        
+        if (btnPrev) btnPrev.disabled = (quizState.currentIndex === 0);
+        
+        if (btnNext) {
+            const isLastQuestion = quizState.currentIndex === questionsDatabase.length - 1;
+            if (isLastQuestion) { 
+                btnNext.textContent = "Finalizar Avaliação"; 
+                btnNext.onclick = finishQuiz; 
+            } else { 
+                btnNext.textContent = "Próxima ➡️"; 
+                btnNext.onclick = () => navigateQuestion(1); 
+            }
+        }
+    }
+
+    function calculateStars(percent) {
+        if (percent === 100) return "⭐⭐⭐⭐⭐";
+        if (percent >= 80) return "⭐⭐⭐⭐";
+        if (percent >= 60) return "⭐⭐⭐";
+        if (percent >= 40) return "⭐⭐";
+        if (percent > 0) return "⭐";
+        return "🌑";
+    }
+
+    function finishQuiz() {
+        const unansweredCount = quizState.userAnswers.filter(answer => answer === null).length;
+        
+        if (unansweredCount > 0) {
+            const confirmMessage = `Existem ${unansweredCount} questões por responder. Quer terminar mesmo assim (as em branco serão dadas como erradas)?`;
+            if (!confirm(confirmMessage)) return;
+        }
+
+        stopSuccessAnimation();
+
+        const correctAnswersCount = quizState.userAnswers.filter((answer, index) => answer === questionsDatabase[index].correctIndex).length;
+        const totalQuestions = questionsDatabase.length;
+        const percentageScore = Math.round((correctAnswersCount / totalQuestions) * 100);
+        const isApproved = percentageScore >= 80;
+        
+        renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved);
+        changeApplicationView('result');
+    }
+
+    function renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved) {
+        document.getElementById('finalPercent').textContent = `${percentageScore}%`;
+        document.getElementById('finalScoreText').textContent = `Acertaste ${correctAnswersCount} de ${totalQuestions}`;
+        document.getElementById('finalStars').textContent = calculateStars(percentageScore);
+        
+        const reviewContainer = document.getElementById('review-container');
+        const actionButtonsContainer = document.getElementById('action-buttons');
+        
+        let summaryHTML = '';
+
+        if (isApproved) {
+            summaryHTML += `
+                <div class="result-summary-box success">
+                    <strong>🎉 MESTRE DA LUZ E GEOMETRIA!</strong> A tua análise geométrica de raios e cálculos de índice e refração estão perfeitamente ajustados para o nível de entrada do IFCE.
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REPETIR PARA 100%</button>`;
+        } else {
+            summaryHTML += `
+                <div class="result-summary-box error">
+                    <strong>⚠️ DESVIO ÓTICO GRAVE DETETADO!</strong> Foste avaliado abaixo da meta (80%). Lembra-te para sempre: os ângulos em óptica medem-se sempre pela reta NORMAL, e nunca pela superfície da água ou do espelho!
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REFAZER AVALIAÇÃO</button>`;
+        }
+        
+        if (correctAnswersCount < totalQuestions) {
+            summaryHTML += '<h4 style="margin-bottom:15px; color:var(--text-color); font-size:1.15rem;">Auditoria das Falhas Físicas e Algébricas:</h4>';
+            questionsDatabase.forEach((question, index) => {
+                const userAnswerIndex = quizState.userAnswers[index];
+                if (userAnswerIndex !== question.correctIndex) {
+                    const userAnswerText = userAnswerIndex === null ? "Deixaste em branco" : question.options[userAnswerIndex];
+                    const correctAnswerText = question.options[question.correctIndex];
+                    
+                    let plainQuestionText = question.text.replace(/<div class="q-svg-container">[\s\S]*?<\/div>/gi, ' [Desenho Omitido] ');
+
+                    summaryHTML += `
+                        <div class="error-log-item">
+                            <strong style="color:var(--theme-dark); font-size:1.05rem; display:block; margin-bottom:8px;">Q${index + 1}: ${plainQuestionText}</strong>
+                            <span style="color:var(--wrong-border); font-weight: 600; display:block; margin-bottom:5px;">A tua análise cega: ${userAnswerText}</span>
+                            <span style="color:var(--correct-border); font-weight: 700; display:block;">O Resultado da Óptica Exata: ${correctAnswerText}</span>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        reviewContainer.innerHTML = summaryHTML;
+    }
+
+    function resetQuiz() { 
+        quizState.userAnswers = new Array(questionsDatabase.length).fill(null); 
+        quizState.currentIndex = 0; 
+        changeApplicationView('practice'); 
+    }
+    
+    // START APPLICATION
+    initializeSearch();
+    changeApplicationView('explanation');
+</script>
+</body>
+</html>

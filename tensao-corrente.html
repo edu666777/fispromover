@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Física: Eletrodinâmica Básica - Promover</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* --- VARIÁVEIS DE COR E TEMA: ELETRICIDADE (Âmbar e Azul Cobalto) --- */
+        :root {
+            --bg-color: #FFFBEB; /* Âmbar muito claro (Fundo) */
+            --text-color: #422006; /* Âmbar 950 (Texto muito escuro) */
+            --border-color: #B45309; /* Âmbar 700 (Contorno forte) */
+            --white: #FFFFFF;
+            
+            --theme-light: #FEF3C7; /* Âmbar 100 (Fundo caixas) */
+            --theme-medium: #F59E0B; /* Âmbar 500 (Amarelo Eletricidade) */
+            --theme-dark: #D97706; /* Âmbar 600 (Acentos escuros) */
+            --theme-contrast: #2563EB; /* Azul Cobalto (Eletrões) */
+            --theme-accent: #EF4444; /* Vermelho (Resistência/Calor) */
+            --theme-text-active: #FFFFFF;
+            
+            --correct-bg: #D1FAE5;
+            --correct-border: #059669;
+            --wrong-bg: #FFE4E6;
+            --wrong-border: #BE123C;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 15px 120px 15px;
+            background-image: radial-gradient(var(--theme-medium) 1px, transparent 1.5px);
+            background-size: 30px 30px;
+            background-color: #FFFBEB;
+        }
+
+        /* --- ANIMAÇÕES --- */
+        @keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1) rotate(-5deg); color: var(--theme-contrast); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+        .pulse-effect { animation: pulse 2s infinite; display: inline-block; }
+        .shake-effect { animation: shake 0.4s ease-in-out; }
+
+        /* --- LAYOUT PRINCIPAL --- */
+        .container { width: 100%; max-width: 650px; display: flex; flex-direction: column; gap: 25px; }
+        .logo-header { display: flex; flex-direction: column; align-items: center; padding: 15px 0 25px 0; text-align: center; }
+        .css-logo { font-size: 1.5rem; font-weight: 900; color: var(--theme-text-active); text-transform: uppercase; letter-spacing: -1px; border: 3px solid var(--border-color); padding: 8px 24px; border-radius: 12px; background: var(--theme-dark); box-shadow: 4px 4px 0px var(--theme-contrast); margin-bottom: 15px; transform: rotate(-2deg); }
+        h1 { font-size: 2rem; font-weight: 900; color: var(--text-color); text-transform: uppercase; letter-spacing: -0.5px; line-height: 1.1; }
+        .subtitle { font-size: 1rem; color: var(--white); font-weight: 700; margin-top: 5px; background: var(--theme-contrast); padding: 4px 12px; border-radius: 8px; border: 2px solid var(--border-color); }
+
+        /* --- NAVEGAÇÃO --- */
+        .toggle-container { background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 6px; display: flex; box-shadow: 4px 4px 0px var(--border-color); position: sticky; top: 15px; z-index: 50; }
+        .toggle-btn { flex: 1; border: none; background: none; padding: 12px 0; border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.05rem; color: var(--text-color); cursor: pointer; transition: all 0.2s ease; }
+        .toggle-btn.active { background-color: var(--theme-dark); color: var(--theme-text-active); border: 2px solid var(--border-color); box-shadow: 2px 2px 0px var(--border-color); }
+
+        .view-section { display: none; animation: fadeIn 0.3s ease; flex-direction: column; gap: 35px; }
+        .view-section.active { display: flex; }
+
+        /* --- PESQUISA --- */
+        .search-container { position: relative; width: 100%; }
+        .search-input { width: 100%; padding: 16px 20px 16px 55px; border: 3px solid var(--border-color); border-radius: 12px; background-color: var(--white); font-family: 'Poppins', sans-serif; font-size: 1.05rem; font-weight: 600; color: var(--text-color); box-shadow: 4px 4px 0px var(--border-color); outline: none; transition: all 0.2s ease; }
+        .search-input:focus { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--theme-contrast); border-color: var(--theme-dark); }
+        .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 1.4rem; }
+        #no-results { text-align: center; color: var(--wrong-border); font-weight: 800; display: none; background: var(--wrong-bg); padding: 15px; border: 3px solid var(--wrong-border); border-radius: 8px; }
+
+        /* --- TEORIA --- */
+        .content-group { display: flex; flex-direction: column; position: relative; padding-top: 15px; }
+        .section-badge { display: inline-flex; align-items: center; gap: 10px; background-color: var(--theme-dark); color: var(--white); font-size: 1.1rem; font-weight: 800; padding: 8px 20px; border-radius: 8px; border: 3px solid var(--border-color); box-shadow: 3px 3px 0px var(--theme-contrast); text-transform: uppercase; position: absolute; top: -5px; left: 15px; z-index: 10; transform: rotate(-1.5deg); }
+        .theory-box { display: flex; flex-direction: column; padding: 35px 25px 25px 35px; border-radius: 12px; background-color: var(--white); border: 3px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); font-weight: 500; font-size: 1rem; line-height: 1.7; position: relative; overflow: hidden; gap: 20px; border-left: 14px solid var(--theme-medium); }
+        .theory-box h3 { font-size: 1.35rem; font-weight: 900; color: var(--theme-dark); margin-bottom: 5px; display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px; }
+        
+        .visual-area { background: #FFFAEC; border: 3px dashed var(--theme-medium); border-radius: 12px; padding: 25px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; width: 100%; }
+        .highlight-box { background-color: #EFF6FF; border: 3px solid var(--theme-contrast); border-left: 8px solid var(--theme-contrast); padding: 18px 20px; border-radius: 8px; font-size: 0.95rem; color: #1E3A8A; font-weight: 600; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); }
+
+        /* --- QUIZ UI --- */
+        .difficulty-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; border: 2px solid var(--border-color); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
+        .dif-facil { background: #D1FAE5; color: #065F46; }
+        .dif-medio { background: #FEF08A; color: #713F12; }
+        .dif-dificil { background: #FECACA; color: #7F1D1D; }
+
+        .question-map { display: flex; gap: 8px; overflow-x: auto; padding: 10px 5px; margin-bottom: 20px; white-space: nowrap; scroll-behavior: smooth; }
+        .question-map::-webkit-scrollbar { display: none; }
+        .map-dot { min-width: 38px; height: 38px; border: 2px solid var(--border-color); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; color: var(--theme-dark); background: white; cursor: pointer; transition: all 0.2s; }
+        .map-dot.active { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); transform: scale(1.15); }
+        .map-dot.answered-correct { background-color: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .map-dot.answered-wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .quiz-question-card { border: 4px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); padding: 30px; border-radius: 16px; background: var(--white); }
+        .quiz-question-counter { font-size: 0.85rem; font-weight: 900; color: var(--theme-dark); letter-spacing: 1px; }
+        .quiz-question-text { font-size: 1.15rem; margin-top: 8px; color: var(--text-color); font-weight: 800; line-height: 1.5; margin-bottom: 25px;}
+
+        .option-btn { display: flex; align-items: center; width: 100%; padding: 18px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.1s ease; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 600; text-align: left; color: var(--text-color); }
+        .option-btn:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px var(--theme-contrast); }
+        .opt-circle { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--border-color); margin-right: 15px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.05rem; flex-shrink: 0; background: var(--theme-light); color: var(--theme-dark); }
+        .option-btn.correct { background-color: var(--correct-bg); border-color: var(--correct-border); box-shadow: 3px 3px 0px var(--correct-border); }
+        .option-btn.correct .opt-circle { background-color: var(--correct-border); color: white; border-color: var(--correct-border); }
+        .option-btn.wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); opacity: 0.9; }
+        .option-btn.wrong .opt-circle { background-color: var(--wrong-border); color: white; border-color: var(--wrong-border); }
+        .option-btn.disabled { pointer-events: none; opacity: 0.7; }
+
+        /* --- FEEDBACK DA QUESTÃO --- */
+        .feedback-box { display: block; margin-top: 25px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 25px; animation: slideUp 0.3s ease-out; box-shadow: 5px 5px 0px rgba(0,0,0,0.1); }
+        .feedback-title { font-weight: 900; text-transform: uppercase; font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .feedback-item { margin-bottom: 10px; font-size: 0.95rem; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); line-height: 1.5; font-weight: 500; }
+        .feedback-item.correct-opt { background: var(--correct-bg); border-color: var(--correct-border); color: #064E3B; font-weight: 700; box-shadow: 3px 3px 0px var(--correct-border); }
+        .feedback-item.wrong-opt { background: #FFE4E6; border-color: #BE123C; color: #7F1D1D; border-style: dashed; margin-top: 8px; }
+
+        /* --- RESULTADOS --- */
+        .result-card { background: white; border: 4px solid var(--border-color); border-radius: 16px; padding: 40px 20px; box-shadow: 8px 8px 0px var(--border-color); margin-bottom: 30px; text-align: center; }
+        .stars-container { font-size: 2.5rem; margin: 15px 0; letter-spacing: 5px; }
+        .percentage-big { font-size: 5rem; font-weight: 900; color: var(--theme-dark); line-height: 1; margin: 15px 0; text-shadow: 4px 4px 0px var(--theme-contrast); }
+        
+        .result-summary-box { padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 3px solid; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); }
+        .result-summary-box.success { background: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .result-summary-box.error { background: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+        .error-log-item { margin-bottom: 15px; padding: 20px; background: var(--theme-light); border-radius: 12px; border: 3px dashed var(--theme-medium); text-align: left;}
+
+        /* --- RODAPÉ --- */
+        .quiz-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--white); border-top: 3px solid var(--border-color); padding: 15px 20px; display: none; justify-content: center; gap: 20px; z-index: 100; box-shadow: 0px -4px 10px rgba(0,0,0,0.05); }
+        .nav-btn { padding: 15px 30px; border-radius: 12px; font-weight: 900; border: 3px solid var(--border-color); cursor: pointer; box-shadow: 3px 3px 0px var(--border-color); font-family: 'Poppins', sans-serif; text-transform: uppercase; background: white; transition: transform 0.1s; }
+        .nav-btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 0px 0px 0px transparent; }
+        .btn-next { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); }
+        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+        
+        .btn-action { width: 100%; padding: 20px; background-color: var(--theme-dark); color: white; border: 3px solid var(--border-color); border-radius: 12px; font-size: 1.15rem; font-weight: 900; cursor: pointer; box-shadow: 6px 6px 0px var(--theme-contrast); transition: all 0.1s; text-transform: uppercase; margin-top: 10px; }
+        .btn-action:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0px var(--theme-contrast); }
+
+        /* Fórmulas Eletrodinâmica */
+        .g-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; width: 100%; margin-top: 10px; }
+        .g-card { flex: 1 1 calc(50% - 15px); min-width: 130px; border-radius: 12px; padding: 15px 10px; text-align: center; border: 3px solid var(--border-color); display: flex; flex-direction: column; align-items: center; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); background-color: var(--white); transition: transform 0.2s; }
+        .g-card.full-width { flex: 1 1 100%; max-width: 280px; }
+        .g-icon { font-size: 2.5rem; margin-bottom: 8px; line-height: 1; }
+        .g-title { font-size: 1rem; font-weight: 900; margin-bottom: 4px; text-transform: uppercase; color: var(--theme-dark); }
+        .g-formula { font-size: 1.15rem; font-weight: 900; color: var(--theme-text-active); margin-bottom: 4px; line-height: 1.2; background: var(--theme-dark); padding: 6px 12px; border-radius: 6px; border: 2px solid var(--border-color); }
+        .g-desc { font-size: 0.85rem; font-weight: 600; color: var(--text-color); margin-top: 6px; line-height: 1.3; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <header class="logo-header">
+            <div class="css-logo"><span class="pulse-effect">⚡</span> PROMOVER</div>
+            <h1>Física / 9º Ano</h1>
+            <p class="subtitle">Eletrodinâmica: Tensão e Corrente</p>
+        </header>
+
+        <div class="toggle-container">
+            <button class="toggle-btn active" id="btnExp" onclick="changeApplicationView('explanation')">📘 Teoria</button>
+            <button class="toggle-btn" id="btnPrac" onclick="changeApplicationView('practice')">🧠 Prática (30)</button>
+        </div>
+
+        <!-- VISTA: TEORIA -->
+        <main id="viewExplanation" class="view-section active">
+            
+            <div class="search-container">
+                <span class="search-icon" aria-hidden="true">🔍</span>
+                <input type="text" id="searchInput" class="search-input" placeholder="Pesquisar conceito... (ex: Corrente, Volt, Ohm)">
+            </div>
+            <div id="no-results"><p>😕 Conceito elétrico não encontrado.</p></div>
+
+            <section class="content-group">
+                <div class="section-badge">🔋 1. A Corrente Elétrica</div>
+                <article class="theory-box search-target">
+                    <h3>O Rio de Eletrões</h3>
+                    <p>A Eletrodinâmica estuda as cargas elétricas <strong>em movimento</strong>. Em materiais condutores (como o cobre), existem "eletrões livres" que podem ser empurrados.</p>
+                    
+                    <div class="visual-area">
+                        <span style="font-size: 0.85rem; font-weight: 700; color: var(--theme-dark); text-transform: uppercase;">Fluxo de Eletrões no Fio</span>
+                        <svg viewBox="0 0 300 120" width="100%" height="auto" style="max-width: 300px; margin-top: 10px;">
+                            <!-- Fio Condutor -->
+                            <rect x="20" y="40" width="260" height="40" fill="#94A3B8" stroke="#475569" stroke-width="3" rx="10"/>
+                            
+                            <!-- Eletrões e Vetores de velocidade -->
+                            <circle cx="60" cy="60" r="8" fill="#2563EB"/>
+                            <text x="56" y="64" font-size="12" font-weight="bold" fill="white">-</text>
+                            <line x1="72" y1="60" x2="92" y2="60" stroke="#F59E0B" stroke-width="2" marker-end="url(#arr-elec)"/>
+
+                            <circle cx="140" cy="60" r="8" fill="#2563EB"/>
+                            <text x="136" y="64" font-size="12" font-weight="bold" fill="white">-</text>
+                            <line x1="152" y1="60" x2="172" y2="60" stroke="#F59E0B" stroke-width="2" marker-end="url(#arr-elec)"/>
+
+                            <circle cx="220" cy="60" r="8" fill="#2563EB"/>
+                            <text x="216" y="64" font-size="12" font-weight="bold" fill="white">-</text>
+                            <line x1="232" y1="60" x2="252" y2="60" stroke="#F59E0B" stroke-width="2" marker-end="url(#arr-elec)"/>
+                            
+                            <text x="150" y="110" text-anchor="middle" font-size="12" font-weight="bold" fill="#0F172A">Corrente de Eletrões Organizada</text>
+
+                            <defs>
+                                <marker id="arr-elec" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#F59E0B"/></marker>
+                            </defs>
+                        </svg>
+                    </div>
+
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li><strong>O que é?</strong> É o movimento ORDENADO das cargas elétricas. Sem uma bateria, os eletrões movem-se de forma caótica e não geram corrente útil.</li>
+                        <li><strong>Unidade SI:</strong> A corrente elétrica (<strong>i</strong>) é medida em <strong>Ampères (A)</strong>.</li>
+                        <li><strong>Sentido Convencional vs Real:</strong> Historicamente, achavam que eram as cargas positivas que se moviam. Por isso, no <em>sentido convencional</em>, a corrente sai do Pólo Positivo (+) para o Negativo (-). Mas na <em>realidade</em>, os eletrões (negativos) viajam do Pólo Negativo (-) para o Positivo (+).</li>
+                    </ul>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">⚡ 2. Tensão e Materiais</div>
+                <article class="theory-box search-target">
+                    <h3>Diferença de Potencial (DDP)</h3>
+                    <p>Os eletrões não andam pelo fio sozinhos por magia. Precisam de um "empurrão". Esse empurrão é dado pela pilha, tomada ou bateria.</p>
+                    
+                    <div class="highlight-box">
+                        <strong>Analogia da Água:</strong> Imagina um cano de água. A água só flui se houver uma "Bomba de Água" a empurrar. A <strong>Tensão (DDP)</strong> é a bomba. A <strong>Corrente (Ampère)</strong> é a água a fluir.
+                    </div>
+
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px; margin-top:10px;">
+                        <li><strong>Unidade SI:</strong> A Tensão (simbolizada por <strong>U</strong> ou <strong>V</strong>) é medida em <strong>Volts (V)</strong> (Ex: Tomada de 220V, Pilha de 1,5V).</li>
+                        <li><strong>Condutores:</strong> Materiais com eletrões livres soltos que deixam a corrente passar fácil (Ex: Cobre, Ouro).</li>
+                        <li><strong>Isolantes:</strong> Materiais onde os eletrões estão presos ao núcleo, impedindo a corrente (Ex: Borracha, Plástico, Vidro).</li>
+                    </ul>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">🧱 3. Resistência e a Lei de Ohm</div>
+                <article class="theory-box search-target">
+                    <h3>O Obstáculo e o Efeito Joule</h3>
+                    <p>Quando os eletrões viajam pelo fio, eles chocam com os átomos do material. A este obstáculo chamamos <strong>Resistência Elétrica (R)</strong>, medida em <strong>Ohms (Ω)</strong>. Esse choque gera Calor, fenómeno conhecido como <strong>Efeito Joule</strong> (útil em chuveiros elétricos e torradeiras).</p>
+                    
+                    <div class="visual-area">
+                        <span style="font-size: 0.85rem; font-weight: 700; color: var(--theme-dark); text-transform: uppercase;">Esquema de Circuito Fechado</span>
+                        <svg viewBox="0 0 300 160" width="100%" height="auto" style="max-width: 300px; margin-top: 10px;">
+                            <!-- Caminho do Circuito -->
+                            <path d="M 50 120 L 50 40 L 250 40 L 250 120 Z" fill="none" stroke="#94A3B8" stroke-width="4"/>
+                            
+                            <!-- Bateria (Fundo) -->
+                            <rect x="130" y="110" width="40" height="20" fill="#FFFAEC"/> <!-- hide path -->
+                            <line x1="140" y1="100" x2="140" y2="140" stroke="#EF4444" stroke-width="4"/> <!-- Positivo -->
+                            <line x1="160" y1="110" x2="160" y2="130" stroke="#0F172A" stroke-width="6"/> <!-- Negativo -->
+                            <text x="135" y="90" font-size="12" font-weight="bold" fill="#D97706">Bateria (U)</text>
+                            <text x="125" y="125" font-size="16" font-weight="bold" fill="#EF4444">+</text>
+                            <text x="170" y="125" font-size="16" font-weight="bold" fill="#0F172A">-</text>
+
+                            <!-- Interruptor Fechado (Cima) -->
+                            <rect x="130" y="30" width="40" height="20" fill="#FFFAEC"/> <!-- hide path -->
+                            <circle cx="130" cy="40" r="4" fill="#0F172A"/>
+                            <circle cx="170" cy="40" r="4" fill="#0F172A"/>
+                            <line x1="130" y1="40" x2="170" y2="40" stroke="#0F172A" stroke-width="4"/> <!-- Fechado -->
+                            <text x="115" y="20" font-size="11" font-weight="bold" fill="#64748B">Interruptor (Fechado)</text>
+
+                            <!-- Resistor (Direita) -->
+                            <rect x="240" y="60" width="20" height="40" fill="#FFFAEC"/> <!-- hide path -->
+                            <path d="M 250 60 L 240 65 L 260 75 L 240 85 L 260 95 L 250 100" fill="none" stroke="#EF4444" stroke-width="3"/>
+                            <text x="260" y="85" font-size="12" font-weight="bold" fill="#EF4444">Resistor (R)</text>
+
+                            <!-- Seta de Corrente Convencional (Esquerda) -->
+                            <line x1="50" y1="100" x2="50" y2="60" stroke="#2563EB" stroke-width="3" marker-end="url(#arr-i)"/>
+                            <text x="5" y="85" font-size="12" font-weight="bold" fill="#2563EB">Corrente (i)</text>
+
+                            <defs>
+                                <marker id="arr-i" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2563EB"/></marker>
+                            </defs>
+                        </svg>
+                    </div>
+
+                    <div class="g-grid">
+                        <div class="g-card">
+                            <div class="g-icon">💧</div>
+                            <div class="g-title">Fluxo (i)</div>
+                            <div class="g-formula">i = ΔQ / Δt</div>
+                            <div class="g-desc">A Corrente (i) é a Carga (Q) a passar a cada segundo (t).</div>
+                        </div>
+                        <div class="g-card">
+                            <div class="g-icon">⚖️</div>
+                            <div class="g-title">1ª Lei de Ohm</div>
+                            <div class="g-formula">U = R . i</div>
+                            <div class="g-desc">A Tensão (U) é igual à Resistência (R) vezes a Corrente (i).</div>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <button class="btn-action" onclick="changeApplicationView('practice')">
+                Iniciar Avaliação Eletrodinâmica ➜
+            </button>
+        </main>
+
+        <!-- VISTA: PRÁTICA -->
+        <main id="viewPractice" class="view-section">
+            <div style="margin-bottom: 20px; background-color: var(--white); padding: 15px; border-radius: 12px; border: 3px solid var(--border-color); box-shadow: 4px 4px 0px var(--border-color);">
+                <h2 style="color:var(--theme-dark); font-weight:900; margin-bottom: 5px;">A Prova de Fogo - IFCE</h2>
+                <p style="color: var(--theme-contrast); font-size: 0.95rem; font-weight:600;">
+                    30 questões exclusivas sobre <strong>Tensão, Corrente e a 1ª Lei de Ohm</strong> (não requer conhecimento de circuitos em série/paralelo). Acerta <strong>80% (24/30)</strong>.
+                </p>
+            </div>
+            
+            <div class="question-map" id="qMap"></div>
+            <div id="quizContainer"></div>
+        </main>
+
+        <!-- VISTA: RESULTADOS -->
+        <main id="viewResult" class="view-section">
+            <div class="result-card">
+                <h2 style="font-weight:900; text-transform:uppercase;">Relatório de Desempenho</h2>
+                <div class="stars-container" id="finalStars">⭐⭐⭐</div>
+                <div class="percentage-big" id="finalPercent">0%</div>
+                <p id="finalScoreText" style="font-size:1.2rem; font-weight: 700; color: #555;"></p>
+                <div id="review-container" style="text-align: left; margin-top: 25px;"></div>
+            </div>
+            <div id="action-buttons"></div>
+        </main>
+    </div>
+
+    <footer class="quiz-footer" id="quizFooter">
+        <button class="nav-btn btn-prev" id="btnPrev" onclick="navigateQuestion(-1)">Anterior</button>
+        <button class="nav-btn btn-next" id="btnNext" onclick="navigateQuestion(1)">Próxima</button>
+    </footer>
+
+<script>
+    /* --- ESTRUTURA DE DADOS REESCRITA E FOCADA EXCLUSIVAMENTE NOS FUNDAMENTOS (SEM SÉRIE/PARALELO AVANÇADO) --- */
+    const questionsDatabase = [
+        {
+            level: "Fácil",
+            text: "O que constitui rigorosamente a 'Corrente Elétrica' no interior de um fio condutor metálico ligado a uma bateria?",
+            options: ["A criação espontânea de energia dentro do fio.", "A passagem de calor gerada pela tomada.", "O movimento ordenado e dirigido de eletrões livres.", "O deslocamento veloz dos prótons em direção ao polo negativo."],
+            correctIndex: 2,
+            explanation: {
+                correctText: "Em materiais condutores sólidos (metais), a corrente elétrica é definida como o fluxo organizado de eletrões livres que transitam devido à presença da bateria.",
+                otherOptions: ["A energia não se cria, apenas se transforma/transfere.", "O calor é uma consequência secundária (Efeito Joule), não a corrente em si.", "", "Os prótons estão cravados no núcleo do átomo; não se movem ao longo do fio."]
+            }
+        },
+        {
+            level: "Fácil",
+            text: "Se deixares um pedaço de fio de cobre solto em cima da secretária (sem estar ligado a nenhuma bateria), como é que os seus eletrões livres se comportam?",
+            options: ["Eles movem-se de forma caótica e desordenada em todas as direções, não gerando corrente útil.", "Eles congelam e ficam totalmente imóveis.", "Eles movem-se de forma perfeitamente alinhada para a direita.", "Eles evaporam para o ar circundante."],
+            correctIndex: 0,
+            explanation: {
+                correctText: "A agitação térmica faz com que os eletrões livres se movimentem a velocidades altas, mas de forma aleatória. Como não há um 'empurrão' (Tensão) a organizar o trânsito, a corrente elétrica resultante é nula.",
+                otherOptions: ["", "Os eletrões só param no zero absoluto (-273ºC).", "Sem uma DDP (bateria), eles não se organizam num único sentido.", "Eletrões não evaporam num fio estável."]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Usando uma analogia clássica: se um circuito elétrico fosse o sistema de canalização de água de uma casa, que peça elétrica desempenharia o papel da 'Bomba de Água' que força o líquido a andar pelos canos?",
+            options: ["A Resistência Elétrica (Ohm).", "A Tensão Elétrica ou DDP (Volt).", "A Corrente Elétrica (Ampère).", "O Interruptor."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "A Tensão (Diferença de Potencial) é a 'pressão' ou o 'empurrão' energético fornecido pela bateria que obriga os eletrões (a água) a circularem pelo circuito.",
+                otherOptions: ["A Resistência atua como um cano estreito (obstáculo).", "", "A Corrente é a própria água a fluir em litros por segundo.", "O Interruptor atua como a torneira (abre/fecha)."]
+            }
+        },
+        {
+            level: "Fácil",
+            text: "Qual é a unidade de medida do Sistema Internacional (SI) utilizada para expressar a TENSÃO ELÉTRICA (Diferença de Potencial)?",
+            options: ["Ampères (A)", "Volts (V)", "Coulombs (C)", "Ohms (Ω)"],
+            correctIndex: 1,
+            explanation: {
+                correctText: "A Tensão ou DDP é medida em Volts (V), em homenagem ao cientista Alessandro Volta. Exemplo: uma tomada debita 220 Volts.",
+                otherOptions: ["Ampère (A) é para a Corrente.", "", "Coulomb (C) é a quantidade de Carga Elétrica.", "Ohm (Ω) é para a Resistência."]
+            }
+        },
+        {
+            level: "Fácil",
+            text: "E qual é a unidade do Sistema Internacional (SI) usada para medir o 'fluxo' ou INTENSIDADE DA CORRENTE ELÉTRICA que passa no fio?",
+            options: ["Ampères (A)", "Joules (J)", "Volts (V)", "Watts (W)"],
+            correctIndex: 0,
+            explanation: {
+                correctText: "A intensidade da corrente é medida em Ampères (A), indicando quantos Coulombs de carga passam por uma secção do fio a cada segundo.",
+                otherOptions: ["", "Joule (J) mede Energia ou Trabalho.", "Volt (V) mede a Tensão.", "Watt (W) mede a Potência."]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Fórmula do Fluxo (i = ΔQ / Δt): Num laboratório, um estudante regista que passaram 40 Coulombs (C) de carga elétrica num pedaço de fio durante exatos 8 segundos. Qual é a corrente elétrica (i) que está a circular?",
+            options: ["320 A", "8 A", "5 A", "0,2 A"],
+            correctIndex: 2,
+            explanation: {
+                correctText: "A corrente é a carga dividida pelo tempo: i = 40 / 8 = 5 Ampères.",
+                otherOptions: ["320 seria multiplicar 40 por 8.", "8 é apenas o tempo.", "", "0,2 seria a divisão invertida (8/40)."]
+            }
+        },
+        {
+            level: "Médio",
+            text: "O Sentido CONVENCIONAL da Corrente Elétrica — aquele que desenhamos nos esquemas com setinhas — foi definido antes de os cientistas descobrirem como os eletrões realmente se moviam. De acordo com este Sentido Convencional, a corrente viaja:",
+            options: ["Do Polo Negativo para o Polo Positivo.", "Do Polo Positivo (+) para o Polo Negativo (-).", "Sem direção específica.", "Do centro da bateria para as pontas simultaneamente."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "No século XIX, assumiu-se que as cargas positivas é que se moviam, indo do positivo (+) para o negativo (-). A física manteve este 'Sentido Convencional' por tradição para resolver diagramas e equações até hoje.",
+                otherOptions: ["Este é o Sentido REAL (como os eletrões negativos físicos realmente viajam).", "", "O sentido é perfeitamente específico.", "Incorreto."]
+            }
+        },
+        {
+            level: "Difícil",
+            text: "Já o Sentido REAL da Corrente Elétrica num condutor metálico, baseado no que sabemos hoje sobre estrutura atómica e movimento de partículas, ocorre:",
+            options: ["Dos eletrões (cargas negativas) a fugirem do Polo Negativo (-) em direção ao Polo Positivo (+).", "Dos prótons a saírem do Positivo para o Negativo.", "Dos neutrões a transitarem pelo fio.", "Apenas quando há relâmpagos."],
+            correctIndex: 0,
+            explanation: {
+                correctText: "Na realidade física, apenas os eletrões (negativos) se conseguem soltar. Como cargas iguais se repelem e opostas se atraem, eles fogem do polo negativo da bateria e são fortemente atraídos para o polo positivo.",
+                otherOptions: ["", "Prótons não saem do núcleo.", "Neutrões não têm carga elétrica e não sofrem atração da DDP.", "Relâmpagos são descargas elétricas no gás, mas o sentido real atua em qualquer circuito."]
+            }
+        },
+        {
+            level: "Fácil",
+            text: "Para que a eletricidade viaje pela nossa casa, os fios são feitos de cobre revestidos a plástico. Nesta situação, o COBRE atua como um __________ e o PLÁSTICO atua como um __________. (Preenche os espaços)",
+            options: ["Isolante / Condutor", "Semicondutor / Gerador", "Condutor / Isolante", "Isolante / Isolante"],
+            correctIndex: 2,
+            explanation: {
+                correctText: "O cobre tem muitos eletrões livres, sendo um excelente Condutor que deixa a eletricidade viajar. O plástico prende os seus eletrões com força, atuando como Isolante para não apanharmos choques ao tocar no fio.",
+                otherOptions: ["Ordem totalmente invertida.", "Nenhum é gerador nem semicondutor típico.", "", "Se ambos fossem isolantes a energia não passava."]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Das alternativas abaixo, assinala aquela que contém uma lista composta APENAS por materiais Isolantes (também chamados de Dielétricos):",
+            options: ["Cobre, Prata, Alumínio, Ouro.", "Plástico, Borracha, Vidro, Cerâmica.", "Borracha, Água do Mar (salgada), Ouro, Madeira.", "Ferro, Corpo Humano, Grafite, Vidro."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "Plástico, Borracha, Vidro e Cerâmica não dispõem de eletrões livres suficientes para conduzir a corrente, sendo excelentes obstáculos para isolar circuitos elétricos.",
+                otherOptions: ["Todos estes são Excelentes Condutores.", "", "A água salgada e o ouro são ótimos condutores.", "Ferro e corpo humano são condutores."]
+            }
+        },
+        {
+            level: "Fácil",
+            text: "O que é, por definição fundamental, a RESISTÊNCIA ELÉTRICA de um material?",
+            options: ["A capacidade do material de gerar a sua própria energia.", "A dificuldade ou oposição que o material impõe à passagem da corrente elétrica através de si.", "A facilidade com que o fio arrefece a temperatura.", "O magnetismo do componente."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "A Resistência (medida em Ohms) é exatamente isso: uma resistência/obstáculo. Quando os eletrões viajam, batem nos átomos do material. Quanto mais colisões houver, maior a Resistência.",
+                otherOptions: ["Quem gera energia é o Gerador/Bateria.", "", "Materiais com resistência geram calor, não arrefecimento.", "O magnetismo é um campo de força paralelo."]
+            }
+        },
+        {
+            level: "Fácil",
+            text: "Em que unidade do Sistema Internacional (SI) devemos medir a Resistência Elétrica para usar na Lei de Ohm?",
+            options: ["Ampères (A)", "Volts (V)", "Ohms (Ω)", "Farads (F)"],
+            correctIndex: 2,
+            explanation: {
+                correctText: "A Resistência mede-se em Ohms (símbolo letra grega Ómega maiúsculo - Ω), em honra ao físico alemão Georg Simon Ohm.",
+                otherOptions: ["Ampère = Corrente.", "Volt = Tensão.", "", "Farad = Capacitância."]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Quando os eletrões da corrente elétrica viajam por um resistor (como o filamento de uma torradeira), eles sofrem múltiplas colisões com os átomos e libertam muita energia em forma de CALOR. Este fenómeno famoso na física chama-se:",
+            options: ["Efeito Joule", "Efeito Borboleta", "Efeito Estufa", "Efeito Fotoelétrico"],
+            correctIndex: 0,
+            explanation: {
+                correctText: "O Efeito Joule é a conversão de energia elétrica em energia térmica (calor) quando a corrente encontra resistência. É o princípio base dos chuveiros elétricos, fornos e secadores de cabelo.",
+                otherOptions: ["", "Efeito Borboleta é teoria do caos meteorológico.", "Efeito Estufa é o aquecimento planetário por gases.", "Efeito Fotoelétrico é a luz a arrancar eletrões de metais."]
+            }
+        },
+        {
+            level: "Médio",
+            text: "A Primeira Lei de Ohm, a equação mais sagrada da eletrodinâmica escolar, relaciona três grandezas. Qual destas fórmulas representa corretamente a 1ª Lei de Ohm?",
+            options: ["i = U . R", "R = U . i", "U = R . i", "U = i / R"],
+            correctIndex: 2,
+            explanation: {
+                correctText: "A Tensão (U) exigida para atravessar um componente é igual à Resistência (R) desse componente multiplicada pela intensidade da Corrente (i) que lá passa. A fórmula é: U = R × i.",
+                otherOptions: ["Isso daria um resultado matematicamente inválido.", "Para isolar o R, a fórmula seria R = U / i.", "", "A fórmula seria U = R . i."]
+            }
+        },
+        {
+            level: "Difícil",
+            text: "Matemática Ohmica: Liga-se um resistor elétrico de resistência R = 20 Ω a uma bateria que fornece uma tensão de U = 60 V. Qual será a intensidade da corrente (i) que percorre esse circuito?",
+            options: ["1200 A", "3 A", "0,33 A", "40 A"],
+            correctIndex: 1,
+            explanation: {
+                correctText: "Partindo de U = R × i, isolamos a corrente: i = U / R. Substituindo os valores: i = 60 V / 20 Ω = 3 Ampères.",
+                otherOptions: ["1200 seria o erro de multiplicar 60 por 20.", "", "0,33 seria a divisão invertida (20 / 60).", "40 seria uma subtração ilógica (60 - 20)."]
+            }
+        },
+        {
+            level: "Difícil",
+            text: "Mais Cálculo: Numa oficina, um mecânico usa um amperímetro para medir um fio do carro e descobre uma corrente de 5 A a passar por uma peça. Sabendo que a bateria do carro fornece estritamente 12 V de tensão, qual é a Resistência (R) da peça testada?",
+            options: ["60 Ω", "17 Ω", "2,4 Ω", "0,41 Ω"],
+            correctIndex: 2,
+            explanation: {
+                correctText: "Usando U = R × i, isolamos o R: R = U / i. Substituindo: R = 12 / 5 = 2,4 Ohms (Ω).",
+                otherOptions: ["60 seria a multiplicação (12 × 5).", "17 é uma soma (12 + 5).", "", "0,41 é a divisão ao contrário (5 / 12)."]
+            }
+        },
+        {
+            level: "Médio",
+            text: "O que acontece matematicamente num 'Resistor Ôhmico' ideal se tu DUPLICARES a Tensão (Voltagem) da bateria que o alimenta?",
+            options: ["A sua Resistência também duplica.", "A Corrente (i) que o atravessa DUPLICA proporcionalmente.", "A Corrente (i) reduz-se para metade.", "Não acontece nada, o circuito desliga-se."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "A essência da 1ª Lei de Ohm diz que a Tensão e a Corrente são DIRETAMENTE PROPORCIONAIS. A resistência (R) do resistor nunca muda (é uma peça física fixa). Logo, se a Tensão aumenta para o dobro (2U), a Corrente é forçada a ser o dobro (2i).",
+                otherOptions: ["O Resistor é uma peça sólida, os seus Ohms não mudam.", "", "A corrente subiria, não cairia.", "A bateria daria mais potência, não desligaria."]
+            }
+        },
+        {
+            level: "Fácil",
+            text: "Qual é a verdadeira função de um 'Interruptor' num circuito elétrico tradicional (como o interruptor da luz do teu quarto)?",
+            options: ["Aumentar a Resistência (Ohms) da lâmpada.", "Fornecer mais Volts (Tensão) diretamente para a luz.", "Abrir ou Fechar o circuito, permitindo (ou impedindo fisicamente) que os eletrões completem a volta e cheguem ao destino.", "Mudar a direção da corrente contínua."],
+            correctIndex: 2,
+            explanation: {
+                correctText: "O interruptor funciona como uma 'ponte-levadiça'. Quando está 'fechado', os contatos tocam-se e a corrente passa. Quando está 'aberto', cria-se um buraco de ar (isolante) no fio e a corrente interrompe-se instantaneamente (i = 0).",
+                otherOptions: ["Não altera os Ohms da lâmpada.", "Quem fornece Volts é a companhia EDP.", "", "Não reverte direções."]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Um estudante olha para um circuito que contém um Interruptor na posição ABERTO (desligado). O que se pode afirmar sobre a Corrente Elétrica (i) e a Tensão (U) da bateria naquele exato momento?",
+            options: ["A Corrente e a Tensão caem ambas para Zero simultaneamente.", "A Corrente é Zero (i = 0 A), mas a Bateria continua a ter a sua Tensão (U = 1,5 V, por exemplo). Apenas não há caminho fechado para os eletrões passarem.", "A Corrente atinge o máximo, mas a Tensão é zero.", "Os eletrões viajam pelo ar até ao outro lado da ponte."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "A Tensão (a força de empurrão da bateria) existe sempre que a bateria estiver viva, independentemente de os fios estarem ligados ou cortados. Mas a Corrente de fluxo (Ampères) só existe se o circuito estiver fechado. Sem ponte, i = 0.",
+                otherOptions: ["A bateria não 'morre' só porque desligaste o botão.", "", "Falso e caótico.", "Corrente de 1.5V não consegue saltar buracos de ar (o ar é um forte isolante)."]
+            }
+        },
+        {
+            level: "Difícil",
+            text: "Se analisares o Gráfico Cartesiano da 1ª Lei de Ohm para um Resistor ideal, onde o Eixo Vertical é a Tensão (U) e o Eixo Horizontal é a Corrente (i). Como se apresenta visualmente esse gráfico?",
+            options: ["Uma linha curva em forma de parábola ascendente.", "Uma reta horizontal plana e paralela ao eixo da corrente.", "Uma RETA INCLINADA que parte obrigatoriamente da origem (0,0), demonstrando a proporção direta entre U e i.", "Uma linha em ziguezague imprevisível."],
+            correctIndex: 2,
+            explanation: {
+                correctText: "Como U e i crescem à mesma taxa (U = R.i e o R é constante), a geometria dita que o seu gráfico seja uma reta perfeita e inclinada, iniciando em zero (se 0 Volts, 0 Ampères).",
+                otherOptions: ["Curvas são para proporções quadráticas/exponenciais.", "Uma reta plana significaria que a Tensão não muda conforme a corrente aumenta, o que viola a lei.", "", "O resistor ôhmico é previsível e perfeito."]
+            }
+        },
+        {
+            level: "Fácil",
+            text: "As siglas e abreviações da Eletrodinâmica: Para as três grandezas (TENSÃO, CORRENTE, RESISTÊNCIA), quais são os seus respectivos símbolos numéricos/letras em Física e no SI?",
+            options: ["U, i, R (Volts, Ampères, Ohms).", "V, C, O (Velocidade, Carga, Ohm).", "i, U, W (Ampères, Volts, Watts).", "E, M, C (Energia, Massa, Coulombs)."],
+            correctIndex: 0,
+            explanation: {
+                correctText: "O padrão universal é: Tensão/DDP usa a letra U (e mede-se em Volts). Corrente usa a letra i (mede-se em Ampères). Resistência usa a letra R (mede-se em Ohms).",
+                otherOptions: ["", "Invenção incorreta.", "Watt é potência, não resistência.", "Isso tem a ver com a fórmula da relatividade de Einstein."]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Segurança e Curtos-Circuitos: Um curto-circuito perigoso acontece numa casa quando, devido a fios descarnados, o fio Positivo e o Negativo tocam-se diretamente sem passar por nenhuma lâmpada ou televisor. O que ocorre à Corrente (i) baseando-te na fórmula U = R.i?",
+            options: ["A Corrente desaparece calmamente para o chão.", "Como a Resistência (R) desse caminho direto é quase ZERO, a divisão da Tensão faz com que a Corrente (i) dispare para um valor INFINITAMENTE ALTO, derretendo os cabos por Efeito Joule extremo.", "A Corrente mantém-se igual à que estava, apenas a lâmpada desliga.", "A Tensão da companhia elétrica multiplica-se por 1000."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "Se R cai quase para zero no curto-circuito, i = U / 0,001. A divisão por algo minúsculo gera um número colossal de Ampères. Uma corrente altíssima gera um calor massivo e instantâneo que causa incêndios (Efeito Joule).",
+                otherOptions: ["A corrente vai sempre pelo caminho mais fácil.", "", "Os eletrões correm desesperados sem freio e causam estragos.", "A EDP continua a mandar os mesmos 220V."]
+            }
+        },
+        {
+            level: "Fácil",
+            text: "Para evitar que as casas peguem fogo durante os curtos-circuitos, usamos componentes de segurança que detetam o disparo súbito de Ampères e cortam automaticamente o fluxo de energia da casa. Quais são esses componentes?",
+            options: ["Amperímetros e Voltímetros.", "Fusiveis e Disjuntores.", "Transformadores.", "Resistores blindados térmicos."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "Fusíveis contêm um arame fino que derrete (queima) de propósito se a corrente ficar muito perigosa, interrompendo o circuito. Disjuntores fazem o mesmo, mas são interruptores automáticos que apenas 'desarmam' e podem ser ligados novamente.",
+                otherOptions: ["Estes apenas medem, não protegem.", "", "Transformadores alteram a voltagem, não cortam segurança a sobrecargas.", "Eles aquecem, não protegem a rede."]
+            }
+        },
+        {
+            level: "Difícil",
+            text: "Qual é o nome do aparelho laboratorial usado exclusivamente para MEDIR A TENSÃO (DDP) de uma bateria ou componente, e qual o que MEDE A CORRENTE?",
+            options: ["Dinamômetro para Tensão e Termômetro para Corrente.", "Ohmímetro para Tensão e Decibelímetro para Corrente.", "Voltímetro (mede Volts/Tensão) e Amperímetro (mede Ampères/Corrente).", "Barômetro e Higrômetro."],
+            correctIndex: 2,
+            explanation: {
+                correctText: "O nome dos aparelhos deriva diretamente das unidades do Sistema Internacional. O Voltímetro mede a DDP em Volts. O Amperímetro mede a intensidade em Ampères.",
+                otherOptions: ["Dinamômetro mede Força.", "Ohmímetro mediria resistência.", "", "Medem pressão atmosférica e humidade do ar."]
+            }
+        },
+        {
+            level: "Fácil",
+            text: "Bateria do Telemóvel: Os carregadores de smartphone enviam para a bateria uma corrente que viaja sempre numa ÚNICA e constante direção (do Positivo para o Negativo). Este tipo de corrente chama-se:",
+            options: ["Corrente Alternada (AC).", "Corrente Estática.", "Corrente Contínua (DC/CC).", "Eletromagnetismo Puro."],
+            correctIndex: 2,
+            explanation: {
+                correctText: "A Corrente Contínua (DC - Direct Current) caracteriza-se por ter os eletrões sempre a marchar num único sentido, sem nunca recuar. É o padrão de todas as pilhas e baterias.",
+                otherOptions: ["AC é a das tomadas da parede (vai e volta 50x por segundo).", "Não há 'corrente' se for estática (parada).", "", "Fenómeno abrangente, não um tipo de corrente."]
+            }
+        },
+        {
+            level: "Médio",
+            text: "A Água Pura Destilada (sem sais minerais nem impurezas) num copo é um bom condutor de eletricidade se atirares um fio lá para dentro?",
+            options: ["Sim, a água é o melhor condutor natural depois do Ouro.", "Não, a água puríssima destilada é, na verdade, um excelente ISOLANTE elétrico, pois não possui iões livres para transportar a carga.", "Sim, por causa dos prótons de hidrogénio.", "Não, porque evapora assim que toca no fio."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "A água que conduz choque no nosso dia a dia (piscinas, mar, torneira) fá-lo porque está cheia de sais e impurezas minerais dissolvidas que geram iões livres. H2O pura, a 100%, é um forte isolante sem portadores de carga.",
+                otherOptions: ["Ouro, cobre, alumínio são metais, esses sim excelentes condutores sólidos.", "", "A química desmente isto em isolantes puros.", "A voltagem doméstica normal não evaporaria água só pelo contacto."]
+            }
+        },
+        {
+            level: "Difícil",
+            text: "Cálculo Cruzado: O Pedro ligou um ferro de engomar. O fio do ferro tem uma Resistência interna total de 20 Ω. Ao fim de 5 segundos ligado, constata que passaram 50 Coulombs (C) de carga pelo fio. Qual a Tensão (U) da tomada em que ele foi ligado?",
+            options: ["1000 Volts", "10 Volts", "200 Volts", "50 Volts"],
+            correctIndex: 2,
+            explanation: {
+                correctText: "1º Passo: Achar a Corrente. i = ΔQ/Δt -> i = 50 / 5 = 10 Ampères. 2º Passo: Achar a Tensão pela Lei de Ohm: U = R × i -> U = 20 Ω × 10 A = 200 Volts.",
+                otherOptions: ["Isso seria não saber fazer o fluxo de carga e só multiplicar os números cegamente.", "Seria 50 / 5 = 10 e depois achar que isso eram Volts em vez de Ampères.", "", ""]
+            }
+        },
+        {
+            level: "Médio",
+            text: "O nosso corpo é um condutor de eletricidade graças ao sal e água nos tecidos. O que é que realmente causa a morte e a paragem do coração durante um choque grave?",
+            options: ["A altíssima Tensão (Volts) por si só. Um Taser de 50.000 Volts é sempre mortal.", "O impacto sónico dos protões a bater na pele.", "A intensidade da Corrente (Ampères) que consegue atravessar os órgãos vitais. Valores ínfimos de 0,1 A já causam fibrilação fatal no coração.", "Os Ohms da rede da EDP."],
+            correctIndex: 2,
+            explanation: {
+                correctText: "Os Volts apenas empurram. O que danifica as células do teu coração e te mata são as 'balas' (os eletrões em Ampères) que furam os teus tecidos. Um Taser policial tem 50.000 V (muito forte), mas fornece ínfimos 0,002 Ampères, por isso a vítima contrai-se mas não morre.",
+                otherOptions: ["Voltagem estática alta (como um balão) tem milhares de Volts e não nos magoa.", "Protões não viajam do fio para a pele.", "", "Ohms é a resistência, a EDP fornece Volts e Corrente."]
+            }
+        },
+        {
+            level: "Fácil",
+            text: "Prefixos Eletrodinâmicos: Numa questão o professor diz que um LED é atravessado por uma corrente de 500 miliampères (mA). Se tiveres de converter para Ampères (A) para usar na Lei de Ohm (já que ela exige valores puros no SI), quanto vale esse número?",
+            options: ["5000 Ampères", "50 Ampères", "0,5 Ampères", "5 Ampères"],
+            correctIndex: 2,
+            explanation: {
+                correctText: "O prefixo 'mili' significa dividir por 1000. Assim como 500 milímetros = 0,5 metros, então 500 miliampères = 0,5 Ampères. Deves sempre usar 0,5 A nos cálculos da Lei de Ohm.",
+                otherOptions: ["As outras conversões multiplicam ou dividem erroneamente pelas casas decimais erradas.", "", "", ""]
+            }
+        },
+        {
+            level: "Difícil",
+            text: "Carga Elementar (Fundamento da Eletrodinâmica): Qual das seguintes afirmações sobre a natureza da carga elétrica do Eletrão e do Próton é Falsa?",
+            options: ["O Eletrão possui carga fundamental Negativa.", "O Próton possui carga fundamental Positiva.", "Num átomo neutro de Cobre, o número de eletrões tem de ser igual ao número de prótons.", "A Eletricidade surge porque os Prótons são super leves e fogem do núcleo para andar pelos fios."],
+            correctIndex: 3,
+            explanation: {
+                correctText: "A opção falsa é a última. Os Prótons estão fundidos e enclausurados no núcleo do átomo através de forças nucleares gigantescas e pesam 1800x mais que o eletrão. Eles não fogem para o fio! Apenas os pequenos eletrões da 'capa exterior' conseguem navegar.",
+                otherOptions: ["Verdade. O eletrão é o mestre do sinal de menos (-).", "Verdade. O próton é o do sinal mais (+).", "Verdade. Neutralidade significa que as cargas anulam-se (ex: 29 protões e 29 eletrões).", ""]
+            }
+        }
+    ];
+
+    const quizState = {
+        currentIndex: 0,
+        userAnswers: new Array(questionsDatabase.length).fill(null),
+        confettiAnimationId: null
+    };
+
+    function initializeSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const contentGroups = document.querySelectorAll('.content-group');
+        const noResultsMsg = document.getElementById('no-results');
+
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', function(event) {
+            const searchTerm = normalizeText(event.target.value);
+            let totalVisibleElements = 0;
+            
+            contentGroups.forEach(group => {
+                const groupContent = normalizeText(group.textContent);
+                const isMatch = groupContent.includes(searchTerm);
+                
+                group.style.display = isMatch ? 'flex' : 'none';
+                if (isMatch) totalVisibleElements++;
+            });
+            
+            noResultsMsg.style.display = totalVisibleElements === 0 ? 'block' : 'none';
+        });
+    }
+
+    function normalizeText(text) {
+        return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    function changeApplicationView(viewName) {
+        const views = ['viewExplanation', 'viewPractice', 'viewResult'];
+        
+        views.forEach(viewId => document.getElementById(viewId).classList.remove('active'));
+        
+        const quizFooter = document.getElementById('quizFooter');
+        if (quizFooter) quizFooter.style.display = 'none';
+
+        if (viewName === 'explanation') {
+            document.getElementById('viewExplanation').classList.add('active');
+            document.getElementById('btnExp').classList.add('active');
+            document.getElementById('btnPrac').classList.remove('active');
+        } else if (viewName === 'practice') {
+            document.getElementById('viewPractice').classList.add('active');
+            if (quizFooter) quizFooter.style.display = 'flex';
+            document.getElementById('btnExp').classList.remove('active');
+            document.getElementById('btnPrac').classList.add('active');
+            
+            renderCurrentQuestion();
+            renderNavigationMap();
+        } else if (viewName === 'result') {
+            document.getElementById('viewResult').classList.add('active');
+        }
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function getDifficultyBadgeClass(level) {
+        const mapping = { 'Fácil': 'dif-facil', 'Médio': 'dif-medio', 'Difícil': 'dif-dificil' };
+        return mapping[level] || 'dif-facil';
+    }
+
+    function buildOptionsHTML(question, selectedAnswerIndex) {
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        return question.options.map((optionText, optionIndex) => {
+            let cssClass = '';
+            
+            if (selectedAnswerIndex !== null) {
+                if (optionIndex === question.correctIndex) cssClass = 'correct';
+                else if (optionIndex === selectedAnswerIndex) cssClass = 'wrong';
+                else cssClass = 'disabled';
+            }
+
+            const isDisabled = selectedAnswerIndex !== null ? 'disabled' : '';
+
+            return `
+                <button class="option-btn ${cssClass}" onclick="handleOptionSelection(${optionIndex})" ${isDisabled}>
+                    <div class="opt-circle">${alphabet[optionIndex]}</div>
+                    <div>${optionText}</div>
+                </button>
+            `;
+        }).join('');
+    }
+
+    function buildFeedbackHTML(question, selectedAnswerIndex) {
+        const isCorrect = selectedAnswerIndex === question.correctIndex;
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        const titleClass = isCorrect ? 'success' : 'error';
+        const titleText = isCorrect ? '✅ Resposta Energizada e Certa!' : '❌ Curto-Circuito Lógico Detetado!';
+        
+        const distortionsHTML = question.explanation.otherOptions.map((explanationText, idx) => {
+            if (idx === question.correctIndex || explanationText.trim() === "") return '';
+            return `<div class="feedback-item wrong-opt"><strong>${alphabet[idx]})</strong> ${explanationText}</div>`;
+        }).join('');
+
+        return `
+            <div class="feedback-box show">
+                <div class="feedback-title ${titleClass}" style="color: ${isCorrect ? 'var(--correct-border)' : 'var(--wrong-border)'}">${titleText}</div>
+                <div class="feedback-item correct-opt"><strong>O Fato Eletrodinâmico:</strong> ${question.options[question.correctIndex]}</div>
+                <div style="margin-top:15px;font-size:1rem;color:var(--text-color);margin-bottom:15px;font-weight:600;">${question.explanation.correctText}</div>
+                ${distortionsHTML ? `<div style="margin-top:15px;border-top:2px dashed var(--border-color);padding-top:15px;">
+                    <small style="color:var(--text-color);"><strong>Análise dos Desvios e Distratores:</strong></small>
+                    ${distortionsHTML}
+                </div>` : ''}
+            </div>
+        `;
+    }
+
+    function renderCurrentQuestion() {
+        const container = document.getElementById('quizContainer');
+        if (!container) return;
+
+        const question = questionsDatabase[quizState.currentIndex];
+        const selectedAnswerIndex = quizState.userAnswers[quizState.currentIndex];
+        const badgeClass = getDifficultyBadgeClass(question.level);
+        
+        let feedbackHTML = selectedAnswerIndex !== null ? buildFeedbackHTML(question, selectedAnswerIndex) : '';
+
+        container.innerHTML = `
+            <div class="quiz-question-card">
+                <span class="difficulty-badge ${badgeClass}">${question.level}</span>
+                <div style="margin-bottom:25px;">
+                    <span class="quiz-question-counter">QUESTÃO ${quizState.currentIndex + 1} DE ${questionsDatabase.length}</span>
+                    <h2 class="quiz-question-text">${question.text}</h2>
+                </div>
+                <div class="options-list">
+                    ${buildOptionsHTML(question, selectedAnswerIndex)}
+                </div>
+                ${feedbackHTML}
+            </div>
+        `;
+        
+        updateNavigationButtons();
+    }
+
+    function handleOptionSelection(selectedIndex) {
+        if (quizState.userAnswers[quizState.currentIndex] !== null) return;
+        
+        quizState.userAnswers[quizState.currentIndex] = selectedIndex;
+        const isCorrect = selectedIndex === questionsDatabase[quizState.currentIndex].correctIndex;
+        
+        if (isCorrect) startSuccessAnimation();
+        else triggerErrorShakeEffect();
+        
+        renderCurrentQuestion();
+        renderNavigationMap();
+    }
+
+    function triggerErrorShakeEffect() {
+        const container = document.getElementById('quizContainer');
+        if (container) { 
+            container.classList.remove('shake-effect'); 
+            void container.offsetWidth; 
+            container.classList.add('shake-effect'); 
+            setTimeout(() => container.classList.remove('shake-effect'), 500); 
+        }
+    }
+
+    function startSuccessAnimation() {
+        const duration = 1500;
+        const end = Date.now() + duration;
+        
+        stopSuccessAnimation();
+        
+        function animateFrame() {
+            if(window.confetti && typeof confetti === 'function') {
+                const config = { particleCount: 5, spread: 55, colors: ['#F59E0B', '#2563EB', '#D97706', '#EF4444'] };
+                confetti({ ...config, angle: 60, origin: { x: 0, y: 0.6 } });
+                confetti({ ...config, angle: 120, origin: { x: 1, y: 0.6 } });
+            }
+            if (Date.now() < end) quizState.confettiAnimationId = requestAnimationFrame(animateFrame);
+        }
+        animateFrame();
+    }
+
+    function stopSuccessAnimation() {
+        if (window.confetti && typeof confetti.reset === 'function') confetti.reset(); 
+        if (quizState.confettiAnimationId) {
+            cancelAnimationFrame(quizState.confettiAnimationId);
+            quizState.confettiAnimationId = null;
+        }
+    }
+
+    function renderNavigationMap() {
+        const mapContainer = document.getElementById('qMap');
+        if (!mapContainer) return;
+        
+        mapContainer.innerHTML = questionsDatabase.map((question, index) => {
+            const isCurrent = index === quizState.currentIndex;
+            const userAnswer = quizState.userAnswers[index];
+            const hasAnswered = userAnswer !== null;
+            const isCorrect = userAnswer === question.correctIndex;
+            
+            let cssClass = 'map-dot';
+            if (isCurrent) cssClass += ' active';
+            if (hasAnswered) cssClass += isCorrect ? ' answered-correct' : ' answered-wrong';
+            
+            return `<div class="${cssClass}" onclick="goToQuestion(${index})">${index + 1}</div>`;
+        }).join('');
+        
+        setTimeout(() => { 
+            const activeDot = mapContainer.querySelector('.map-dot.active'); 
+            if (activeDot) activeDot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); 
+        }, 50);
+    }
+
+    function goToQuestion(targetIndex) { 
+        stopSuccessAnimation();
+        quizState.currentIndex = targetIndex; 
+        renderCurrentQuestion(); 
+        renderNavigationMap(); 
+    }
+    
+    function navigateQuestion(directionOffset) { 
+        const nextIndex = quizState.currentIndex + directionOffset; 
+        if (nextIndex >= 0 && nextIndex < questionsDatabase.length) goToQuestion(nextIndex); 
+    }
+
+    function updateNavigationButtons() {
+        const btnPrev = document.getElementById('btnPrev');
+        const btnNext = document.getElementById('btnNext');
+        
+        if (btnPrev) btnPrev.disabled = (quizState.currentIndex === 0);
+        
+        if (btnNext) {
+            const isLastQuestion = quizState.currentIndex === questionsDatabase.length - 1;
+            if (isLastQuestion) { 
+                btnNext.textContent = "Finalizar Avaliação"; 
+                btnNext.onclick = finishQuiz; 
+            } else { 
+                btnNext.textContent = "Próxima ➡️"; 
+                btnNext.onclick = () => navigateQuestion(1); 
+            }
+        }
+    }
+
+    function calculateStars(percent) {
+        if (percent === 100) return "⭐⭐⭐⭐⭐";
+        if (percent >= 80) return "⭐⭐⭐⭐";
+        if (percent >= 60) return "⭐⭐⭐";
+        if (percent >= 40) return "⭐⭐";
+        if (percent > 0) return "⭐";
+        return "🌑";
+    }
+
+    function finishQuiz() {
+        const unansweredCount = quizState.userAnswers.filter(answer => answer === null).length;
+        
+        if (unansweredCount > 0) {
+            const confirmMessage = `Existem ${unansweredCount} questões por responder. Quer terminar mesmo assim (as em branco serão dadas como erradas)?`;
+            if (!confirm(confirmMessage)) return;
+        }
+
+        stopSuccessAnimation();
+
+        const correctAnswersCount = quizState.userAnswers.filter((answer, index) => answer === questionsDatabase[index].correctIndex).length;
+        const totalQuestions = questionsDatabase.length;
+        const percentageScore = Math.round((correctAnswersCount / totalQuestions) * 100);
+        const isApproved = percentageScore >= 80;
+        
+        renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved);
+        changeApplicationView('result');
+    }
+
+    function renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved) {
+        document.getElementById('finalPercent').textContent = `${percentageScore}%`;
+        document.getElementById('finalScoreText').textContent = `Acertaste ${correctAnswersCount} de ${totalQuestions}`;
+        document.getElementById('finalStars').textContent = calculateStars(percentageScore);
+        
+        const reviewContainer = document.getElementById('review-container');
+        const actionButtonsContainer = document.getElementById('action-buttons');
+        
+        let summaryHTML = '';
+
+        if (isApproved) {
+            summaryHTML += `
+                <div class="result-summary-box success">
+                    <strong>🎉 DOMÍNIO DA LEI DE OHM COMPROVADO!</strong> A tua análise rigorosa de Tensão, Corrente e Resistência está afiada. Tensão empurra, Corrente flui, e a tua nota sobe.
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REPETIR PARA OS 100%</button>`;
+        } else {
+            summaryHTML += `
+                <div class="result-summary-box error">
+                    <strong>⚠️ APAGÃO DE CONHECIMENTO DETETADO!</strong> Foste avaliado abaixo da meta dos 80%. Tens que revisar urgentemente as diferenças teóricas entre Volts (empurrão) e Ampères (o rio que passa).
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REFAZER AVALIAÇÃO</button>`;
+        }
+        
+        if (correctAnswersCount < totalQuestions) {
+            summaryHTML += '<h4 style="margin-bottom:15px; color:var(--text-color); font-size:1.15rem;">Auditoria Técnica das Falhas:</h4>';
+            questionsDatabase.forEach((question, index) => {
+                const userAnswerIndex = quizState.userAnswers[index];
+                if (userAnswerIndex !== question.correctIndex) {
+                    const userAnswerText = userAnswerIndex === null ? "Deixaste em branco (Interruptor Aberto)" : question.options[userAnswerIndex];
+                    const correctAnswerText = question.options[question.correctIndex];
+                    
+                    let plainQuestionText = question.text.replace(/<div class="q-svg-container">[\s\S]*?<\/div>/gi, ' [Esquema Omitido] ');
+
+                    summaryHTML += `
+                        <div class="error-log-item">
+                            <strong style="color:var(--theme-dark); font-size:1.05rem; display:block; margin-bottom:8px;">Q${index + 1}: ${plainQuestionText}</strong>
+                            <span style="color:var(--wrong-border); font-weight: 600; display:block; margin-bottom:5px;">O teu erro de cálculo: ${userAnswerText}</span>
+                            <span style="color:var(--correct-border); font-weight: 700; display:block;">O Fato Físico Irrefutável: ${correctAnswerText}</span>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        reviewContainer.innerHTML = summaryHTML;
+    }
+
+    function resetQuiz() { 
+        quizState.userAnswers = new Array(questionsDatabase.length).fill(null); 
+        quizState.currentIndex = 0; 
+        changeApplicationView('practice'); 
+    }
+    
+    // START APPLICATION
+    initializeSearch();
+    changeApplicationView('explanation');
+</script>
+</body>
+</html>

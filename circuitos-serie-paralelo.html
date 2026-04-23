@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Física: Circuitos em Série e Paralelo - Promover</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* --- VARIÁVEIS DE COR E TEMA: CIRCUITOS (Ciano, Azul e Âmbar) --- */
+        :root {
+            --bg-color: #F0F9FF; /* Fundo Sky muito claro */
+            --text-color: #082F49; /* Sky 900 (Texto escuro) */
+            --border-color: #0369A1; /* Sky 700 (Contorno forte) */
+            --white: #FFFFFF;
+            
+            --theme-light: #E0F2FE; /* Sky 100 */
+            --theme-medium: #0EA5E9; /* Sky 500 (Acento principal) */
+            --theme-dark: #0284C7; /* Sky 600 (Acento escuro) */
+            --theme-contrast: #F59E0B; /* Âmbar 500 (Lâmpadas/Resistores) */
+            --theme-accent: #EF4444; /* Vermelho */
+            --theme-text-active: #FFFFFF;
+            
+            --correct-bg: #ECFCCB;
+            --correct-border: #16A34A;
+            --wrong-bg: #FFE4E6;
+            --wrong-border: #E11D48;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 15px 120px 15px;
+            background-image: radial-gradient(var(--theme-medium) 1px, transparent 1.5px);
+            background-size: 30px 30px;
+        }
+
+        /* --- ANIMAÇÕES --- */
+        @keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1) rotate(-5deg); color: var(--theme-contrast); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+        .pulse-effect { animation: pulse 2s infinite; display: inline-block; }
+        .shake-effect { animation: shake 0.4s ease-in-out; }
+
+        /* --- LAYOUT PRINCIPAL --- */
+        .container { width: 100%; max-width: 650px; display: flex; flex-direction: column; gap: 25px; }
+        .logo-header { display: flex; flex-direction: column; align-items: center; padding: 15px 0 25px 0; text-align: center; }
+        .css-logo { font-size: 1.5rem; font-weight: 900; color: var(--theme-text-active); text-transform: uppercase; letter-spacing: -1px; border: 3px solid var(--border-color); padding: 8px 24px; border-radius: 12px; background: var(--theme-dark); box-shadow: 4px 4px 0px var(--theme-contrast); margin-bottom: 15px; transform: rotate(-2deg); }
+        h1 { font-size: 2rem; font-weight: 900; color: var(--text-color); text-transform: uppercase; letter-spacing: -0.5px; line-height: 1.1; }
+        .subtitle { font-size: 1rem; color: var(--white); font-weight: 700; margin-top: 5px; background: var(--theme-contrast); padding: 4px 12px; border-radius: 8px; border: 2px solid var(--border-color); }
+
+        /* --- NAVEGAÇÃO --- */
+        .toggle-container { background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 6px; display: flex; box-shadow: 4px 4px 0px var(--border-color); position: sticky; top: 15px; z-index: 50; }
+        .toggle-btn { flex: 1; border: none; background: none; padding: 12px 0; border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.05rem; color: var(--text-color); cursor: pointer; transition: all 0.2s ease; }
+        .toggle-btn.active { background-color: var(--theme-dark); color: var(--theme-text-active); border: 2px solid var(--border-color); box-shadow: 2px 2px 0px var(--border-color); }
+
+        .view-section { display: none; animation: fadeIn 0.3s ease; flex-direction: column; gap: 35px; }
+        .view-section.active { display: flex; }
+
+        /* --- PESQUISA --- */
+        .search-container { position: relative; width: 100%; }
+        .search-input { width: 100%; padding: 16px 20px 16px 55px; border: 3px solid var(--border-color); border-radius: 12px; background-color: var(--white); font-family: 'Poppins', sans-serif; font-size: 1.05rem; font-weight: 600; color: var(--text-color); box-shadow: 4px 4px 0px var(--border-color); outline: none; transition: all 0.2s ease; }
+        .search-input:focus { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--theme-contrast); border-color: var(--theme-dark); }
+        .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 1.4rem; }
+        #no-results { text-align: center; color: var(--wrong-border); font-weight: 800; display: none; background: var(--wrong-bg); padding: 15px; border: 3px solid var(--wrong-border); border-radius: 8px; }
+
+        /* --- TEORIA --- */
+        .content-group { display: flex; flex-direction: column; position: relative; padding-top: 15px; }
+        .section-badge { display: inline-flex; align-items: center; gap: 10px; background-color: var(--theme-dark); color: var(--white); font-size: 1.1rem; font-weight: 800; padding: 8px 20px; border-radius: 8px; border: 3px solid var(--border-color); box-shadow: 3px 3px 0px var(--theme-contrast); text-transform: uppercase; position: absolute; top: -5px; left: 15px; z-index: 10; transform: rotate(-1.5deg); }
+        .theory-box { display: flex; flex-direction: column; padding: 35px 25px 25px 35px; border-radius: 12px; background-color: var(--white); border: 3px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); font-weight: 500; font-size: 1rem; line-height: 1.7; position: relative; overflow: hidden; gap: 20px; border-left: 14px solid var(--theme-medium); }
+        .theory-box h3 { font-size: 1.35rem; font-weight: 900; color: var(--theme-dark); margin-bottom: 5px; display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px; }
+        
+        .visual-area { background: #F8FAFC; border: 3px dashed var(--theme-medium); border-radius: 12px; padding: 25px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; width: 100%; }
+        .highlight-box { background-color: #EEF2FF; border: 3px solid var(--theme-contrast); border-left: 8px solid var(--theme-contrast); padding: 18px 20px; border-radius: 8px; font-size: 0.95rem; color: #312E81; font-weight: 600; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); }
+        .highlight-box.danger { background-color: #FFF1F2; border-color: var(--theme-accent); color: #9F1239; border-left-color: var(--theme-accent); }
+
+        /* GLOSSÁRIO DIDÁTICO DE VARIÁVEIS */
+        .var-list { list-style: none; display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 10px; }
+        .var-list li { background: var(--bg-color); padding: 12px 15px; border-radius: 8px; border: 2px solid var(--theme-light); font-size: 0.95rem; display: flex; align-items: center; gap: 12px; }
+        .var-badge { display: flex; align-items: center; justify-content: center; background: var(--theme-dark); color: var(--white); min-width: 36px; height: 36px; border-radius: 8px; font-weight: 900; font-size: 1.1rem; border: 2px solid var(--border-color); flex-shrink: 0; box-shadow: 2px 2px 0px var(--theme-contrast); }
+        .unit-badge { display: inline-block; background: var(--theme-light); color: var(--theme-dark); padding: 2px 8px; border-radius: 6px; font-weight: 800; font-size: 0.8rem; border: 2px solid var(--theme-medium); margin-top: 4px; }
+        .var-text { display: flex; flex-direction: column; }
+        .var-text strong { color: var(--text-color); font-size: 1rem; }
+        .var-text span { font-size: 0.85rem; color: #475569; line-height: 1.3; margin-top: 2px; }
+
+        /* --- QUIZ UI --- */
+        .difficulty-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; border: 2px solid var(--border-color); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
+        .dif-facil { background: #D1FAE5; color: #065F46; }
+        .dif-medio { background: #FEF08A; color: #713F12; }
+        .dif-dificil { background: #FECACA; color: #7F1D1D; }
+
+        .question-map { display: flex; gap: 8px; overflow-x: auto; padding: 10px 5px; margin-bottom: 20px; white-space: nowrap; scroll-behavior: smooth; }
+        .question-map::-webkit-scrollbar { display: none; }
+        .map-dot { min-width: 38px; height: 38px; border: 2px solid var(--border-color); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; color: var(--theme-dark); background: white; cursor: pointer; transition: all 0.2s; }
+        .map-dot.active { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); transform: scale(1.15); }
+        .map-dot.answered-correct { background-color: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .map-dot.answered-wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .quiz-question-card { border: 4px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); padding: 30px; border-radius: 16px; background: var(--white); }
+        .quiz-question-counter { font-size: 0.85rem; font-weight: 900; color: var(--theme-dark); letter-spacing: 1px; }
+        .quiz-question-text { font-size: 1.15rem; margin-top: 8px; color: var(--text-color); font-weight: 800; line-height: 1.5; margin-bottom: 25px;}
+
+        .option-btn { display: flex; align-items: center; width: 100%; padding: 18px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.1s ease; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 600; text-align: left; color: var(--text-color); }
+        .option-btn:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px var(--theme-contrast); }
+        .opt-circle { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--border-color); margin-right: 15px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.05rem; flex-shrink: 0; background: var(--theme-light); color: var(--theme-dark); }
+        .option-btn.correct { background-color: var(--correct-bg); border-color: var(--correct-border); box-shadow: 3px 3px 0px var(--correct-border); }
+        .option-btn.correct .opt-circle { background-color: var(--correct-border); color: white; border-color: var(--correct-border); }
+        .option-btn.wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); opacity: 0.9; }
+        .option-btn.wrong .opt-circle { background-color: var(--wrong-border); color: white; border-color: var(--wrong-border); }
+        .option-btn.disabled { pointer-events: none; opacity: 0.7; }
+
+        /* --- FEEDBACK DA QUESTÃO --- */
+        .feedback-box { display: block; margin-top: 25px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 25px; animation: slideUp 0.3s ease-out; box-shadow: 5px 5px 0px rgba(0,0,0,0.1); }
+        .feedback-title { font-weight: 900; text-transform: uppercase; font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .feedback-item { margin-bottom: 10px; font-size: 0.95rem; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); line-height: 1.5; font-weight: 500; }
+        .feedback-item.correct-opt { background: var(--correct-bg); border-color: var(--correct-border); color: #064E3B; font-weight: 700; box-shadow: 3px 3px 0px var(--correct-border); }
+        .feedback-item.wrong-opt { background: #FFE4E6; border-color: #BE123C; color: #7F1D1D; border-style: dashed; margin-top: 8px; }
+
+        /* --- RESULTADOS --- */
+        .result-card { background: white; border: 4px solid var(--border-color); border-radius: 16px; padding: 40px 20px; box-shadow: 8px 8px 0px var(--border-color); margin-bottom: 30px; text-align: center; }
+        .stars-container { font-size: 2.5rem; margin: 15px 0; letter-spacing: 5px; }
+        .percentage-big { font-size: 5rem; font-weight: 900; color: var(--theme-dark); line-height: 1; margin: 15px 0; text-shadow: 4px 4px 0px var(--theme-contrast); }
+        
+        .result-summary-box { padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 3px solid; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); }
+        .result-summary-box.success { background: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .result-summary-box.error { background: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+        .error-log-item { margin-bottom: 15px; padding: 20px; background: var(--theme-light); border-radius: 12px; border: 3px dashed var(--theme-medium); text-align: left;}
+
+        /* --- RODAPÉ --- */
+        .quiz-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--white); border-top: 3px solid var(--border-color); padding: 15px 20px; display: none; justify-content: center; gap: 20px; z-index: 100; box-shadow: 0px -4px 10px rgba(0,0,0,0.05); }
+        .nav-btn { padding: 15px 30px; border-radius: 12px; font-weight: 900; border: 3px solid var(--border-color); cursor: pointer; box-shadow: 3px 3px 0px var(--border-color); font-family: 'Poppins', sans-serif; text-transform: uppercase; background: white; transition: transform 0.1s; color: var(--text-color); }
+        .nav-btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 0px 0px 0px transparent; }
+        .btn-next { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); }
+        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+        
+        .btn-action { width: 100%; padding: 20px; background-color: var(--theme-dark); color: white; border: 3px solid var(--border-color); border-radius: 12px; font-size: 1.15rem; font-weight: 900; cursor: pointer; box-shadow: 6px 6px 0px var(--theme-contrast); transition: all 0.1s; text-transform: uppercase; margin-top: 10px; }
+        .btn-action:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0px var(--theme-contrast); }
+
+        /* Fórmulas */
+        .g-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; width: 100%; margin-top: 5px; }
+        .g-card { flex: 1 1 calc(50% - 15px); min-width: 130px; border-radius: 12px; padding: 20px 15px; text-align: center; border: 3px solid var(--border-color); display: flex; flex-direction: column; align-items: center; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); background-color: var(--white); transition: transform 0.2s; }
+        .g-card.full-width { flex: 1 1 100%; max-width: 100%; }
+        .g-icon { font-size: 2.5rem; margin-bottom: 8px; line-height: 1; }
+        .g-title { font-size: 1.1rem; font-weight: 900; margin-bottom: 8px; text-transform: uppercase; color: var(--theme-dark); border-bottom: 2px solid var(--theme-light); padding-bottom: 5px; width: 100%; }
+        .g-formula { font-size: 1.25rem; font-weight: 900; color: var(--white); margin-bottom: 8px; line-height: 1.2; background: var(--theme-contrast); padding: 8px 16px; border-radius: 8px; border: 3px solid var(--border-color); letter-spacing: 1px; box-shadow: 2px 2px 0px var(--border-color); }
+        .g-desc { font-size: 0.9rem; font-weight: 600; color: var(--text-color); margin-top: 10px; line-height: 1.4; text-align: left; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <header class="logo-header">
+            <div class="css-logo"><span class="pulse-effect">🔌</span> PROMOVER</div>
+            <h1>Física / 9º Ano</h1>
+            <p class="subtitle">Associação de Circuitos: Série e Paralelo</p>
+        </header>
+
+        <div class="toggle-container">
+            <button class="toggle-btn active" id="btnExp" onclick="changeApplicationView('explanation')">📘 Teoria</button>
+            <button class="toggle-btn" id="btnPrac" onclick="changeApplicationView('practice')">🧠 Prática (30)</button>
+        </div>
+
+        <!-- VISTA: TEORIA -->
+        <main id="viewExplanation" class="view-section active">
+            
+            <div class="search-container">
+                <span class="search-icon" aria-hidden="true">🔍</span>
+                <input type="text" id="searchInput" class="search-input" placeholder="Pesquisar conceito... (ex: Série, Paralelo, Req)">
+            </div>
+            <div id="no-results"><p>😕 Termo físico não encontrado.</p></div>
+
+            <section class="content-group">
+                <div class="section-badge">📖 1. O Dicionário de Variáveis</div>
+                <article class="theory-box search-target">
+                    <h3>A Linguagem Universal</h3>
+                    <p>Antes de associarmos resistores, precisamos de entender as três variáveis globais que definem a leitura do circuito como um todo.</p>
+                    
+                    <div class="highlight-box" style="margin-top: 10px; background-color: var(--white);">
+                        <strong style="color: var(--theme-dark); font-size: 1.1rem; text-transform: uppercase;">O Glossário IFCE</strong>
+                        <ul class="var-list">
+                            <li>
+                                <div class="var-badge">Req</div>
+                                <div class="var-text">
+                                    <strong>Resistência Equivalente <span class="unit-badge">Ohms (Ω)</span></strong>
+                                    <span>A soma matemática (fusão) de todas as resistências. É como se trocássemos todos os resistores por <strong>UM SÓ</strong> que fizesse o mesmo trabalho.</span>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="var-badge">Ut</div>
+                                <div class="var-text">
+                                    <strong>Tensão Total <span class="unit-badge">Volts (V)</span></strong>
+                                    <span>A força máxima total fornecida pela bateria ou tomada do circuito.</span>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="var-badge">it</div>
+                                <div class="var-text">
+                                    <strong>Corrente Total <span class="unit-badge">Ampères (A)</span></strong>
+                                    <span>O "rio principal" de eletrões que sai da bateria, antes de se dividir em eventuais ramificações.</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">🛤️ 2. Circuito em Série</div>
+                <article class="theory-box search-target">
+                    <h3>O Caminho Único</h3>
+                    <p>Na associação em <strong>Série</strong>, os componentes (ex: lâmpadas) são ligados "em fila indiana". A corrente elétrica tem apenas <strong>um único caminho</strong> possível para percorrer do polo positivo ao negativo.</p>
+
+                    <div class="visual-area">
+                        <span style="font-size: 0.85rem; font-weight: 700; color: var(--theme-dark); text-transform: uppercase;">Diagrama: Associação em Série</span>
+                        <svg viewBox="0 0 280 120" width="100%" height="auto" style="max-width: 280px; margin-top: 10px;">
+                            <!-- Fios -->
+                            <path d="M 40 60 L 40 20 L 240 20 L 240 60 L 200 60" fill="none" stroke="#0F172A" stroke-width="3" rx="4"/>
+                            <path d="M 40 60 L 40 100 L 240 100 L 240 60 L 160 60" fill="none" stroke="#0F172A" stroke-width="3" rx="4"/>
+                            
+                            <!-- Bateria -->
+                            <rect x="25" y="45" width="30" height="30" fill="#3B82F6" stroke="#1E3A8A" stroke-width="2" rx="4"/>
+                            <rect x="35" y="40" width="10" height="5" fill="#94A3B8" stroke="#1E3A8A" stroke-width="2"/>
+                            <text x="40" y="65" text-anchor="middle" font-size="16" font-weight="900" fill="#FFF">+</text>
+
+                            <!-- Resistor 1 -->
+                            <rect x="100" y="10" width="40" height="20" fill="#F59E0B" stroke="#B45309" stroke-width="2" rx="4"/>
+                            <text x="120" y="24" text-anchor="middle" font-size="12" font-weight="900" fill="#FFF">R1</text>
+
+                            <!-- Resistor 2 -->
+                            <rect x="180" y="10" width="40" height="20" fill="#F59E0B" stroke="#B45309" stroke-width="2" rx="4"/>
+                            <text x="200" y="24" text-anchor="middle" font-size="12" font-weight="900" fill="#FFF">R2</text>
+
+                            <!-- Setas de Corrente (i constante) -->
+                            <line x1="70" y1="20" x2="85" y2="20" stroke="#EF4444" stroke-width="3" marker-end="url(#arr-i)"/>
+                            <text x="77" y="15" text-anchor="middle" font-size="12" font-weight="bold" fill="#EF4444">i</text>
+                            
+                            <line x1="150" y1="20" x2="165" y2="20" stroke="#EF4444" stroke-width="3" marker-end="url(#arr-i)"/>
+                            <text x="157" y="15" text-anchor="middle" font-size="12" font-weight="bold" fill="#EF4444">i</text>
+
+                            <defs>
+                                <marker id="arr-i" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#EF4444"/></marker>
+                            </defs>
+                        </svg>
+                    </div>
+
+                    <div class="g-grid" style="margin-bottom: 15px;">
+                        <div class="g-card full-width">
+                            <div class="g-icon">➕</div>
+                            <div class="g-title">Cálculo da Req (Em Série)</div>
+                            <div class="g-formula">Req = R1 + R2 + R3...</div>
+                            <div class="g-desc">Basta <strong>SOMAR</strong> os valores normalmente. Ao ligares resistores um atrás do outro, o caminho da corrente fica mais duro. A resistência total <strong>AUMENTA</strong>.</div>
+                        </div>
+                    </div>
+
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li><strong>Corrente (i):</strong> É a mesma em todos os componentes. A "água" não tem por onde fugir.</li>
+                        <li><strong>Tensão (U):</strong> A voltagem total da bateria <strong>DIVIDE-SE</strong> entre os resistores. O resistor de maior valor (Ω) "rouba" a maior parte da tensão.</li>
+                    </ul>
+
+                    <div class="highlight-box danger" style="margin-top: 15px;">
+                        <strong style="color: var(--wrong-border); font-size: 1.1rem; text-transform: uppercase;">A Fraqueza Fatal</strong>
+                        <p style="font-size: 0.95rem; color: #9F1239; margin-top: 5px; line-height: 1.4;">
+                            Como há apenas uma via, se uma lâmpada <strong>queimar</strong> (ou for retirada), o circuito fica <strong>ABERTO</strong>. A corrente cessa imediatamente, e <strong>TODAS</strong> as outras lâmpadas se apagam (ex: velhas luzes de Natal).
+                        </p>
+                    </div>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">🔀 3. Circuito em Paralelo</div>
+                <article class="theory-box search-target">
+                    <h3>Múltiplos Caminhos</h3>
+                    <p>Na associação em <strong>Paralelo</strong>, o circuito cria "bifurcações" (Nós). A corrente elétrica chega a um cruzamento e <strong>divide-se</strong> por caminhos paralelos independentes.</p>
+                    
+                    <div class="visual-area">
+                        <span style="font-size: 0.85rem; font-weight: 700; color: var(--theme-dark); text-transform: uppercase;">Diagrama: Associação em Paralelo</span>
+                        <svg viewBox="0 0 280 140" width="100%" height="auto" style="max-width: 280px; margin-top: 10px;">
+                            <!-- Fios Principais -->
+                            <path d="M 40 70 L 40 20 L 100 20" fill="none" stroke="#0F172A" stroke-width="3" rx="4"/>
+                            <path d="M 40 70 L 40 120 L 100 120" fill="none" stroke="#0F172A" stroke-width="3" rx="4"/>
+                            
+                            <!-- Bateria -->
+                            <rect x="25" y="55" width="30" height="30" fill="#3B82F6" stroke="#1E3A8A" stroke-width="2" rx="4"/>
+                            <rect x="35" y="50" width="10" height="5" fill="#94A3B8" stroke="#1E3A8A" stroke-width="2"/>
+                            <text x="40" y="75" text-anchor="middle" font-size="16" font-weight="900" fill="#FFF">+</text>
+
+                            <!-- Nós (Bifurcações) -->
+                            <circle cx="100" cy="20" r="5" fill="#0F172A"/>
+                            <circle cx="100" cy="120" r="5" fill="#0F172A"/>
+                            <circle cx="200" cy="20" r="5" fill="#0F172A"/>
+                            <circle cx="200" cy="120" r="5" fill="#0F172A"/>
+
+                            <!-- Ramo 1 -->
+                            <path d="M 100 20 L 100 50" fill="none" stroke="#0F172A" stroke-width="3"/>
+                            <rect x="90" y="50" width="20" height="40" fill="#F59E0B" stroke="#B45309" stroke-width="2" rx="4"/>
+                            <text x="100" y="75" text-anchor="middle" font-size="12" font-weight="900" fill="#FFF">R1</text>
+                            <path d="M 100 90 L 100 120" fill="none" stroke="#0F172A" stroke-width="3"/>
+
+                            <!-- Fios conectando R1 a R2 -->
+                            <path d="M 100 20 L 200 20 L 200 50" fill="none" stroke="#0F172A" stroke-width="3"/>
+                            <path d="M 100 120 L 200 120 L 200 90" fill="none" stroke="#0F172A" stroke-width="3"/>
+
+                            <!-- Ramo 2 -->
+                            <rect x="190" y="50" width="20" height="40" fill="#F59E0B" stroke="#B45309" stroke-width="2" rx="4"/>
+                            <text x="200" y="75" text-anchor="middle" font-size="12" font-weight="900" fill="#FFF">R2</text>
+
+                            <!-- Setas de Corrente Divisão -->
+                            <line x1="60" y1="20" x2="80" y2="20" stroke="#EF4444" stroke-width="3" marker-end="url(#arr-i)"/>
+                            <text x="70" y="15" text-anchor="middle" font-size="12" font-weight="bold" fill="#EF4444">i(total)</text>
+                            
+                            <!-- i1 e i2 -->
+                            <line x1="100" y1="30" x2="100" y2="40" stroke="#10B981" stroke-width="3" marker-end="url(#arr-i-green)"/>
+                            <text x="85" y="40" text-anchor="middle" font-size="12" font-weight="bold" fill="#10B981">i1</text>
+                            
+                            <line x1="150" y1="20" x2="170" y2="20" stroke="#10B981" stroke-width="3" marker-end="url(#arr-i-green)"/>
+                            <text x="160" y="15" text-anchor="middle" font-size="12" font-weight="bold" fill="#10B981">i2</text>
+
+                            <defs>
+                                <marker id="arr-i-green" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#10B981"/></marker>
+                            </defs>
+                        </svg>
+                    </div>
+
+                    <div class="g-grid" style="margin-bottom: 15px;">
+                        <div class="g-card">
+                            <div class="g-icon">➗</div>
+                            <div class="g-title">Produto pela Soma</div>
+                            <div class="g-formula" style="font-size: 1.15rem;">Req = (R1 × R2) / (R1 + R2)</div>
+                            <div class="g-desc">Usado para associar resistores de 2 em 2. Em paralelo, a Req total <strong>DIMINUI</strong> sempre, pois criaste caminhos extra.</div>
+                        </div>
+                        <div class="g-card" style="background-color: var(--theme-light); border-color: var(--theme-dark);">
+                            <div class="g-icon">💡</div>
+                            <div class="g-title">Atalho IFCE (Iguais)</div>
+                            <div class="g-formula">Req = R / N</div>
+                            <div class="g-desc">Se os resistores forem <strong>IGUAIS</strong>, divide o valor de um deles (R) pela quantidade (N). Ex: três de 30Ω = 30/3 = 10Ω.</div>
+                        </div>
+                    </div>
+
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li><strong>Tensão (U):</strong> É <strong>IGUAL</strong> para todos os ramos! Se a bateria for de 220V, tanto R1 quanto R2 recebem os 220V.</li>
+                        <li><strong>Corrente (i):</strong> O "rio" principal ($i_{total}$) chega ao nó e <strong>DIVIDE-SE</strong>. O ramo que tiver MENOR resistência puxa a MAIOR quantidade de corrente.</li>
+                    </ul>
+
+                    <div class="highlight-box" style="margin-top: 15px;">
+                        <strong style="color: #312E81; font-size: 1.1rem; text-transform: uppercase;">A Vantagem Doméstica</strong>
+                        <p style="font-size: 0.95rem; margin-top: 5px; line-height: 1.4;">
+                            É assim que a tua casa é ligada. Se a lâmpada R1 fundir, o seu ramo corta, mas a corrente continua a fluir livremente pelo ramo vizinho (R2). As tomadas funcionam de forma 100% independente.
+                        </p>
+                    </div>
+                </article>
+            </section>
+
+            <button class="btn-action" onclick="changeApplicationView('practice')">
+                Iniciar Avaliação de Circuitos ➜
+            </button>
+        </main>
+
+        <!-- VISTA: PRÁTICA -->
+        <main id="viewPractice" class="view-section">
+            <div style="margin-bottom: 20px; background-color: var(--white); padding: 15px; border-radius: 12px; border: 3px solid var(--border-color); box-shadow: 4px 4px 0px var(--border-color);">
+                <h2 style="color:var(--theme-dark); font-weight:900; margin-bottom: 5px;">A Prova de Fogo - IFCE</h2>
+                <p style="color: var(--theme-contrast); font-size: 0.95rem; font-weight:600;">
+                    30 questões exclusivas sobre <strong>Associação de Circuitos em Série e Paralelo e Cálculos de Req</strong>. Pega numa folha de papel. Acerta <strong>80% (24/30)</strong>.
+                </p>
+            </div>
+            
+            <div class="question-map" id="qMap"></div>
+            <div id="quizContainer"></div>
+        </main>
+
+        <!-- VISTA: RESULTADOS -->
+        <main id="viewResult" class="view-section">
+            <div class="result-card">
+                <h2 style="font-weight:900; text-transform:uppercase;">Relatório de Desempenho</h2>
+                <div class="stars-container" id="finalStars">⭐⭐⭐</div>
+                <div class="percentage-big" id="finalPercent">0%</div>
+                <p id="finalScoreText" style="font-size:1.2rem; font-weight: 700; color: #555;"></p>
+                <div id="review-container" style="text-align: left; margin-top: 25px;"></div>
+            </div>
+            <div id="action-buttons"></div>
+        </main>
+    </div>
+
+    <footer class="quiz-footer" id="quizFooter">
+        <button class="nav-btn btn-prev" id="btnPrev" onclick="navigateQuestion(-1)">Anterior</button>
+        <button class="nav-btn btn-next" id="btnNext" onclick="navigateQuestion(1)">Próxima</button>
+    </footer>
+
+<script>
+    /* --- ESTRUTURA DE DADOS: CIRCUITOS (SÉRIE E PARALELO Puros e Req) --- */
+    const questionsDatabase = [
+        // FUNDAMENTOS DA SÉRIE
+        {
+            level: "Fácil",
+            text: "Num circuito em SÉRIE, os resistores são instalados uns a seguir aos outros, formando um caminho único. Qual é a característica fundamental da Corrente Elétrica (i) neste circuito?",
+            options: ["A corrente anula-se no meio do caminho.", "A corrente divide-se proporcionalmente por cada resistor.", "A corrente elétrica (i) é exatamente a MESMA em todos os componentes.", "A corrente aumenta a cada resistor que passa."],
+            correctIndex: 2,
+            explanation: {
+                correctText: "Como só existe um único 'cano' (fio) para a água (eletrões) fluir, a intensidade da corrente (Ampères) que passa na primeira lâmpada é a mesma que passa na última.",
+                otherOptions: ["Corrente não se anula se o circuito estiver fechado.", "Corrente só se divide em circuitos em Paralelo.", "A corrente nunca aumenta ao longo do fio, apenas se desgasta a tensão."]
+            }
+        },
+        {
+            level: "Fácil",
+            text: "Um cordão de luzes de Natal antigo possui 50 pequenas lâmpadas ligadas rigorosamente em SÉRIE. Se a lâmpada número 12 fundir (queimar), o que acontecerá às restantes?",
+            options: ["As outras 49 brilharão muito mais intensamente.", "As outras 49 continuarão acesas normalmente.", "As lâmpadas antes da número 12 ficam acesas, as depois apagam-se.", "Todas as 49 lâmpadas restantes APAGARÃO instantaneamente."],
+            correctIndex: 3,
+            explanation: {
+                correctText: "Uma lâmpada queimada significa um filamento quebrado (um buraco no fio). Como a ligação é em Série (caminho único), o circuito fica 'Aberto' e a corrente cessa imediatamente para todos.",
+                otherOptions: ["Esta é a fraqueza mortal da série. Não há caminhos alternativos para a corrente desviar e continuar.", "", ""]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Se a Corrente (i) é constante na associação em SÉRIE, o que acontece à Tensão (U) da bateria (ex: 12 Volts) quando a corrente atravessa vários resistores?",
+            options: ["A Tensão (U) multiplica-se.", "A Tensão Total (U) DIVIDE-SE entre os resistores. A soma das tensões gastas em cada resistor dá a tensão da bateria.", "A Tensão mantém-se 12 Volts em todos os componentes de forma idêntica.", "A Tensão zera no primeiro resistor."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "Em Série, a força da bateria (U) é distribuída. Se tens 3 lâmpadas idênticas numa bateria de 12V, cada uma vai receber apenas 4V de 'empurrão'.",
+                otherOptions: ["", "Tensão constante em todos os componentes é característica do Paralelo.", "Se zerar logo, as outras não funcionam."]
+            }
+        },
+        {
+            level: "Fácil",
+            text: "Cálculo Direto - Req em Série: Três resistores de valores R1 = 5 Ω, R2 = 10 Ω e R3 = 15 Ω são ligados um a seguir ao outro (em Série). Qual é a Resistência Equivalente (Req) total deste circuito?",
+            options: ["30 Ω", "2,7 Ω", "50 Ω", "150 Ω"],
+            correctIndex: 0,
+            explanation: {
+                correctText: "Na associação em Série, a Resistência Equivalente é a simples SOMA direta de todas as resistências: Req = 5 + 10 + 15 = 30 Ohms.",
+                otherOptions: ["", "Isto seria o cálculo se estivessem em Paralelo.", "Apenas somamos, não multiplicamos cegamente.", ""]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Cálculo Lei de Ohm em Série: Pegando no circuito anterior (Req = 30 Ω em série). Se ligarmos esse circuito a uma bateria de U = 60 Volts, qual será a Corrente (i) que sai da bateria?",
+            options: ["2 Ampères", "0,5 Ampères", "1800 Ampères", "30 Ampères"],
+            correctIndex: 0,
+            explanation: {
+                correctText: "Aplicando a 1ª Lei de Ohm global ($U = Req \cdot i$): Isolamos o 'i' ($i = U / Req$). Fica: i = 60 / 30 = 2 Ampères.",
+                otherOptions: ["", "0,5 seria a divisão invertida (30/60).", "Multiplicação falsa.", "30 é o valor dos Ohms."]
+            }
+        },
+
+        // FUNDAMENTOS DO PARALELO
+        {
+            level: "Fácil",
+            text: "Numa associação de resistores em PARALELO, o caminho principal cria ramificações (Nós). Qual é a característica suprema da TENSÃO (U) nestes circuitos?",
+            options: ["A Tensão divide-se pelos caminhos.", "A Tensão zera no nó.", "A Tensão (U) é IGUAL em todos os ramos paralelos e igual à tensão da fonte.", "A Tensão soma-se para formar uma Super-Tensão."],
+            correctIndex: 2,
+            explanation: {
+                correctText: "Em paralelo, todos os componentes partilham os mesmos pontos de início e fim. Logo, todos estão submetidos à mesma exata Voltagem da bateria. Se a tomada dá 220V, a TV e o frigorífico (em paralelo) recebem ambos 220V diretos.",
+                otherOptions: ["Tensão divide-se em Série.", "", "Não se soma.", ""]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Se a Tensão (U) é igual para todos num circuito em PARALELO, o que acontece à Corrente Elétrica Total (it) quando atinge o 'Nó' (a bifurcação do fio)?",
+            options: ["A corrente retrocede.", "A corrente ignora os caminhos menores.", "A Corrente DIVIDE-SE. A soma das correntes que descem por cada ramo é igual à corrente total que chegou ao nó.", "A Corrente multiplica-se, violando a conservação de energia."],
+            correctIndex: 2,
+            explanation: {
+                correctText: "A corrente atua como um rio. Ao chegar à bifurcação, divide-se (uma parte da água vai para a esquerda, outra para a direita). O ramo que tiver MENOR resistência (menos obstáculos) puxará MAIOR parte da corrente.",
+                otherOptions: ["", "", "A corrente tem de ser conservada (água que entra = água que sai).", ""]
+            }
+        },
+        {
+            level: "Fácil",
+            text: "A instalação elétrica das nossas casas (lâmpadas, tomadas, eletrodomésticos) é feita obrigatoriamente através de qual tipo de associação?",
+            options: ["Em Série.", "Em Paralelo.", "Uma mistura alternada diária.", "Em Curto-Circuito contínuo."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "Em Paralelo! Isto garante duas coisas vitais: 1) Todos os aparelhos recebem 220V diretos. 2) A independência (se desligares a luz da casa de banho, a TV na sala não vai abaixo).",
+                otherOptions: ["Se fosse em Série, desligar um interruptor apagava a casa toda.", "", "", "Curto-circuito é falha, não instalação."]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Cálculo de Req em Paralelo (Regra do Produto pela Soma): Dois resistores R1 = 6 Ω e R2 = 3 Ω são ligados em Paralelo. Qual a Resistência Equivalente (Req)?",
+            options: ["9 Ω", "2 Ω", "18 Ω", "0,5 Ω"],
+            correctIndex: 1,
+            explanation: {
+                correctText: "Para 2 resistores em paralelo, usamos o atalho 'Produto a dividir pela Soma': Req = (6 * 3) / (6 + 3) -> Req = 18 / 9 -> Req = 2 Ohms.",
+                otherOptions: ["9 Ω seria o erro brutal de somar diretamente (que só se faz em Série).", "18 Ω é só a multiplicação.", ""]
+            }
+        },
+        {
+            level: "Difícil",
+            text: "Paradoxo do Paralelo: Ligas um resistor de 100 Ω em paralelo com um resistor minúsculo de 1 Ω. Sem fazer cálculos pesados, o que podes afirmar com 100% de certeza sobre o valor da Resistência Equivalente (Req)?",
+            options: ["Será de 101 Ω.", "Será exatamente a média (50,5 Ω).", "Será OBRIGATORIAMENTE menor que 1 Ω (menor que a menor resistência do grupo).", "Será de 99 Ω."],
+            correctIndex: 2,
+            explanation: {
+                correctText: "Regra de Ouro do Paralelo: A Resistência Equivalente (Req) de um circuito paralelo será SEMPRE MENOR do que o menor resistor que lá estiver instalado. (Neste caso, Req ≈ 0,99 Ω).",
+                otherOptions: ["Isto seria a soma de circuito em Série.", "Falso.", "Ao dares mais caminhos para os eletrões passarem, a dificuldade global cai sempre.", ""]
+            }
+        },
+
+        // MISTURA TEÓRICA E COMPARATIVA
+        {
+            level: "Médio",
+            text: "Tens uma bateria ligada a uma lâmpada. De repente, pegas numa segunda lâmpada idêntica e ligas EM SÉRIE com a primeira. O que acontece ao brilho da lâmpada original e à resistência total do circuito?",
+            options: ["A Resistência Total sobe. O brilho da lâmpada diminui (porque a corrente e a tensão caíram para ela).", "A Resistência Total desce. O brilho aumenta.", "A Resistência mantém-se. O brilho dobra.", "A lâmpada explode."],
+            correctIndex: 0,
+            explanation: {
+                correctText: "Ao adicionar 'em série', estás a meter mais obstáculos na mesma estrada (A Req aumenta). Isto faz a corrente total cair (1ª Lei de Ohm). Além disso, a tensão da bateria vai ter de ser dividida pelas duas. Menos tensão + menos corrente = Luz fraca.",
+                otherOptions: ["", "Falso.", "", ""]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Inverso: Tens uma bateria ligada a uma lâmpada. Pegas numa segunda lâmpada idêntica e ligas EM PARALELO com a primeira. O que acontece à Resistência Total do circuito gerador?",
+            options: ["A Resistência Total aumenta, esgotando a bateria.", "A Resistência Total (Req) DIMINUI. Ao abrires um novo caminho paralelo, facilitaste o fluxo da corrente total que sai da bateria.", "A Resistência Total fica exatamente a mesma.", "O circuito vira de série automaticamente."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "Adicionar ramificações (paralelo) é como abrir mais faixas de portagem numa autoestrada. A Resistência Global (Req) diminui, o que faz a bateria libertar muito MAIS corrente elétrica no total para alimentar ambas.",
+                otherOptions: ["Adicionar em série é que aumenta a resistência.", "", "", ""]
+            }
+        },
+        {
+            level: "Fácil",
+            text: "Atalho IFCE (N resistores iguais): Tens 5 lâmpadas rigorosamente idênticas, cada uma com Resistência R = 100 Ω, ligadas em PARALELO na parede. Qual a Req de forma rápida?",
+            options: ["500 Ω", "20 Ω", "100 Ω", "0,05 Ω"],
+            correctIndex: 1,
+            explanation: {
+                correctText: "Se os resistores em paralelo são todos IGUAIS, divides o valor de um (R) pela quantidade deles (N). Req = 100 / 5 = 20 Ohms.",
+                otherOptions: ["500 seria se estivessem em Série.", "", "100 seria uma única lâmpada.", "Erro de divisão."]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Se tivermos 3 resistores diferentes (R1=2, R2=4, R3=6) associados em SÉRIE, quem sofre a MAIOR Tensão (DDP) da bateria?",
+            options: ["Todos sofrem a mesma tensão de forma exata.", "O menor resistor (R1=2).", "O maior resistor (R3=6).", "A tensão é anulada no do meio."],
+            correctIndex: 2,
+            explanation: {
+                correctText: "Em Série, a corrente (i) é a mesma para todos. Pela Lei de Ohm ($U = R \cdot i$), quem tiver o MAIOR R vai precisar de MAIS Volts (U) para deixar passar aquela mesma corrente. Logo, o maior resistor rouba a maior fatia da DDP.",
+                otherOptions: ["Em série, a tensão divide-se consoante o tamanho do obstáculo.", "O menor precisa de menos força.", "", ""]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Se tivermos os mesmos 3 resistores diferentes (R1=2, R2=4, R3=6) associados agora em PARALELO, por qual deles passará a MAIOR Corrente (i)?",
+            options: ["Pelo maior (R3=6).", "Pelo menor (R1=2).", "A corrente será igual nos três.", "A corrente passará apenas no do meio."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "A corrente elétrica age de forma natural: procura sempre o caminho mais fácil. Em paralelo (onde a Tensão é igual), o ramo com a MENOR Resistência permite o maior fluxo de água (eletrões).",
+                otherOptions: ["O maior trava a corrente, passa lá menos.", "", "Corrente igual ocorre em Série.", ""]
+            }
+        },
+        
+        // ANÁLISE DE AVARIAS E INTERRUPTORES
+        {
+            level: "Fácil",
+            text: "Um circuito é composto por uma bateria e duas lâmpadas (A e B) ligadas em PARALELO. O que acontece se retirares a lâmpada B do seu soquete?",
+            options: ["A lâmpada A apaga-se, pois o circuito quebrou.", "A lâmpada A queima imediatamente por receber o dobro da corrente.", "A lâmpada A continua acesa e a brilhar com a mesma intensidade.", "A bateria inverte os polos."],
+            correctIndex: 2,
+            explanation: {
+                correctText: "A glória do Paralelo: Os ramos são independentes. Como a lâmpada A continua ligada diretamente aos mesmos polos da bateria, a sua Tensão e Resistência não mudaram. O seu brilho e estado mantêm-se intactos.",
+                otherOptions: ["Isto aconteceria se a ligação fosse em Série.", "A não 'suga' a corrente de B. Apenas a corrente TOTAL da bateria vai diminuir.", "", ""]
+            }
+        },
+        {
+            level: "Difícil",
+            text: "O que acontece, tecnicamente, quando criamos um 'Curto-Circuito' num determinado componente R1 que estava ligado a funcionar?",
+            options: ["Enviamos o dobro dos Volts para R1.", "Oferecemos à corrente um caminho alternativo sem Resistência Nenhuma (um fio liso paralelo a R1). A corrente, sendo 'preguiçosa', desvia toda pelo fio sem resistência e ignora o R1 (i=0 nele).", "Aumentamos a resistência de R1 para o infinito.", "Desligamos a DDP central do painel."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "Um Curto-Circuito ocorre quando colocamos um fio livre de obstáculos em paralelo com uma carga. Toda a corrente passa a desviar pelo 'atalho' de Resistência zero, causando pico de Ampéres e anulando a peça.",
+                otherOptions: ["Isso não é um curto.", "", "Um curto anula a resistência do trajeto, não a sobe.", ""]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Tens um Interruptor principal encostado à bateria e três lâmpadas ligadas em PARALELO depois dele. Se abrires (desligares) esse interruptor geral, o que ocorre?",
+            options: ["Apenas a primeira lâmpada se apaga.", "Todas as lâmpadas se apagam, pois cortaste a raiz (o rio principal) antes de ele se bifurcar para os caminhos paralelos.", "As lâmpadas piscam.", "Apenas as lâmpadas 2 e 3 se mantêm."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "Um interruptor no ramo PRINCIPAL (onde flui a $i_{total}$) atua sobre todo o circuito de uma vez. Para controlar lâmpadas paralelas de forma independente, terias de colocar um interruptor dentro de cada ramo secundário.",
+                otherOptions: ["Falso.", "", "Sem corrente base, nada acende.", ""]
+            }
+        },
+        {
+            level: "Fácil",
+            text: "Os modernos faróis de LED dos carros contêm dezenas de luzes. Quando uma das 'luzinhas' avaria (queima), o resto do farol continua a funcionar perfeitamente, deixando apenas um ponto negro. Como foram soldadas essas luzes internamente?",
+            options: ["Em Série.", "Em Paralelo.", "Não usam solda elétrica.", "Estão todas ligadas num curto-circuito tático."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "Sempre que vires um sistema onde uma peça morre mas as outras sobrevivem de forma independente e isolada, a Engenharia utilizou ligações em Paralelo.",
+                otherOptions: ["Série desligaria o farol todo, originando multas constantes.", "", "", "Curto-circuito queima carros."]
+            }
+        },
+        {
+            level: "Médio",
+            text: "O teu Amperímetro (mede corrente) e o teu Voltímetro (mede tensão) têm exigências elétricas rigorosas. Como deves instalar estes dois medidores nas aulas de laboratório?",
+            options: ["O Amperímetro liga-se em PARALELO e o Voltímetro liga-se em SÉRIE.", "Ambos ligam-se em Paralelo.", "O Amperímetro liga-se em SÉRIE (para a água/corrente o atravessar) e o Voltímetro liga-se em PARALELO (abraçando a peça para medir a diferença de pressões).", "Ambos em Série."],
+            correctIndex: 2,
+            explanation: {
+                correctText: "O Amperímetro tem de estar 'na linha' (Série) e possui resistência quase zero. O Voltímetro atua como um inspetor por fora (Paralelo) e tem resistência quase infinita para não roubar corrente.",
+                otherOptions: ["Ligar Amperímetro em Paralelo gera um Curto-Circuito letal.", "", "", "Ligar Voltímetro em Série bloqueia o circuito inteiro (pois R é infinito)."]
+            }
+        },
+
+        // CÁLCULOS COMPLEXOS / MISTOS
+        {
+            level: "Difícil",
+            text: "Cálculo Req Completo: Tens TRÊS resistores (R1 = 20 Ω, R2 = 30 Ω, R3 = 60 Ω) ligados em PARALELO. Qual é a Resistência Equivalente (Req) do sistema todo? (Usa a fórmula $1/Req = 1/R1 + 1/R2 + 1/R3$).",
+            options: ["110 Ω", "10 Ω", "6 Ω", "0,1 Ω"],
+            correctIndex: 1,
+            explanation: {
+                correctText: "Resolução: 1/Req = 1/20 + 1/30 + 1/60. O MMC é 60. -> 3/60 + 2/60 + 1/60 = 6 / 60. Logo, 1/Req = 6/60. Invertendo a fração: Req = 60/6 = 10 Ohms.",
+                otherOptions: ["110 seria a soma em Série (Erro).", "", "6 é apenas o numerador da soma.", "0,1 é o valor decimal antes de inverter a fração (Erro Clássico!)."]
+            }
+        },
+        {
+            level: "Difícil",
+            text: "Uma Bateria (U = 24V) está ligada a dois resistores em PARALELO (R1 = 6 Ω e R2 = 12 Ω). Qual é a intensidade da Corrente Total (it) que sai da bateria?",
+            options: ["6 A", "18 A", "2 A", "1,33 A"],
+            correctIndex: 0,
+            explanation: {
+                correctText: "1º) Achar a Req do Paralelo: Req = (6*12)/(6+12) = 72/18 = 4 Ω. 2º) Achar a corrente Total pela 1ª Lei ($i = U/Req$): i = 24V / 4Ω = 6 Ampères.",
+                otherOptions: ["", "18 é a soma dos Ohms (errado).", "2 seria se a Req fosse 12.", ""]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Na questão anterior (R1=6Ω e R2=12Ω em Paralelo numa bateria de 24V). A corrente total que saiu da bateria foi de 6 A. Ao chegar ao nó (bifurcação), como é que esses 6 A se vão dividir?",
+            options: ["3 A para o R1 e 3 A para o R2 (divisão igual).", "1 A para o R1 e 5 A para o R2.", "4 A vão descer pelo R1 (menor resistência) e 2 A vão descer pelo R2 (maior resistência).", "Os 6 A vão passar em ambos."],
+            correctIndex: 2,
+            explanation: {
+                correctText: "Pela 1ª Lei de Ohm ($i = U/R$) em cada ramo: No R1 (24/6) = 4 A. No R2 (24/12) = 2 A. O ramo com MENOS Ohms (6Ω) puxa MAIS corrente (4A). A soma dá os 6A totais perfeitos.",
+                otherOptions: ["Divisão igual só ocorreria se os resistores fossem rigorosamente idênticos.", "", "", "Isso é uma impossibilidade matemática de conservação."]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Imagina duas pilhas AAA vulgares de 1,5 Volts cada. Se as ligares em SÉRIE (polo positivo de uma colado ao polo negativo da outra, como num comando de TV), qual será a Tensão (U) Total fornecida ao circuito?",
+            options: ["1,5 Volts", "3,0 Volts", "0 Volts", "0,75 Volts"],
+            correctIndex: 1,
+            explanation: {
+                correctText: "Geradores em Série SOMAM as suas Tensões! O empurrão das duas pilhas junta-se (1,5 + 1,5 = 3,0 V) para dar muito mais força aos eletrões. É por isso que brinquedos levam 4 pilhas em série (dando 6V).",
+                otherOptions: ["Só daria 1.5 se fossem ligadas em paralelo.", "", "Se as ligasses com polos invertidos (Positivo com Positivo), anulavam-se a zero.", ""]
+            }
+        },
+        {
+            level: "Difícil",
+            text: "Se ligares as duas pilhas de 1,5 Volts da questão anterior em PARALELO (Positivo com Positivo, Negativo com Negativo), qual será a Tensão (U) Total fornecida?",
+            options: ["3,0 Volts", "1,5 Volts, mas a capacidade de carga (tempo de vida) vai durar o DOBRO do tempo, pois as pilhas dividem o esforço.", "0 Volts (curto-circuito fatal).", "15 Volts"],
+            correctIndex: 1,
+            explanation: {
+                correctText: "Geradores idênticos em Paralelo NÃO somam Tensões. A DDP mantém-se a mesma da bateria individual (1,5V). A grande vantagem é que a capacidade de fornecimento de corrente em Ampére-hora aumenta, durando mais tempo.",
+                otherOptions: ["Para somar tensão teriam de estar em série.", "", "Curto circuito só se ligasses os polos contrários.", "Erro bruto."]
+            }
+        },
+        
+        // MISTURA TEÓRICA E APLICAÇÕES PRÁTICAS
+        {
+            level: "Fácil",
+            text: "O que acontece à luminosidade (Efeito Joule) de três lâmpadas idênticas se as mudarmos de uma montagem em Série para uma montagem em Paralelo (usando a mesma bateria U)?",
+            options: ["A luminosidade (brilho) AUMENTA muito. No paralelo, a Req cai, puxando muito mais corrente total, e todas recebem a Tensão máxima da bateria sem precisarem de a dividir.", "A luminosidade DIMINUI, porque a corrente espalha-se e esgota a força.", "A luminosidade mantém-se rigorosamente idêntica.", "As lâmpadas fundem antes de ligar."],
+            correctIndex: 0,
+            explanation: {
+                correctText: "Montar luzes em paralelo é o ideal. Elas recebem o total dos Volts da bateria e a resistência do circuito despenca, o que as faz brilhar no seu esplendor máximo (mas vai descarregar a bateria mais rápido).",
+                otherOptions: ["O paralelo nunca diminui a luminosidade de componentes de tensão base.", "", "", ""]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Analisando Circuitos Residenciais: Na tua cozinha tens a torradeira, a máquina do café e a batedeira todas ligadas a uma 'Tripla' (extensão com várias tomadas). Isso é uma ligação em Paralelo. O que acontece à corrente total que viaja pelo fio da extensão se ligares todos os aparelhos ao mesmo tempo?",
+            options: ["A corrente cai, pois a tensão é anulada.", "A Corrente Total (it) AUMENTA perigosamente. Cada novo aparelho em paralelo diminui a Req da casa, puxando mais 'i' somado. O fio pode sobreaquecer e desarmar o disjuntor.", "A corrente matematicamente não se altera de forma alguma.", "A eletricidade vira Estática."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "Isto é a definição do perigo do T (Tripla/Benjamim). Quantos mais aparelhos em paralelo, menor a Resistência Total Equivalente do sistema. Logo, a Corrente Base na raiz (no fio do T) cresce pela soma (i1+i2+i3), podendo derreter o plástico.",
+                otherOptions: ["A Tensão residencial (220V) não cai facilmente.", "", "A corrente tem forçosamente de subir se baixas a Req.", "Eletrostática não atua em fios ativos."]
+            }
+        },
+        {
+            level: "Difícil",
+            text: "Um circuito contém um Resistor de 40 Ω. Se lhe acoplares um Resistor de 10 Ω em Paralelo, a Resistência Equivalente (Req) passará a ser de 8 Ω. Este resultado estranho de (40 + 10 = 8) desafia o bom senso comum de um leigo porque:",
+            options: ["A fórmula multiplicou incorretamente a gravidade atómica.", "Porque na Física Paralela a Resistência Equivalente será sempre INFERIOR à menor resistência instalada. Ao ligar mais um caminho (mesmo que seja de 10 Ω), a eletricidade tem uma via extra de fuga que antes não existia, facilitando a passagem e baixando os Ohms globais.", "Os 10 Ohms absorveram magneticamente os 40 Ohms em calor dissipado inútil.", "Foi um erro de cálculo do medidor eletrónico."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "É o milagre do Paralelo (Produto / Soma). (40*10)/(40+10) = 400/50 = 8 Ohms. Acrescentar um componente em Paralelo NUNCA sobe a resistência, ele atua como uma pista extra no trânsito, facilitando a fuga geral dos Eletrões.",
+                otherOptions: ["Não tem relação com a gravidade.", "", "O calor não devora Ohms na matemática base.", "Cálculo exato Ohmico."]
+            }
+        },
+        {
+            level: "Fácil",
+            text: "Se tu queres MEDIR a Corrente Total (it) que flui de uma bateria de 12V e que vai alimentar 3 lâmpadas em paralelo... Onde é o ÚNICO lugar matemático que deves inserir o teu Amperímetro em Série?",
+            options: ["Colado ao polo de cada lâmpada separada.", "Exatamente à saída do Polo da Bateria (no ramo 'Mãe'), antes de o fio chegar à primeira 'Bifurcação' ou 'Nó'.", "No fio de Neutro da Rua isolada da casa.", "Colocado em Paralelo direto com a bateria nuclear."],
+            correctIndex: 1,
+            explanation: {
+                correctText: "A Corrente Total ($i_t$) só existe no cabo de fluxo inicial (a espinha dorsal). Assim que o fio atinge o 1º Nó, a corrente de eletrões espalha-se e divide-se em frações menores ($i_1$, $i_2$, $i_3$).",
+                otherOptions: ["Aí medirias apenas as correntes parciais dos ramos.", "", "O neutro atua noutras regras e não no painel interno DC focado.", "Paralelo queima o Amperímetro e falha a leitura de fluxo corrente."]
+            }
+        },
+        {
+            level: "Médio",
+            text: "Cálculo Rápido: Tens Quatro resistores de 100 Ω cada ligados em Série. Qual a Req SÉRIE? E se estiverem ligados em Paralelo? Qual a Req PARALELA? (Identifica a alínea que dá a dupla resposta correta na ordem Série - Paralelo).",
+            options: ["Série: 100 Ω | Paralelo: 100 Ω", "Série: 400 Ω | Paralelo: 25 Ω", "Série: 25 Ω | Paralelo: 400 Ω", "Série: 0 Ω | Paralelo: 1000 Ω"],
+            correctIndex: 1,
+            explanation: {
+                correctText: "Em Série: Somam-se todos (100+100+100+100 = 400 Ω). Em Paralelo de Iguais: Divide-se pelo N de resistores (Req = R/N -> 100/4 = 25 Ω). Conclusão Clássica: A Série engarrafa e sobe (400), o Paralelo liberta e desce (25).",
+                otherOptions: ["", "A segunda alínea é a única que obedece à dupla regra correta matemática.", "Ordem invertida falsa.", ""]
+            }
+        }
+    ];
+
+    const quizState = {
+        currentIndex: 0,
+        userAnswers: new Array(questionsDatabase.length).fill(null),
+        confettiAnimationId: null
+    };
+
+    function initializeSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const contentGroups = document.querySelectorAll('.content-group');
+        const noResultsMsg = document.getElementById('no-results');
+
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', function(event) {
+            const searchTerm = normalizeText(event.target.value);
+            let totalVisibleElements = 0;
+            
+            contentGroups.forEach(group => {
+                const groupContent = normalizeText(group.textContent);
+                const isMatch = groupContent.includes(searchTerm);
+                
+                group.style.display = isMatch ? 'flex' : 'none';
+                if (isMatch) totalVisibleElements++;
+            });
+            
+            noResultsMsg.style.display = totalVisibleElements === 0 ? 'block' : 'none';
+        });
+    }
+
+    function normalizeText(text) {
+        return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    function changeApplicationView(viewName) {
+        const views = ['viewExplanation', 'viewPractice', 'viewResult'];
+        
+        views.forEach(viewId => document.getElementById(viewId).classList.remove('active'));
+        
+        const quizFooter = document.getElementById('quizFooter');
+        if (quizFooter) quizFooter.style.display = 'none';
+
+        if (viewName === 'explanation') {
+            document.getElementById('viewExplanation').classList.add('active');
+            document.getElementById('btnExp').classList.add('active');
+            document.getElementById('btnPrac').classList.remove('active');
+        } else if (viewName === 'practice') {
+            document.getElementById('viewPractice').classList.add('active');
+            if (quizFooter) quizFooter.style.display = 'flex';
+            document.getElementById('btnExp').classList.remove('active');
+            document.getElementById('btnPrac').classList.add('active');
+            
+            renderCurrentQuestion();
+            renderNavigationMap();
+        } else if (viewName === 'result') {
+            document.getElementById('viewResult').classList.add('active');
+        }
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function getDifficultyBadgeClass(level) {
+        const mapping = { 'Fácil': 'dif-facil', 'Médio': 'dif-medio', 'Difícil': 'dif-dificil' };
+        return mapping[level] || 'dif-facil';
+    }
+
+    function buildOptionsHTML(question, selectedAnswerIndex) {
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        return question.options.map((optionText, optionIndex) => {
+            let cssClass = '';
+            
+            if (selectedAnswerIndex !== null) {
+                if (optionIndex === question.correctIndex) cssClass = 'correct';
+                else if (optionIndex === selectedAnswerIndex) cssClass = 'wrong';
+                else cssClass = 'disabled';
+            }
+
+            const isDisabled = selectedAnswerIndex !== null ? 'disabled' : '';
+
+            return `
+                <button class="option-btn ${cssClass}" onclick="handleOptionSelection(${optionIndex})" ${isDisabled}>
+                    <div class="opt-circle">${alphabet[optionIndex]}</div>
+                    <div>${optionText}</div>
+                </button>
+            `;
+        }).join('');
+    }
+
+    function buildFeedbackHTML(question, selectedAnswerIndex) {
+        const isCorrect = selectedAnswerIndex === question.correctIndex;
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        const titleClass = isCorrect ? 'success' : 'error';
+        const titleText = isCorrect ? '✅ Circuito Fechado com Sucesso!' : '❌ Ligação Falhada!';
+        
+        const distortionsHTML = question.explanation.otherOptions.map((explanationText, idx) => {
+            if (idx === question.correctIndex || explanationText.trim() === "") return '';
+            return `<div class="feedback-item wrong-opt"><strong>${alphabet[idx]})</strong> ${explanationText}</div>`;
+        }).join('');
+
+        return `
+            <div class="feedback-box show">
+                <div class="feedback-title ${titleClass}" style="color: ${isCorrect ? 'var(--correct-border)' : 'var(--wrong-border)'}">${titleText}</div>
+                <div class="feedback-item correct-opt"><strong>O Padrão Correto (IFCE):</strong> ${question.options[question.correctIndex]}</div>
+                <div style="margin-top:15px;font-size:1rem;color:var(--text-color);margin-bottom:15px;font-weight:600;">${question.explanation.correctText}</div>
+                ${distortionsHTML ? `<div style="margin-top:15px;border-top:2px dashed var(--border-color);padding-top:15px;">
+                    <small style="color:var(--text-color);"><strong>O que os Distratores queriam fazer-te acreditar:</strong></small>
+                    ${distortionsHTML}
+                </div>` : ''}
+            </div>
+        `;
+    }
+
+    function renderCurrentQuestion() {
+        const container = document.getElementById('quizContainer');
+        if (!container) return;
+
+        const question = questionsDatabase[quizState.currentIndex];
+        const selectedAnswerIndex = quizState.userAnswers[quizState.currentIndex];
+        const badgeClass = getDifficultyBadgeClass(question.level);
+        
+        let feedbackHTML = selectedAnswerIndex !== null ? buildFeedbackHTML(question, selectedAnswerIndex) : '';
+
+        container.innerHTML = `
+            <div class="quiz-question-card">
+                <span class="difficulty-badge ${badgeClass}">${question.level}</span>
+                <div style="margin-bottom:25px;">
+                    <span class="quiz-question-counter">QUESTÃO ${quizState.currentIndex + 1} DE ${questionsDatabase.length}</span>
+                    <h2 class="quiz-question-text">${question.text}</h2>
+                </div>
+                <div class="options-list">
+                    ${buildOptionsHTML(question, selectedAnswerIndex)}
+                </div>
+                ${feedbackHTML}
+            </div>
+        `;
+        
+        updateNavigationButtons();
+    }
+
+    function handleOptionSelection(selectedIndex) {
+        if (quizState.userAnswers[quizState.currentIndex] !== null) return;
+        
+        quizState.userAnswers[quizState.currentIndex] = selectedIndex;
+        const isCorrect = selectedIndex === questionsDatabase[quizState.currentIndex].correctIndex;
+        
+        if (isCorrect) startSuccessAnimation();
+        else triggerErrorShakeEffect();
+        
+        renderCurrentQuestion();
+        renderNavigationMap();
+    }
+
+    function triggerErrorShakeEffect() {
+        const container = document.getElementById('quizContainer');
+        if (container) { 
+            container.classList.remove('shake-effect'); 
+            void container.offsetWidth; 
+            container.classList.add('shake-effect'); 
+            setTimeout(() => container.classList.remove('shake-effect'), 500); 
+        }
+    }
+
+    function startSuccessAnimation() {
+        const duration = 1500;
+        const end = Date.now() + duration;
+        
+        stopSuccessAnimation();
+        
+        function animateFrame() {
+            if(window.confetti && typeof confetti === 'function') {
+                const config = { particleCount: 5, spread: 55, colors: ['#0EA5E9', '#F59E0B', '#0284C7', '#10B981'] };
+                confetti({ ...config, angle: 60, origin: { x: 0, y: 0.6 } });
+                confetti({ ...config, angle: 120, origin: { x: 1, y: 0.6 } });
+            }
+            if (Date.now() < end) quizState.confettiAnimationId = requestAnimationFrame(animateFrame);
+        }
+        animateFrame();
+    }
+
+    function stopSuccessAnimation() {
+        if (window.confetti && typeof confetti.reset === 'function') confetti.reset(); 
+        if (quizState.confettiAnimationId) {
+            cancelAnimationFrame(quizState.confettiAnimationId);
+            quizState.confettiAnimationId = null;
+        }
+    }
+
+    function renderNavigationMap() {
+        const mapContainer = document.getElementById('qMap');
+        if (!mapContainer) return;
+        
+        mapContainer.innerHTML = questionsDatabase.map((question, index) => {
+            const isCurrent = index === quizState.currentIndex;
+            const userAnswer = quizState.userAnswers[index];
+            const hasAnswered = userAnswer !== null;
+            const isCorrect = userAnswer === question.correctIndex;
+            
+            let cssClass = 'map-dot';
+            if (isCurrent) cssClass += ' active';
+            if (hasAnswered) cssClass += isCorrect ? ' answered-correct' : ' answered-wrong';
+            
+            return `<div class="${cssClass}" onclick="goToQuestion(${index})">${index + 1}</div>`;
+        }).join('');
+        
+        setTimeout(() => { 
+            const activeDot = mapContainer.querySelector('.map-dot.active'); 
+            if (activeDot) activeDot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); 
+        }, 50);
+    }
+
+    function goToQuestion(targetIndex) { 
+        stopSuccessAnimation();
+        quizState.currentIndex = targetIndex; 
+        renderCurrentQuestion(); 
+        renderNavigationMap(); 
+    }
+    
+    function navigateQuestion(directionOffset) { 
+        const nextIndex = quizState.currentIndex + directionOffset; 
+        if (nextIndex >= 0 && nextIndex < questionsDatabase.length) goToQuestion(nextIndex); 
+    }
+
+    function updateNavigationButtons() {
+        const btnPrev = document.getElementById('btnPrev');
+        const btnNext = document.getElementById('btnNext');
+        
+        if (btnPrev) btnPrev.disabled = (quizState.currentIndex === 0);
+        
+        if (btnNext) {
+            const isLastQuestion = quizState.currentIndex === questionsDatabase.length - 1;
+            if (isLastQuestion) { 
+                btnNext.textContent = "Finalizar Avaliação Final"; 
+                btnNext.onclick = finishQuiz; 
+            } else { 
+                btnNext.textContent = "Próxima Questão ➡️"; 
+                btnNext.onclick = () => navigateQuestion(1); 
+            }
+        }
+    }
+
+    function calculateStars(percent) {
+        if (percent === 100) return "⭐⭐⭐⭐⭐";
+        if (percent >= 80) return "⭐⭐⭐⭐";
+        if (percent >= 60) return "⭐⭐⭐";
+        if (percent >= 40) return "⭐⭐";
+        if (percent > 0) return "⭐";
+        return "🌑";
+    }
+
+    function finishQuiz() {
+        const unansweredCount = quizState.userAnswers.filter(answer => answer === null).length;
+        
+        if (unansweredCount > 0) {
+            const confirmMessage = `Existem ${unansweredCount} questões sem qualquer ligação feita. Queres desligar os disjuntores na mesma e zerar o que ficou em branco?`;
+            if (!confirm(confirmMessage)) return;
+        }
+
+        stopSuccessAnimation();
+
+        const correctAnswersCount = quizState.userAnswers.filter((answer, index) => answer === questionsDatabase[index].correctIndex).length;
+        const totalQuestions = questionsDatabase.length;
+        const percentageScore = Math.round((correctAnswersCount / totalQuestions) * 100);
+        const isApproved = percentageScore >= 80;
+        
+        renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved);
+        changeApplicationView('result');
+    }
+
+    function renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved) {
+        document.getElementById('finalPercent').textContent = `${percentageScore}%`;
+        document.getElementById('finalScoreText').textContent = `Acertaste ${correctAnswersCount} de ${totalQuestions}`;
+        document.getElementById('finalStars').textContent = calculateStars(percentageScore);
+        
+        const reviewContainer = document.getElementById('review-container');
+        const actionButtonsContainer = document.getElementById('action-buttons');
+        
+        let summaryHTML = '';
+
+        if (isApproved) {
+            summaryHTML += `
+                <div class="result-summary-box success">
+                    <strong>🎉 DOMÍNIO DAS ASSOCIAÇÕES!</strong> A tua capacidade de gerir nós paralelos e calcular Resistências Equivalentes ($R_{eq}$) prova que és o arquiteto da tua aprovação.
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 GABARITAR TESTE NOVAMENTE</button>`;
+        } else {
+            summaryHTML += `
+                <div class="result-summary-box error">
+                    <strong>⚠️ APAGÃO NAS RAMIFICAÇÕES!</strong> A tua análise caiu nos fios soltos. Revisa a Regra de Ouro (Em Série a Corrente é igual, em Paralelo a Tensão é igual) antes de tentares o exame.
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 RECONSTRUIR O CIRCUITO AVALIATIVO</button>`;
+        }
+        
+        if (correctAnswersCount < totalQuestions) {
+            summaryHTML += '<h4 style="margin-bottom:15px; color:var(--text-color); font-size:1.15rem;">Auditoria dos Nós e Fios Desligados:</h4>';
+            questionsDatabase.forEach((question, index) => {
+                const userAnswerIndex = quizState.userAnswers[index];
+                if (userAnswerIndex !== question.correctIndex) {
+                    const userAnswerText = userAnswerIndex === null ? "Deixado em Branco (Circuito Aberto)" : question.options[userAnswerIndex];
+                    const correctAnswerText = question.options[question.correctIndex];
+                    
+                    let plainQuestionText = question.text;
+
+                    summaryHTML += `
+                        <div class="error-log-item">
+                            <strong style="color:var(--theme-dark); font-size:1.05rem; display:block; margin-bottom:8px;">Q${index + 1}: ${plainQuestionText}</strong>
+                            <span style="color:var(--wrong-border); font-weight: 600; display:block; margin-bottom:5px;">O teu fio solto na prova: ${userAnswerText}</span>
+                            <span style="color:var(--correct-border); font-weight: 700; display:block;">O Fato Corrigido pelos Engenheiros: ${correctAnswerText}</span>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        reviewContainer.innerHTML = summaryHTML;
+    }
+
+    function resetQuiz() { 
+        quizState.userAnswers = new Array(questionsDatabase.length).fill(null); 
+        quizState.currentIndex = 0; 
+        changeApplicationView('practice'); 
+    }
+    
+    // START APPLICATION
+    initializeSearch();
+    changeApplicationView('explanation');
+</script>
+</body>
+</html>
