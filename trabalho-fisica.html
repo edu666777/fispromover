@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Física: Trabalho e Potência - Promover</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* --- VARIÁVEIS DE COR E TEMA: ENERGIA & INDÚSTRIA --- */
+        :root {
+            --bg-color: #FEFCE8; /* Amarelo muito claro (fundo) */
+            --text-color: #0F172A; /* Slate 900 (texto quase preto) */
+            --border-color: #1E293B; /* Slate 800 (contorno) */
+            --white: #FFFFFF;
+            
+            --theme-light: #FEF08A; /* Amarelo 200 */
+            --theme-medium: #EAB308; /* Amarelo 500 (Energia) */
+            --theme-dark: #A16207; /* Amarelo 700 / Dourado escuro */
+            --theme-contrast: #3B82F6; /* Azul Vivo (Contraste mecânico) */
+            --theme-accent: #10B981; /* Verde (Potência) */
+            --theme-text-active: #FFFFFF;
+            
+            --correct-bg: #D1FAE5;
+            --correct-border: #059669;
+            --wrong-bg: #FFE4E6;
+            --wrong-border: #BE123C;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 15px 120px 15px;
+            background-image: linear-gradient(rgba(234, 179, 8, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(234, 179, 8, 0.1) 1px, transparent 1px);
+            background-size: 25px 25px;
+        }
+
+        /* --- ANIMAÇÕES --- */
+        @keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1) rotate(-5deg); color: var(--theme-contrast); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+        .pulse-effect { animation: pulse 2s infinite; display: inline-block; }
+        .shake-effect { animation: shake 0.4s ease-in-out; }
+
+        /* --- LAYOUT PRINCIPAL --- */
+        .container { width: 100%; max-width: 650px; display: flex; flex-direction: column; gap: 25px; }
+        .logo-header { display: flex; flex-direction: column; align-items: center; padding: 15px 0 25px 0; text-align: center; }
+        .css-logo { font-size: 1.5rem; font-weight: 900; color: var(--theme-text-active); text-transform: uppercase; letter-spacing: -1px; border: 3px solid var(--border-color); padding: 8px 24px; border-radius: 12px; background: var(--theme-dark); box-shadow: 4px 4px 0px var(--theme-contrast); margin-bottom: 15px; transform: rotate(-2deg); }
+        h1 { font-size: 2rem; font-weight: 900; color: var(--text-color); text-transform: uppercase; letter-spacing: -0.5px; line-height: 1.1; }
+        .subtitle { font-size: 1rem; color: var(--white); font-weight: 700; margin-top: 5px; background: var(--border-color); padding: 4px 12px; border-radius: 8px; border: 2px solid var(--theme-medium); }
+
+        /* --- NAVEGAÇÃO --- */
+        .toggle-container { background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 6px; display: flex; box-shadow: 4px 4px 0px var(--border-color); position: sticky; top: 15px; z-index: 50; }
+        .toggle-btn { flex: 1; border: none; background: none; padding: 12px 0; border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.05rem; color: var(--text-color); cursor: pointer; transition: all 0.2s ease; }
+        .toggle-btn.active { background-color: var(--theme-dark); color: var(--theme-text-active); border: 2px solid var(--border-color); box-shadow: 2px 2px 0px var(--border-color); }
+
+        .view-section { display: none; animation: fadeIn 0.3s ease; flex-direction: column; gap: 35px; }
+        .view-section.active { display: flex; }
+
+        /* --- PESQUISA --- */
+        .search-container { position: relative; width: 100%; }
+        .search-input { width: 100%; padding: 16px 20px 16px 55px; border: 3px solid var(--border-color); border-radius: 12px; background-color: var(--white); font-family: 'Poppins', sans-serif; font-size: 1.05rem; font-weight: 600; color: var(--text-color); box-shadow: 4px 4px 0px var(--border-color); outline: none; transition: all 0.2s ease; }
+        .search-input:focus { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--theme-contrast); border-color: var(--theme-dark); }
+        .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 1.4rem; }
+        #no-results { text-align: center; color: var(--wrong-border); font-weight: 800; display: none; background: var(--wrong-bg); padding: 15px; border: 3px solid var(--wrong-border); border-radius: 8px; }
+
+        /* --- TEORIA --- */
+        .content-group { display: flex; flex-direction: column; position: relative; padding-top: 15px; }
+        .section-badge { display: inline-flex; align-items: center; gap: 10px; background-color: var(--theme-dark); color: var(--white); font-size: 1.1rem; font-weight: 800; padding: 8px 20px; border-radius: 8px; border: 3px solid var(--border-color); box-shadow: 3px 3px 0px var(--theme-contrast); text-transform: uppercase; position: absolute; top: -5px; left: 15px; z-index: 10; transform: rotate(-1.5deg); }
+        .theory-box { display: flex; flex-direction: column; padding: 35px 25px 25px 35px; border-radius: 12px; background-color: var(--white); border: 3px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); font-weight: 500; font-size: 1rem; line-height: 1.7; position: relative; overflow: hidden; gap: 20px; border-left: 14px solid var(--theme-medium); }
+        .theory-box h3 { font-size: 1.35rem; font-weight: 900; color: var(--theme-dark); margin-bottom: 5px; display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px; }
+        .theory-box h4 { font-size: 1.1rem; font-weight: 800; color: var(--text-color); margin-top: 10px; border-bottom: 2px solid var(--theme-light); padding-bottom: 5px; }
+        
+        .inline-example { display: block; width: fit-content; max-width: 100%; margin-top: 6px; margin-bottom: 6px; padding: 12px 20px; background-color: var(--theme-light); border: 2px solid var(--border-color); border-radius: 8px; font-size: 1.15rem; color: var(--theme-dark); font-weight: 900; letter-spacing: 1px; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); text-align: center; }
+        .visual-area { background: var(--bg-color); border: 3px dashed var(--theme-medium); border-radius: 12px; padding: 25px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; width: 100%; }
+        
+        .highlight-box { background-color: #FEF3C7; border: 3px solid var(--border-color); border-left: 8px solid var(--theme-contrast); padding: 18px 20px; border-radius: 8px; font-size: 0.95rem; color: #78350F; font-weight: 600; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); }
+        .highlight-box.blue { background-color: #EFF6FF; border-left-color: #3B82F6; color: #1E3A8A; }
+        .highlight-box.gray { background-color: #F1F5F9; border-left-color: #475569; color: #0F172A; }
+
+        /* --- CARDS DE FÓRMULAS E TÓPICOS --- */
+        .g-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; width: 100%; margin-top: 10px; }
+        .g-card { flex: 1 1 calc(50% - 15px); min-width: 130px; border-radius: 12px; padding: 15px 10px; text-align: center; border: 3px solid var(--border-color); display: flex; flex-direction: column; align-items: center; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); background-color: var(--white); transition: transform 0.2s; }
+        .g-card:hover { transform: translateY(-3px); }
+        .g-card.full-width { flex: 1 1 100%; max-width: 280px; }
+        .g-icon { font-size: 2.5rem; margin-bottom: 8px; line-height: 1; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.15)); }
+        .g-title { font-size: 1.05rem; font-weight: 900; margin-bottom: 4px; text-transform: uppercase; color: var(--theme-dark); }
+        .g-formula { font-size: 1.15rem; font-weight: 800; color: var(--border-color); margin-bottom: 4px; line-height: 1.2; background: var(--theme-light); padding: 4px 10px; border-radius: 6px; border: 2px solid var(--border-color); }
+        .g-desc { font-size: 0.85rem; font-weight: 600; color: var(--text-color); margin-top: 6px; line-height: 1.3; }
+
+        /* --- BOTÕES GERAIS --- */
+        .btn-action { width: 100%; padding: 20px; background-color: var(--theme-dark); color: white; border: 3px solid var(--border-color); border-radius: 12px; font-size: 1.15rem; font-weight: 900; cursor: pointer; box-shadow: 6px 6px 0px var(--theme-contrast); transition: all 0.1s; text-transform: uppercase; margin-top: 10px; }
+        .btn-action:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0px var(--theme-contrast); }
+
+        /* --- QUIZ UI --- */
+        .difficulty-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; border: 2px solid var(--border-color); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
+        .dif-facil { background: #D1FAE5; color: #065F46; }
+        .dif-medio { background: #FEF08A; color: #713F12; }
+        .dif-dificil { background: #FECACA; color: #7F1D1D; }
+
+        .question-map { display: flex; gap: 8px; overflow-x: auto; padding: 10px 5px; margin-bottom: 20px; white-space: nowrap; scroll-behavior: smooth; }
+        .question-map::-webkit-scrollbar { display: none; }
+        .map-dot { min-width: 38px; height: 38px; border: 2px solid var(--border-color); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; color: var(--theme-dark); background: white; cursor: pointer; transition: all 0.2s; }
+        .map-dot.active { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); transform: scale(1.15); }
+        .map-dot.answered-correct { background-color: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .map-dot.answered-wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .quiz-question-card { border: 4px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); padding: 30px; border-radius: 16px; background: var(--white); }
+        .quiz-question-counter { font-size: 0.85rem; font-weight: 900; color: var(--theme-dark); letter-spacing: 1px; }
+        .quiz-question-text { font-size: 1.15rem; margin-top: 8px; color: var(--text-color); font-weight: 800; line-height: 1.5; margin-bottom: 20px;}
+
+        /* Elemento para imagens SVG dentro das perguntas */
+        .q-svg-container { display: flex; justify-content: center; margin: 15px 0; }
+
+        .option-btn { display: flex; align-items: center; width: 100%; padding: 18px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.1s ease; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 600; text-align: left; color: var(--text-color); }
+        .option-btn:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px var(--theme-contrast); }
+        .opt-circle { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--border-color); margin-right: 15px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.05rem; flex-shrink: 0; background: var(--theme-light); color: var(--theme-dark); }
+        .option-btn.correct { background-color: var(--correct-bg); border-color: var(--correct-border); box-shadow: 3px 3px 0px var(--correct-border); }
+        .option-btn.correct .opt-circle { background-color: var(--correct-border); color: white; border-color: var(--correct-border); }
+        .option-btn.wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); opacity: 0.9; box-shadow: none; }
+        .option-btn.wrong .opt-circle { background-color: var(--wrong-border); color: white; border-color: var(--wrong-border); }
+        .option-btn.disabled { pointer-events: none; opacity: 0.7; }
+
+        /* --- FEEDBACK DA QUESTÃO --- */
+        .feedback-box { display: block; margin-top: 25px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 25px; animation: slideUp 0.3s ease-out; box-shadow: 5px 5px 0px rgba(0,0,0,0.1); }
+        .feedback-title { font-weight: 900; text-transform: uppercase; font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .feedback-item { margin-bottom: 10px; font-size: 0.95rem; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); line-height: 1.5; font-weight: 500; }
+        .feedback-item.correct-opt { background: var(--correct-bg); border-color: var(--correct-border); color: #064E3B; font-weight: 700; box-shadow: 3px 3px 0px var(--correct-border); }
+        .feedback-item.wrong-opt { background: #FEE2E2; border-color: #EF4444; color: #7F1D1D; border-style: dashed; margin-top: 8px; }
+
+        /* --- RESULTADOS --- */
+        .result-card { background: white; border: 4px solid var(--border-color); border-radius: 16px; padding: 40px 20px; box-shadow: 8px 8px 0px var(--border-color); margin-bottom: 30px; text-align: center; }
+        .stars-container { font-size: 2.5rem; margin: 15px 0; letter-spacing: 5px; }
+        .percentage-big { font-size: 5rem; font-weight: 900; color: var(--theme-dark); line-height: 1; margin: 15px 0; text-shadow: 4px 4px 0px var(--theme-contrast); }
+        
+        .result-summary-box { padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 3px solid; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); }
+        .result-summary-box.success { background: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .result-summary-box.error { background: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .error-log-item { margin-bottom: 15px; padding: 20px; background: var(--bg-color); border-radius: 12px; border: 3px dashed var(--theme-medium); text-align: left;}
+
+        /* --- RODAPÉ DE NAVEGAÇÃO --- */
+        .quiz-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--white); border-top: 3px solid var(--border-color); padding: 15px 20px; display: none; justify-content: center; gap: 20px; z-index: 100; box-shadow: 0px -4px 10px rgba(0,0,0,0.05); }
+        .nav-btn { padding: 15px 30px; border-radius: 12px; font-weight: 900; border: 3px solid var(--border-color); cursor: pointer; box-shadow: 3px 3px 0px var(--border-color); font-family: 'Poppins', sans-serif; text-transform: uppercase; background: white; color: var(--text-color); font-size: 1rem; transition: transform 0.1s; }
+        .nav-btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 0px 0px 0px transparent; }
+        .btn-next { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); border-color: var(--border-color); }
+        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <header class="logo-header">
+            <div class="css-logo"><span class="pulse-effect">⚙️</span> PROMOVER</div>
+            <h1>Física / 9º Ano</h1>
+            <p class="subtitle">Dinâmica: Trabalho e Potência</p>
+        </header>
+
+        <div class="toggle-container">
+            <button class="toggle-btn active" id="btnExp" onclick="changeApplicationView('explanation')">📘 Teoria</button>
+            <button class="toggle-btn" id="btnPrac" onclick="changeApplicationView('practice')">🧠 Prática (30)</button>
+        </div>
+
+        <!-- VISTA: TEORIA -->
+        <main id="viewExplanation" class="view-section active">
+            
+            <div class="search-container">
+                <span class="search-icon" aria-hidden="true">🔍</span>
+                <input type="text" id="searchInput" class="search-input" aria-label="Pesquisar conteúdo" placeholder="Pesquisar conceito... (ex: Joule, Nulo, Potência)">
+            </div>
+            <div id="no-results"><p>😕 Termo não encontrado na teoria de Energia.</p></div>
+
+            <section class="content-group">
+                <div class="section-badge">💼 1. O Falso Sentido da Palavra</div>
+                <article class="theory-box search-target">
+                    <h3>O que é o Trabalho (T) na Física?</h3>
+                    <p>No dia a dia, "trabalho" é ficar 8 horas a digitar num computador. Na Física, se tu não moveres nada do sítio, o teu Trabalho é rigorosamente <strong>ZERO</strong>!</p>
+                    <p>O Trabalho (representado por <strong>T</strong> ou <strong>W</strong> de <em>Work</em>) é a transferência de energia que ocorre quando aplicas uma <strong>Força</strong> e consegues causar <strong>Deslocamento</strong>.</p>
+                    
+                    <div class="visual-area" style="background: transparent; border: none; padding: 0;">
+                        <div class="g-grid">
+                            <div class="g-card full-width">
+                                <div class="g-icon">📐</div>
+                                <div class="g-title">A Fórmula Sagrada</div>
+                                <div class="g-formula">T = F &middot; d &middot; cos(&theta;)</div>
+                                <div class="g-desc"><strong>F:</strong> Força (Newtons)<br><strong>d:</strong> Deslocamento (metros)<br><strong>&theta;:</strong> Ângulo entre a força e o chão.</div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">🛑 2. Quando o Trabalho falha</div>
+                <article class="theory-box search-target">
+                    <h3>O famoso "Trabalho Nulo"</h3>
+                    <p>O IFCE adora testar as situações em que a Matemática diz que o Trabalho foi zero, mesmo que tu estejas exausto e a suar.</p>
+                    
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li><strong>Sem Deslocamento (d = 0):</strong> Empurras uma parede de tijolo durante 1 hora. Ela não se mexeu? Trabalho = 0.</li>
+                        <li><strong>Força a 90º (Perpendicular):</strong> Estás a segurar uma mala pesada e caminhas para a FRENTE. A força que fazes na mala é para CIMA, mas andas para a FRENTE. O ângulo é 90º (cos 90º = 0). O teu trabalho mecânico sobre a mala é <strong>Zero</strong>!</li>
+                    </ul>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">🔋 3. Unidades e Tipos</div>
+                <article class="theory-box search-target">
+                    <h3>Joule, Motor e Resistente</h3>
+                    <p>Como o Trabalho é uma forma de Energia, no Sistema Internacional (SI) mede-se em <strong>Joule (J)</strong>.</p>
+                    
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li><strong>Trabalho Motor (T > 0):</strong> A força "ajuda" o movimento. (Ex: O motor do carro a acelerar).</li>
+                        <li><strong>Trabalho Resistente (T < 0):</strong> A força "atrapalha" o movimento. O ângulo é 180º. (Ex: A Força de Atrito a travar o carro). O resultado será negativo!</li>
+                    </ul>
+
+                    <div class="highlight-box blue">
+                        <strong>O Gráfico F &times; d:</strong> Se a prova te der um gráfico de Força por Distância, basta calcular a <strong>ÁREA</strong> da figura geométrica desenhada para descobrires o Trabalho!
+                    </div>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">⚡ 4. A Potência (P)</div>
+                <article class="theory-box search-target">
+                    <h3>Quem é mais rápido?</h3>
+                    <p>Dois pedreiros levantam o mesmo bloco de cimento até ao telhado. O Trabalho (Joules) feito pelos dois foi exatamente igual! Mas o Pedreiro A demorou 1 minuto e o Pedreiro B demorou 10 minutos. Quem é "melhor"?</p>
+                    
+                    <div class="inline-example">Potência = Trabalho / Tempo (P = T / &Delta;t)</div>
+                    
+                    <p>A <strong>Potência</strong> mede a RAPIDEZ com que a energia é transferida. É medida em <strong>Watts (W)</strong> (ou J/s). O Pedreiro A tem muito mais Potência.</p>
+                </article>
+            </section>
+
+            <button class="btn-action" onclick="changeApplicationView('practice')">
+                Iniciar a Avaliação (30 Questões) ➜
+            </button>
+        </main>
+
+        <!-- VISTA: PRÁTICA (QUIZ) -->
+        <main id="viewPractice" class="view-section">
+            <div style="margin-bottom: 20px; background-color: var(--white); padding: 15px; border-radius: 12px; border: 3px solid var(--border-color); box-shadow: 4px 4px 0px var(--border-color);">
+                <h2 style="color:var(--theme-dark); font-weight:900; margin-bottom: 5px;">A Prova de Fogo - IFCE</h2>
+                <p style="color: var(--theme-contrast); font-size: 0.95rem; font-weight:600;">
+                    30 questões sobre Trabalho, Energia e Potência. Cuidado com os ângulos a 90 graus! Acerta <strong>80% (24/30)</strong>.
+                </p>
+            </div>
+            
+            <div class="question-map" id="qMap"></div>
+            <div id="quizContainer" style="margin-bottom: 40px;"></div>
+        </main>
+
+        <!-- VISTA: RESULTADOS -->
+        <main id="viewResult" class="view-section">
+            <div class="result-card">
+                <h2 style="font-weight:900; text-transform:uppercase;">Relatório Final</h2>
+                <div class="stars-container" id="finalStars">⭐⭐⭐</div>
+                <div class="percentage-big" id="finalPercent">0%</div>
+                <p style="font-size:1.2rem; font-weight:700; color:#555;" id="finalScoreText">Acertaste 0 de 30</p>
+                <div id="review-container" style="text-align: left; margin-top: 20px;"></div>
+            </div>
+            <div id="action-buttons"></div>
+        </main>
+
+    </div>
+
+    <!-- RODAPÉ DE NAVEGAÇÃO -->
+    <footer class="quiz-footer" id="quizFooter">
+        <button class="nav-btn btn-prev" id="btnPrev" onclick="navigateQuestion(-1)">Anterior</button>
+        <button class="nav-btn btn-next" id="btnNext" onclick="navigateQuestion(1)">Próxima</button>
+    </footer>
+
+<script>
+    /* --- ESTRUTURA DE DADOS (BASE DE QUESTÕES - TRABALHO E ENERGIA IFCE) --- */
+    const questionsDatabase = [
+        { 
+            level: "Fácil", 
+            text: "Na Física, o conceito de 'Trabalho' é definido estritamente como:", 
+            options: ["Qualquer esforço humano que gere suor.", "A transferência de energia mecânica gerada por uma Força que consegue provocar o Deslocamento de um corpo.", "A força pura armazenada num músculo.", "A velocidade máxima de um objeto em queda livre."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Para haver 'Trabalho' na física tem de haver Força e tem de haver Deslocamento (movimento). Força sem movimento não transfere energia (T=0).", 
+                otherOptions: ["Esforço não é trabalho mecânico se o objeto não sair do sítio."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Qual é a unidade padrão de medida do Trabalho no Sistema Internacional (SI)?", 
+            options: ["Newton (N)", "Watt (W)", "Joule (J)", "Quilograma (kg)"], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "O Trabalho é uma transferência de ENERGIA. Logo, qualquer forma de energia mede-se em Joule (J).", 
+                otherOptions: ["Newton é para Força. Watt é para Potência. Quilograma é para Massa."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Se empurrares um caixote com uma força constante de 50 N na mesma direção e sentido do chão, conseguindo deslocá-lo por 4 metros. Qual foi o Trabalho mecânico realizado por ti?", 
+            options: ["50 J", "12,5 J", "200 J", "0 J"], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Como a força e o deslocamento estão alinhados, T = F × d. Multiplicamos 50 N por 4 m. 50 × 4 = 200 Joules.", 
+                otherOptions: ["Cálculo direto de multiplicação simples."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Um atleta de halterofilismo levanta uma barra de ferro muito pesada acima da cabeça. Depois de levantar, ele FICA PARADO, a segurar a barra no ar por 10 segundos, suando e tremendo. Durante esses 10 segundos parado, qual foi o Trabalho Mecânico que ele realizou SOBRE A BARRA?", 
+            options: ["Muito elevado, pois gastou energia biológica.", "Foi negativo, porque a gravidade puxa.", "ZERO absoluto (0 J).", "Igual ao peso da barra."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Rasteira do IFCE! Se ele está parado a segurar, a barra não se desloca (d = 0). Pela fórmula T = F × d, qualquer força multiplicada por zero resulta em ZERO trabalho mecânico.", 
+                otherOptions: ["Gastou energia química nas células, mas não transferiu energia mecânica (não moveu a barra)."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Um aluno carrega uma mochila pesada e caminha pelo corredor do IFCE de forma HORIZONTAL a velocidade constante. Qual o Trabalho da Força que a mão dele faz sobre a mochila (empurrando-a para cima contra a gravidade) durante a caminhada?", 
+            options: ["Positivo e alto.", "Negativo.", "ZERO Joules.", "Aumenta com a distância."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Armadilha Clássica: A força da mão aponta para CIMA (vertical), mas o movimento é para a FRENTE (horizontal). O ângulo entre a força e o deslocamento é de 90º. Como o cosseno de 90º é 0, o Trabalho é Nulo (zero). A força não ajudou nem atrapalhou o avanço horizontal.", 
+                otherOptions: ["Incorreto."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Quando atiras uma bola de basquetebol e ela vai a rolar pelo chão, o piso exerce uma Força de Atrito que trava a bola. Qual o sinal matemático do Trabalho da Força de Atrito neste caso?", 
+            options: ["Positivo (+), porque é um Trabalho Motor.", "Negativo (-), porque é um Trabalho Resistente, que 'rouba' a energia do movimento.", "Zero.", "O atrito não realiza trabalho."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "A bola move-se para a frente, mas o atrito puxa para trás (ângulo de 180º). Como o atrito se opõe ao movimento, ele 'suga' a energia cinética (dissipando em calor), realizando um Trabalho Resistente (negativo).", 
+                otherOptions: ["Trabalho Motor é a favor do movimento."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Um corpo cai livremente do alto de um prédio. Sobre o Trabalho realizado pela Força Peso (gravidade) durante esta queda, podemos afirmar que:", 
+            options: ["É zero, porque o Peso aponta para baixo.", "É Trabalho Resistente (negativo).", "É Trabalho Motor (positivo), pois o Peso atua no mesmo sentido do deslocamento (para baixo), acelerando a queda.", "Depende da massa do ar."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "O Peso atrai para baixo e o objeto cai para baixo. Força e Deslocamento alinham-se. Quando a força ajuda o movimento, o Trabalho é Motor (positivo).", 
+                otherOptions: ["Seria Resistente se o objeto estivesse a ser atirado para CIMA (onde o peso puxaria contra)."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "A fórmula da Potência (P) mecânica relaciona o Trabalho realizado com:", 
+            options: ["O ângulo da inclinação.", "A massa do corpo.", "O intervalo de tempo (Δt) em que esse trabalho foi feito.", "O atrito da pista."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Potência é a Rapidez com que a energia é gasta ou transferida (P = T / Δt). Duas máquinas podem fazer o mesmo trabalho, mas a que o faz em menos tempo tem mais Potência.", 
+                otherOptions: ["Incorreto."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Qual é a unidade do Sistema Internacional (SI) utilizada para medir a Potência de um equipamento (como a potência de uma lâmpada ou de um motor elétrico)?", 
+            options: ["Volts (V)", "Joule (J)", "Newton (N)", "Watt (W)"], 
+            correctIndex: 3, 
+            explanation: { 
+                correctText: "A Potência mede-se em Watt (W). Um Watt equivale a transferir um Joule de energia por segundo (1 W = 1 J/s).", 
+                otherOptions: ["Volts é Tensão elétrica. Joule é Trabalho/Energia."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Cálculo de Potência: Um guindaste precisa levantar um bloco de cimento pesado. Ele realiza um Trabalho de 3.000 Joules em exatamente 5 segundos. Qual foi a Potência média do motor deste guindaste?", 
+            options: ["15.000 W", "3.000 W", "600 W", "150 W"], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "P = T / Δt. Se ele fez 3000 Joules em 5 segundos, P = 3000 / 5 = 600 Watts de potência desenvolvida.", 
+                otherOptions: ["15.000 seria se tivesses multiplicado as grandezas em vez de dividir."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: `Leitura de Gráfico: Observa o gráfico da Força aplicada sobre um corpo consoante o seu Deslocamento (d). Como encontras o valor do Trabalho Total realizado nos primeiros 10 metros?
+                <div class="q-svg-container">
+                    <svg width="200" height="120" viewBox="0 0 200 120" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <rect x="20" y="40" width="120" height="60" fill="#FEF08A" />
+                      <line x1="20" y1="100" x2="180" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="10" x2="20" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="40" x2="140" y2="40" stroke="#EAB308" stroke-width="3"/>
+                      <line x1="140" y1="40" x2="140" y2="100" stroke="#64748B" stroke-dasharray="4"/>
+                      <text x="2" y="45" font-size="12" font-weight="bold">50</text>
+                      <text x="135" y="115" font-size="12" font-weight="bold">10</text>
+                      <text x="5" y="15" font-size="12" font-weight="bold">F(N)</text>
+                      <text x="185" y="115" font-size="12" font-weight="bold">d(m)</text>
+                    </svg>
+                </div>`, 
+            options: ["Dividindo 50 por 10.", "Calculando a ÁREA da figura retangular formada sob a reta (Base × Altura).", "Medindo a inclinação da reta.", "Multiplicando pela aceleração."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Em qualquer gráfico de Força por Deslocamento (F × d), a 'Área' geométrica da figura é matematicamente igual ao Trabalho Mecânico (T). Neste caso: 10 × 50 = 500 J.", 
+                otherOptions: ["Incorreto."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: `Calcula o Trabalho! O gráfico (F × d) mostra uma Força que vai DIMINUINDO até zero nos 4 metros. O desenho forma um triângulo. Qual foi o Trabalho efetuado?
+                <div class="q-svg-container">
+                    <svg width="200" height="120" viewBox="0 0 200 120" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <polygon points="20,100 20,20 140,100" fill="#D1FAE5" />
+                      <line x1="20" y1="100" x2="180" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="10" x2="20" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="20" x2="140" y2="100" stroke="#10B981" stroke-width="3"/>
+                      <text x="2" y="25" font-size="12">30</text>
+                      <text x="135" y="115" font-size="12">4</text>
+                    </svg>
+                </div>`, 
+            options: ["120 J", "34 J", "60 J", "0 J"], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "O Trabalho = Área. Como a figura é um Triângulo, a fórmula é (Base × Altura) / 2. Base = 4. Altura = 30. T = (4 × 30) / 2 = 120 / 2 = 60 Joules.", 
+                otherOptions: ["120 Joules seria se a força fosse constante (retângulo), mas ela foi caindo gradualmente."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Um rapaz usa uma corda para puxar uma mala com uma força de 100 N. Contudo, a corda está INCLINADA em relação ao chão (ângulo de 60º). Se ele mover a mala 2 metros, o Trabalho não será 200 J. O que deves acrescentar ao cálculo (T = F × d)?", 
+            options: ["A massa da mala.", "A velocidade inicial.", "O cosseno do ângulo formado (cos 60º), pois apenas a parte da força que puxa para a frente ajuda no deslocamento.", "A força da gravidade vezes dois."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "A fórmula completa é T = F × d × cos(&theta;). Apenas a componente horizontal da força (que aponta no sentido do movimento) realiza trabalho. A força inclinada perde eficiência para puxar horizontalmente.", 
+                otherOptions: ["Massa e gravidade (Normal) anulam-se verticalmente aqui."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Cálculo de Energia (Peso): Um trabalhador levanta verticalmente um tijolo de 5 kg do chão até uma prateleira de 2 metros de altura (com velocidade constante). Sabendo que g = 10 m/s², qual o Trabalho que ele teve de fazer contra a gravidade?", 
+            options: ["10 J", "50 J", "100 J", "500 J"], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "1º Passo: A Força necessária é igual ao Peso do bloco. P = m × g = 5 × 10 = 50 N. 2º Passo: Trabalho = Força × Distância. Ele levantou 2 metros, logo T = 50 N × 2 m = 100 Joules.", 
+                otherOptions: ["Se esquecesses a gravidade, multiplicarias 5 x 2 (Errado)."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "O que significa dizer, na publicidade de automóveis, que um carro tem um 'Motor de grande Potência'?", 
+            options: ["Que ele é muito pesado e gasta pouca gasolina.", "Que ele consegue realizar uma grande quantidade de Trabalho (transferir energia, como atingir os 100 km/h) num curtíssimo espaço de tempo (poucos segundos).", "Que a sua velocidade máxima é muito baixa mas com muita tração.", "Que ele não tem atrito com o ar."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Potência é rapidez. Um motor mais potente consegue injetar a mesma quantidade de energia mecânica nas rodas numa fração do tempo que um motor fraco demoraria.", 
+                otherOptions: ["Incorreto."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "A Potência (P = T / t) também pode ser calculada na mecânica rodoviária usando outra fórmula direta caso o carro se mova a uma velocidade Constante. Qual é a fórmula secreta?", 
+            options: ["P = Força × Aceleração", "P = Força × Velocidade (P = F × v)", "P = Massa × Distância", "P = Temperatura × Tempo"], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Sabemos que P = (F × d) / t. E sabemos da cinemática que d / t = Velocidade. Portanto, substituir (d/t) por 'v' dá: Potência = Força × Velocidade.", 
+                otherOptions: ["Incorreto."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Um jovem está a tentar mover um rochedo encalhado. Ele faz uma Força imensa de 1000 N durante 30 minutos, fica muito cansado, mas a pedra NÃO se move 1 milímetro. A Força Normal atua para cima e o Peso para baixo. Qual destas 3 forças realizou Trabalho físico sobre a pedra?", 
+            options: ["A Força Humana (Trabalho de 1000 J).", "A Força Peso (Trabalho resistente).", "A Força Normal.", "NENHUMA das forças. O Trabalho total e individual foi 0 Joules."], 
+            correctIndex: 3, 
+            explanation: { 
+                correctText: "Se a pedra não saiu do lugar (d = 0), a fórmula W = F × d diz-nos que 1000 × 0 = 0. Não houve transferência de energia cinética em absoluto. O jovem gastou energia metabólica, não realizou trabalho físico.", 
+                otherOptions: ["Incorreto."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Dois rapazes, A e B, sobem as escadas até ao 3º andar. Ambos têm EXATAMENTE a mesma massa (60 kg) e sobem a mesma altura. O rapaz A sobe a correr (10 segundos). O rapaz B sobe a andar lentamente (40 segundos). Assinala a afirmação correta:", options: ["O rapaz A realizou muito mais Trabalho que o rapaz B.", "O rapaz B realizou mais Trabalho que o rapaz A.", "Eles realizaram rigorosamente o MESMO Trabalho contra a gravidade, mas o rapaz A desenvolveu uma Potência 4 vezes MAIOR que o rapaz B.", "Eles têm a mesma Potência."], correctIndex: 2, explanation: { correctText: "O Trabalho (elevar 60kg ao 3º andar) é idêntico para os dois. O que mudou foi a RAPIDEZ (tempo). O rapaz A fê-lo em 1/4 do tempo, logo precisou de 4x mais Potência muscular.", otherOptions: ["Trabalho não muda com o tempo. Potência sim."] } },
+        { level: "Médio", text: "No dia a dia e na indústria, muitas vezes o Watt é um valor muito pequeno para descrever máquinas (como as turbinas de uma central de energia). Qual é o prefixo do SI usado para representar 1 Milhão de Watts?", options: ["1 Quilowatt (kW)", "1 Megawatt (MW)", "1 Gigawatt (GW)", "1 Miliwatt (mW)"], correctIndex: 1, explanation: { correctText: "Mega (M) é o prefixo oficial para 1 milhão (10⁶). As centrais elétricas medem-se frequentemente em Megawatts. Quilo (k) é mil, e Giga (G) é mil milhões.", otherOptions: ["1 kW = 1000 W."] } },
+        { level: "Fácil", text: "Quando lês na fatura da eletricidade lá de casa que gastaste '100 kWh' (Quilowatt-hora), esta medida estranha não está a cobrar-te por Potência. O kWh é uma unidade inventada para comercializar de forma fácil qual grandeza da física?", options: ["A Força de Atrito.", "A Energia (O Trabalho total que as máquinas da casa realizaram ao ficar horas ligadas à corrente).", "A Velocidade da corrente.", "O Tempo."], correctIndex: 1, explanation: { correctText: "Potência (kW) multiplicada pelo Tempo (hora) resulta sempre no Trabalho Total (Energia). A empresa de luz vende-te Energia, cobrando-te em kWh em vez da enorme escala em Joules.", otherOptions: ["Incorreto."] } },
+        { level: "Difícil", text: "Cálculo Cruzado (Leis de Newton + Trabalho): Um caixote de massa 2 kg, em repouso, sofre uma força de 10 N que o empurra numa pista sem atrito. Após deslocar-se 5 metros, qual foi o TRABALHO da Força?", options: ["20 J", "50 J", "100 J", "250 J"], correctIndex: 1, explanation: { correctText: "Cuidado para não ser levado a usar a massa à toa! O Trabalho só exige a Força e a Distância. T = F × d. T = 10 N × 5 m = 50 Joules. (A massa de 2kg dir-nos-ia a aceleração, mas para o Trabalho não precisas dela).", otherOptions: ["A massa foi um dado 'iscolador' colocado para confundir o aluno ansioso."] } },
+        { level: "Médio", text: "Um comboio viaja numa planície. A Força Normal empurra os rodados para CIMA e o Peso do comboio atrai-o para o CHÃO. Como o deslocamento do comboio é HORIZONTAL (para a frente), qual o trabalho efetuado pelo Peso e pela Normal nesta viagem?", options: ["É Trabalho Positivo alto.", "É Trabalho Resistente (negativo).", "É ZERO (Nulo), pois ambas as forças são perpendiculares (formam 90º) com o vetor do deslocamento (linha do chão).", "Depende do atrito."], correctIndex: 2, explanation: { correctText: "Sempre que a força corta o movimento a 90º (como as forças verticais num movimento estritamente horizontal), o Trabalho é anulado. Elas nem ajudam nem atrapalham o movimento lateral.", otherOptions: ["Incorreto."] } },
+        { level: "Médio", text: "A Força Centrípeta puxa constantemente a Lua para o centro da Terra (formando um raio de círculo), enquanto a Lua se desloca 'de lado' pela órbita, formando sempre um ângulo de 90º entre a força e o deslocamento imediato. Qual é o Trabalho da gravidade sobre a Lua na sua órbita circular perfeita?", options: ["Gigante.", "Nulo (ZERO Joules), porque a força está sempre perpendicular à trajetória da Lua no espaço.", "Depende das marés.", "Negativo."], correctIndex: 1, explanation: { correctText: "Forças que atuam como 'Centrípeta' formam 90º com o vetor da velocidade tangencial. Por isso, a gravidade NÃO realiza trabalho na órbita, e a velocidade da Lua não aumenta nem diminui, apenas muda a curva.", otherOptions: ["Incorreto."] } },
+        { level: "Fácil", text: "Se um motor realiza 1.000 Joules de trabalho em 1 segundo, a sua Potência é de 1.000 Watts. Mas existe outra unidade muito famosa e antiga, criada por James Watt, usada para medir a potência dos motores de carros e bombas. Qual é?", options: ["Volts", "Tesla", "Horsepower (HP) ou Cavalo-Vapor (cv)", "Newtons de Força"], correctIndex: 2, explanation: { correctText: "O Cavalo-Vapor (cv) ou o Horsepower (HP) (cerca de 745 Watts) foi inventado para comparar as máquinas a vapor (início da Revolução Industrial) com a força dos cavalos que elas vieram substituir.", otherOptions: ["Incorreto."] } },
+        { level: "Difícil", text: "Uma rapariga quer levantar a sua mala de 10 kg até uma prateleira a 2m de altura. Primeiro ela tenta erguer a mala DIRETAMENTE do chão para cima. Depois, ela decide usar uma rampa muito longa (plano inclinado liso sem atrito) para subir a mala. A rampa exige muito MENOS força. Mas o que acontece ao TRABALHO total contra a gravidade?", options: ["O trabalho na rampa é muito menor.", "O trabalho na rampa é muito maior porque o caminho é mais longo.", "O Trabalho total será RIGOROSAMENTE IGUAL nos dois casos. Máquinas simples (como rampas e roldanas) reduzem a Força necessária, mas compensam com a distância maior, transferindo a mesma energia no final.", "A mala perde peso na rampa."], correctIndex: 2, explanation: { correctText: "Rasteira famosa! Uma rampa não gera energia de borla. Se precisas de 200 J para colocar a mala lá em cima, terás de gastar 200 J quer subas a prumo (muita força × pouca distância) ou pela rampa (pouca força × muita distância). O Trabalho conserva-se.", otherOptions: ["Incorreto."] } },
+        { level: "Médio", text: "Num jogo, um guarda-redes chuta a bola para a frente. O ar exerce uma Força de Resistência (Atrito Fluido) contra a bola no sentido contrário ao seu avanço. O trabalho desta força do ar será:", options: ["Motor (T > 0)", "Resistente (T < 0), retirando progressivamente a energia cinética da bola.", "Nulo (T = 0)", "Igual ao da gravidade."], correctIndex: 1, explanation: { correctText: "Qualquer força que atrapalhe o movimento (sentido oposto, ângulo 180º) realiza Trabalho Resistente/Negativo, abrandando o corpo e aquecendo o ambiente.", otherOptions: ["Trabalho motor ajuda o avanço."] } },
+        { level: "Fácil", text: "Uma empilhadora do IFCE eleva verticalmente uma caixa pesada a velocidade constante. Qual a relação entre o Trabalho Motor da máquina e o Trabalho Resistente do Peso?", options: ["A empilhadora faz trabalho positivo (ajuda a subir) e o Peso faz trabalho negativo (tenta afundar). Em valor absoluto, os Joules são iguais, mantendo a velocidade fixa.", "O Peso da caixa faz trabalho motor.", "Ambos são positivos.", "Ambos são negativos."], correctIndex: 0, explanation: { correctText: "Para subir, a máquina puxa para cima (mesmo sentido do movimento) = Positivo. A Terra puxa o Peso para baixo (contra a subida) = Negativo.", otherOptions: ["Incorreto."] } },
+        { level: "Difícil", text: `Gráfico da Força Variável: A máquina começa com Força zero e atinge a Força de 40 N, arrastando o bloco por 5 metros (Gráfico em Triângulo). Qual o Trabalho T?
+                <div class="q-svg-container">
+                    <svg width="200" height="120" viewBox="0 0 200 120" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <polygon points="20,100 120,20 120,100" fill="#FEF08A" />
+                      <line x1="20" y1="100" x2="180" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="10" x2="20" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="100" x2="120" y2="20" stroke="#EAB308" stroke-width="3"/>
+                      <text x="2" y="25" font-size="12">40</text>
+                      <text x="115" y="115" font-size="12">5</text>
+                    </svg>
+                </div>`, options: ["200 J", "100 J", "20 J", "50 J"], correctIndex: 1, explanation: { correctText: "A figura é um triângulo (Base × Altura / 2). Base = 5m. Altura = 40N. Trabalho = (5 × 40) / 2 = 200 / 2 = 100 Joules.", otherOptions: ["200 J seria para o retângulo todo (força fixa sempre a 40N, o que não foi o caso)."] } },
+        { level: "Médio", text: "Nas especificações do teu telemóvel, o carregador diz ter '20 W' de potência. Na linguagem estrita da energia, o que é que este aparelho faz?", options: ["Atira 20 Newtons de eletrões para a bateria.", "Aumenta a velocidade do telemóvel em 20 m/s.", "Transfere exatamente 20 Joules de energia elétrica por segundo para a tua bateria.", "Faz um Trabalho Nulo."], correctIndex: 2, explanation: { correctText: "1 Watt = 1 Joule de energia entregue a cada 1 segundo. Logo, 20 Watts é a entrega/conversão de 20 J a cada piscar do relógio.", otherOptions: ["Incorreto."] } },
+        { level: "Fácil", text: "Fechando o tópico: Qualitativamente, qual seria o Trabalho realizado por um carro se, sem gasolina, tu ficasses a empurrá-lo de LADO com a porta, e ele rolasse livremente de FRENTE (movimento ortogonal à tua força)?", options: ["Maior do que empurrar por trás.", "Pequeno, mas positivo.", "ZERO Joules. Uma força aplicada de lado (90º com as rodas) nunca contribui para empurrar o carro para a frente.", "Negativo."], correctIndex: 2, explanation: { correctText: "Trabalho mecânico existe para premiar quem ajudou (ou atrapalhou) o avanço no eixo X da estrada. Como estavas a empurrar num eixo Y perfeitamente cruzado e inútil (90º, onde cos 90º = 0), tiveste zero utilidade mecânica (T=0) no avanço.", otherOptions: ["Incorreto."] } }
+    ];
+
+    /* --- GESTÃO DE ESTADO (STATE) --- */
+    const quizState = {
+        currentIndex: 0,
+        userAnswers: new Array(questionsDatabase.length).fill(null),
+        confettiAnimationId: null
+    };
+
+    /* --- FUNCIONALIDADES DE PESQUISA (TEORIA) --- */
+    function initializeSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const contentGroups = document.querySelectorAll('.content-group');
+        const noResultsMsg = document.getElementById('no-results');
+
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', function(event) {
+            const searchTerm = normalizeText(event.target.value);
+            let totalVisibleElements = 0;
+            
+            contentGroups.forEach(group => {
+                const groupContent = normalizeText(group.textContent);
+                const isMatch = groupContent.includes(searchTerm);
+                
+                group.style.display = isMatch ? 'flex' : 'none';
+                if (isMatch) totalVisibleElements++;
+            });
+            
+            noResultsMsg.style.display = totalVisibleElements === 0 ? 'block' : 'none';
+        });
+    }
+
+    function normalizeText(text) {
+        return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    /* --- CONTROLO DE VISTAS (VIEWS) --- */
+    function changeApplicationView(viewName) {
+        const views = ['viewExplanation', 'viewPractice', 'viewResult'];
+        
+        views.forEach(viewId => document.getElementById(viewId).classList.remove('active'));
+        
+        const quizFooter = document.getElementById('quizFooter');
+        if (quizFooter) quizFooter.style.display = 'none';
+
+        if (viewName === 'explanation') {
+            document.getElementById('viewExplanation').classList.add('active');
+            document.getElementById('btnExp').classList.add('active');
+            document.getElementById('btnPrac').classList.remove('active');
+        } else if (viewName === 'practice') {
+            document.getElementById('viewPractice').classList.add('active');
+            if (quizFooter) quizFooter.style.display = 'flex';
+            document.getElementById('btnExp').classList.remove('active');
+            document.getElementById('btnPrac').classList.add('active');
+            
+            renderCurrentQuestion();
+            renderNavigationMap();
+        } else if (viewName === 'result') {
+            document.getElementById('viewResult').classList.add('active');
+        }
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* --- GERAÇÃO INTERFACE DO QUIZ --- */
+    function getDifficultyBadgeClass(level) {
+        const mapping = { 'Fácil': 'dif-facil', 'Médio': 'dif-medio', 'Difícil': 'dif-dificil' };
+        return mapping[level] || 'dif-facil';
+    }
+
+    function buildOptionsHTML(question, selectedAnswerIndex) {
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        return question.options.map((optionText, optionIndex) => {
+            let cssClass = '';
+            
+            if (selectedAnswerIndex !== null) {
+                if (optionIndex === question.correctIndex) cssClass = 'correct';
+                else if (optionIndex === selectedAnswerIndex) cssClass = 'wrong';
+                else cssClass = 'disabled';
+            }
+
+            const isDisabled = selectedAnswerIndex !== null ? 'disabled' : '';
+
+            return `
+                <button class="option-btn ${cssClass}" onclick="handleOptionSelection(${optionIndex})" ${isDisabled}>
+                    <div class="opt-circle">${alphabet[optionIndex]}</div>
+                    <div>${optionText}</div>
+                </button>
+            `;
+        }).join('');
+    }
+
+    function buildFeedbackHTML(question, selectedAnswerIndex) {
+        const isCorrect = selectedAnswerIndex === question.correctIndex;
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        const titleClass = isCorrect ? 'success' : 'error';
+        const titleText = isCorrect ? '✅ Raciocínio Correto!' : '❌ Diagnóstico de Energia Falhou!';
+        
+        const distortionsHTML = question.explanation.otherOptions.map((explanationText, idx) => {
+            if (idx === question.correctIndex) return '';
+            return `<div class="feedback-item wrong-opt"><strong>${alphabet[idx]})</strong> ${explanationText}</div>`;
+        }).join('');
+
+        return `
+            <div class="feedback-box show">
+                <div class="feedback-title ${titleClass}" style="color: ${isCorrect ? 'var(--correct-border)' : 'var(--wrong-border)'}">${titleText}</div>
+                <div class="feedback-item correct-opt"><strong>O Princípio Físico:</strong> ${question.options[question.correctIndex]}</div>
+                <div style="margin-top:15px;font-size:1rem;color:var(--text-color);margin-bottom:15px;font-weight:600;">${question.explanation.correctText}</div>
+                <div style="margin-top:15px;border-top:2px dashed var(--theme-dark);padding-top:15px;">
+                    <small style="color:var(--text-color);"><strong>Análise dos Desvios:</strong></small>
+                    ${distortionsHTML}
+                </div>
+            </div>
+        `;
+    }
+
+    function renderCurrentQuestion() {
+        const container = document.getElementById('quizContainer');
+        if (!container) return;
+
+        const question = questionsDatabase[quizState.currentIndex];
+        const selectedAnswerIndex = quizState.userAnswers[quizState.currentIndex];
+        const badgeClass = getDifficultyBadgeClass(question.level);
+        
+        let feedbackHTML = selectedAnswerIndex !== null ? buildFeedbackHTML(question, selectedAnswerIndex) : '';
+
+        container.innerHTML = `
+            <div class="quiz-question-card">
+                <span class="difficulty-badge ${badgeClass}">${question.level}</span>
+                <div style="margin-bottom:25px;">
+                    <span class="quiz-question-counter">QUESTÃO ${quizState.currentIndex + 1} DE ${questionsDatabase.length}</span>
+                    <h2 class="quiz-question-text">${question.text}</h2>
+                </div>
+                <div class="options-list">
+                    ${buildOptionsHTML(question, selectedAnswerIndex)}
+                </div>
+                ${feedbackHTML}
+            </div>
+        `;
+        
+        updateNavigationButtons();
+    }
+
+    /* --- LÓGICA DO QUIZ --- */
+    function handleOptionSelection(selectedIndex) {
+        if (quizState.userAnswers[quizState.currentIndex] !== null) return;
+        
+        quizState.userAnswers[quizState.currentIndex] = selectedIndex;
+        const isCorrect = selectedIndex === questionsDatabase[quizState.currentIndex].correctIndex;
+        
+        if (isCorrect) startSuccessAnimation();
+        else triggerErrorShakeEffect();
+        
+        renderCurrentQuestion();
+        renderNavigationMap();
+    }
+
+    function triggerErrorShakeEffect() {
+        const container = document.getElementById('quizContainer');
+        if (container) { 
+            container.classList.remove('shake-effect'); 
+            void container.offsetWidth; 
+            container.classList.add('shake-effect'); 
+            setTimeout(() => container.classList.remove('shake-effect'), 500); 
+        }
+    }
+
+    /* --- ANIMAÇÕES (CONFETTI) --- */
+    function startSuccessAnimation() {
+        const duration = 1500;
+        const end = Date.now() + duration;
+        
+        stopSuccessAnimation();
+        
+        function animateFrame() {
+            if(window.confetti && typeof confetti === 'function') {
+                const config = { particleCount: 5, spread: 55, colors: ['#EAB308', '#3B82F6', '#1E293B', '#10B981'] };
+                confetti({ ...config, angle: 60, origin: { x: 0, y: 0.6 } });
+                confetti({ ...config, angle: 120, origin: { x: 1, y: 0.6 } });
+            }
+            if (Date.now() < end) quizState.confettiAnimationId = requestAnimationFrame(animateFrame);
+        }
+        animateFrame();
+    }
+
+    function stopSuccessAnimation() {
+        if (window.confetti && typeof confetti.reset === 'function') confetti.reset(); 
+        if (quizState.confettiAnimationId) {
+            cancelAnimationFrame(quizState.confettiAnimationId);
+            quizState.confettiAnimationId = null;
+        }
+    }
+
+    /* --- NAVEGAÇÃO MAPA --- */
+    function renderNavigationMap() {
+        const mapContainer = document.getElementById('qMap');
+        if (!mapContainer) return;
+        
+        mapContainer.innerHTML = questionsDatabase.map((question, index) => {
+            const isCurrent = index === quizState.currentIndex;
+            const userAnswer = quizState.userAnswers[index];
+            const hasAnswered = userAnswer !== null;
+            const isCorrect = userAnswer === question.correctIndex;
+            
+            let cssClass = 'map-dot';
+            if (isCurrent) cssClass += ' active';
+            if (hasAnswered) cssClass += isCorrect ? ' answered-correct' : ' answered-wrong';
+            
+            return `<div class="${cssClass}" onclick="goToQuestion(${index})">${index + 1}</div>`;
+        }).join('');
+        
+        setTimeout(() => { 
+            const activeDot = mapContainer.querySelector('.map-dot.active'); 
+            if (activeDot) activeDot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); 
+        }, 50);
+    }
+
+    function goToQuestion(targetIndex) { 
+        stopSuccessAnimation();
+        quizState.currentIndex = targetIndex; 
+        renderCurrentQuestion(); 
+        renderNavigationMap(); 
+    }
+    
+    function navigateQuestion(directionOffset) { 
+        const nextIndex = quizState.currentIndex + directionOffset; 
+        if (nextIndex >= 0 && nextIndex < questionsDatabase.length) goToQuestion(nextIndex); 
+    }
+
+    function updateNavigationButtons() {
+        const btnPrev = document.getElementById('btnPrev');
+        const btnNext = document.getElementById('btnNext');
+        
+        if (btnPrev) btnPrev.disabled = (quizState.currentIndex === 0);
+        
+        if (btnNext) {
+            const isLastQuestion = quizState.currentIndex === questionsDatabase.length - 1;
+            if (isLastQuestion) { 
+                btnNext.textContent = "Finalizar Avaliação"; 
+                btnNext.onclick = finishQuiz; 
+            } else { 
+                btnNext.textContent = "Próxima ➡️"; 
+                btnNext.onclick = () => navigateQuestion(1); 
+            }
+        }
+    }
+
+    /* --- CÁLCULO DE RESULTADOS --- */
+    function calculateStars(percent) {
+        if (percent === 100) return "⭐⭐⭐⭐⭐";
+        if (percent >= 80) return "⭐⭐⭐⭐";
+        if (percent >= 60) return "⭐⭐⭐";
+        if (percent >= 40) return "⭐⭐";
+        if (percent > 0) return "⭐";
+        return "🌑"; // zero stars
+    }
+
+    function finishQuiz() {
+        const unansweredCount = quizState.userAnswers.filter(answer => answer === null).length;
+        
+        if (unansweredCount > 0) {
+            const confirmMessage = `Existem ${unansweredCount} questões por responder. Quer terminar mesmo assim (as em branco serão dadas como erradas)?`;
+            if (!confirm(confirmMessage)) return;
+        }
+
+        stopSuccessAnimation();
+
+        const correctAnswersCount = quizState.userAnswers.filter((answer, index) => answer === questionsDatabase[index].correctIndex).length;
+        const totalQuestions = questionsDatabase.length;
+        const percentageScore = Math.round((correctAnswersCount / totalQuestions) * 100);
+        const isApproved = percentageScore >= 80;
+        
+        renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved);
+        changeApplicationView('result');
+    }
+
+    function renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved) {
+        document.getElementById('finalPercent').textContent = `${percentageScore}%`;
+        document.getElementById('finalScoreText').textContent = `Acertaste ${correctAnswersCount} de ${totalQuestions}`;
+        document.getElementById('finalStars').textContent = calculateStars(percentageScore);
+        
+        const reviewContainer = document.getElementById('review-container');
+        const actionButtonsContainer = document.getElementById('action-buttons');
+        
+        let summaryHTML = '';
+
+        if (isApproved) {
+            summaryHTML += `
+                <div class="result-summary-box success">
+                    <strong>🎉 POTÊNCIA MÁXIMA!</strong> A tua compreensão do Trabalho nulo, da Potência e do cálculo de energia está perfeita e alinhada com o IFCE.
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REPETIR PARA 100%</button>`;
+        } else {
+            summaryHTML += `
+                <div class="result-summary-box error">
+                    <strong>⚠️ ENERGIA EM BAIXA!</strong> Foste avaliado abaixo da meta (80%). Revisa os casos de "Trabalho Nulo" (a 90 graus) e cuidado para não usar a massa desnecessariamente na fórmula W = F × d.
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REFAZER AVALIAÇÃO</button>`;
+        }
+        
+        if (correctAnswersCount < totalQuestions) {
+            summaryHTML += '<h4 style="margin-bottom:15px; color:var(--text-color); font-size:1.15rem;">Revisão Teórica e Algébrica:</h4>';
+            questionsDatabase.forEach((question, index) => {
+                const userAnswerIndex = quizState.userAnswers[index];
+                if (userAnswerIndex !== question.correctIndex) {
+                    const userAnswerText = userAnswerIndex === null ? "Deixaste em branco" : question.options[userAnswerIndex];
+                    const correctAnswerText = question.options[question.correctIndex];
+                    
+                    let plainQuestionText = question.text.replace(/<div class="q-svg-container">[\s\S]*?<\/div>/gi, ' [Gráfico Omitido] ');
+
+                    summaryHTML += `
+                        <div class="error-log-item">
+                            <strong style="color:var(--theme-dark); font-size:1.05rem; display:block; margin-bottom:8px;">Q${index + 1}: ${plainQuestionText}</strong>
+                            <span style="color:var(--wrong-border); font-weight: 600; display:block; margin-bottom:5px;">A tua análise: ${userAnswerText}</span>
+                            <span style="color:var(--correct-border); font-weight: 700; display:block;">A Resposta Correta: ${correctAnswerText}</span>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        reviewContainer.innerHTML = summaryHTML;
+    }
+
+    function resetQuiz() { 
+        quizState.userAnswers = new Array(questionsDatabase.length).fill(null); 
+        quizState.currentIndex = 0; 
+        changeApplicationView('practice'); 
+    }
+    
+    // START APPLICATION
+    initializeSearch();
+    changeApplicationView('explanation');
+</script>
+</body>
+</html>

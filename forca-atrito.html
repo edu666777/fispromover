@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Física: Força de Atrito - Promover</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* --- VARIÁVEIS DE COR E TEMA: ASFALTO & CALOR (Atrito) --- */
+        :root {
+            --bg-color: #F8FAFC; /* Slate 50 (Fundo claro) */
+            --text-color: #0F172A; /* Slate 900 (Texto quase preto) */
+            --border-color: #334155; /* Slate 700 (Contorno asfalto) */
+            --white: #FFFFFF;
+            
+            --theme-light: #E2E8F0; /* Slate 200 */
+            --theme-medium: #F97316; /* Laranja 500 (Calor/Atrito) */
+            --theme-dark: #C2410C; /* Laranja 700 (Travagem) */
+            --theme-contrast: #EF4444; /* Vermelho 500 (Alerta/Paragem) */
+            --theme-accent: #64748B; /* Cinza (Superfície) */
+            --theme-text-active: #FFFFFF;
+            
+            --correct-bg: #D1FAE5;
+            --correct-border: #059669;
+            --wrong-bg: #FFE4E6;
+            --wrong-border: #BE123C;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 15px 120px 15px;
+            background-image: linear-gradient(rgba(51, 65, 85, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(51, 65, 85, 0.1) 1px, transparent 1px);
+            background-size: 25px 25px;
+        }
+
+        /* --- ANIMAÇÕES --- */
+        @keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1) rotate(-5deg); color: var(--theme-contrast); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+        .pulse-effect { animation: pulse 2s infinite; display: inline-block; }
+        .shake-effect { animation: shake 0.4s ease-in-out; }
+
+        /* --- LAYOUT PRINCIPAL --- */
+        .container { width: 100%; max-width: 650px; display: flex; flex-direction: column; gap: 25px; }
+        .logo-header { display: flex; flex-direction: column; align-items: center; padding: 15px 0 25px 0; text-align: center; }
+        .css-logo { font-size: 1.5rem; font-weight: 900; color: var(--theme-text-active); text-transform: uppercase; letter-spacing: -1px; border: 3px solid var(--border-color); padding: 8px 24px; border-radius: 12px; background: var(--theme-dark); box-shadow: 4px 4px 0px var(--theme-contrast); margin-bottom: 15px; transform: rotate(-2deg); }
+        h1 { font-size: 2rem; font-weight: 900; color: var(--text-color); text-transform: uppercase; letter-spacing: -0.5px; line-height: 1.1; }
+        .subtitle { font-size: 1rem; color: var(--white); font-weight: 700; margin-top: 5px; background: var(--theme-accent); padding: 4px 12px; border-radius: 8px; border: 2px solid var(--border-color); }
+
+        /* --- NAVEGAÇÃO --- */
+        .toggle-container { background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 6px; display: flex; box-shadow: 4px 4px 0px var(--border-color); position: sticky; top: 15px; z-index: 50; }
+        .toggle-btn { flex: 1; border: none; background: none; padding: 12px 0; border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.05rem; color: var(--text-color); cursor: pointer; transition: all 0.2s ease; }
+        .toggle-btn.active { background-color: var(--theme-dark); color: var(--theme-text-active); border: 2px solid var(--border-color); box-shadow: 2px 2px 0px var(--border-color); }
+
+        .view-section { display: none; animation: fadeIn 0.3s ease; flex-direction: column; gap: 35px; }
+        .view-section.active { display: flex; }
+
+        /* --- PESQUISA --- */
+        .search-container { position: relative; width: 100%; }
+        .search-input { width: 100%; padding: 16px 20px 16px 55px; border: 3px solid var(--border-color); border-radius: 12px; background-color: var(--white); font-family: 'Poppins', sans-serif; font-size: 1.05rem; font-weight: 600; color: var(--text-color); box-shadow: 4px 4px 0px var(--border-color); outline: none; transition: all 0.2s ease; }
+        .search-input:focus { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--theme-contrast); border-color: var(--theme-dark); }
+        .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 1.4rem; }
+        #no-results { text-align: center; color: var(--wrong-border); font-weight: 800; display: none; background: var(--wrong-bg); padding: 15px; border: 3px solid var(--wrong-border); border-radius: 8px; }
+
+        /* --- TEORIA --- */
+        .content-group { display: flex; flex-direction: column; position: relative; padding-top: 15px; }
+        .section-badge { display: inline-flex; align-items: center; gap: 10px; background-color: var(--theme-dark); color: var(--white); font-size: 1.1rem; font-weight: 800; padding: 8px 20px; border-radius: 8px; border: 3px solid var(--border-color); box-shadow: 3px 3px 0px var(--theme-contrast); text-transform: uppercase; position: absolute; top: -5px; left: 15px; z-index: 10; transform: rotate(-1.5deg); }
+        .theory-box { display: flex; flex-direction: column; padding: 35px 25px 25px 35px; border-radius: 12px; background-color: var(--white); border: 3px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); font-weight: 500; font-size: 1rem; line-height: 1.7; position: relative; overflow: hidden; gap: 20px; border-left: 14px solid var(--theme-medium); }
+        .theory-box h3 { font-size: 1.35rem; font-weight: 900; color: var(--theme-dark); margin-bottom: 5px; display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px; }
+        .theory-box h4 { font-size: 1.1rem; font-weight: 800; color: var(--text-color); margin-top: 10px; border-bottom: 2px solid var(--theme-light); padding-bottom: 5px; }
+        
+        .inline-example { display: block; width: fit-content; max-width: 100%; margin-top: 6px; margin-bottom: 6px; padding: 12px 20px; background-color: var(--theme-light); border: 2px solid var(--border-color); border-radius: 8px; font-size: 1.25rem; color: var(--theme-dark); font-weight: 900; letter-spacing: 1px; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); text-align: center; }
+        .visual-area { background: var(--bg-color); border: 3px dashed var(--theme-medium); border-radius: 12px; padding: 25px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; width: 100%; }
+        
+        .highlight-box { background-color: #FEF3C7; border: 3px solid var(--border-color); border-left: 8px solid var(--theme-contrast); padding: 18px 20px; border-radius: 8px; font-size: 0.95rem; color: #78350F; font-weight: 600; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); }
+        .highlight-box.blue { background-color: #EFF6FF; border-left-color: #3B82F6; color: #1E3A8A; }
+        .highlight-box.gray { background-color: #F1F5F9; border-left-color: #475569; color: #0F172A; }
+
+        /* --- CARDS DE FÓRMULAS E TÓPICOS --- */
+        .g-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; width: 100%; margin-top: 10px; }
+        .g-card { flex: 1 1 calc(50% - 15px); min-width: 130px; border-radius: 12px; padding: 15px 10px; text-align: center; border: 3px solid var(--border-color); display: flex; flex-direction: column; align-items: center; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); background-color: var(--white); transition: transform 0.2s; }
+        .g-card:hover { transform: translateY(-3px); }
+        .g-card.full-width { flex: 1 1 100%; max-width: 280px; }
+        .g-icon { font-size: 2.5rem; margin-bottom: 8px; line-height: 1; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.15)); }
+        .g-title { font-size: 1.05rem; font-weight: 900; margin-bottom: 4px; text-transform: uppercase; color: var(--theme-dark); }
+        .g-formula { font-size: 1.15rem; font-weight: 800; color: var(--theme-contrast); margin-bottom: 4px; line-height: 1.2; background: var(--bg-color); padding: 4px 10px; border-radius: 6px; border: 2px solid var(--border-color); }
+        .g-desc { font-size: 0.85rem; font-weight: 600; color: var(--text-color); margin-top: 6px; line-height: 1.3; }
+
+        /* --- BOTÕES GERAIS --- */
+        .btn-action { width: 100%; padding: 20px; background-color: var(--theme-dark); color: white; border: 3px solid var(--border-color); border-radius: 12px; font-size: 1.15rem; font-weight: 900; cursor: pointer; box-shadow: 6px 6px 0px var(--theme-contrast); transition: all 0.1s; text-transform: uppercase; margin-top: 10px; }
+        .btn-action:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0px var(--theme-contrast); }
+
+        /* --- QUIZ UI --- */
+        .difficulty-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; border: 2px solid var(--border-color); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
+        .dif-facil { background: #D1FAE5; color: #065F46; }
+        .dif-medio { background: #FEF08A; color: #713F12; }
+        .dif-dificil { background: #FECACA; color: #7F1D1D; }
+
+        .question-map { display: flex; gap: 8px; overflow-x: auto; padding: 10px 5px; margin-bottom: 20px; white-space: nowrap; scroll-behavior: smooth; }
+        .question-map::-webkit-scrollbar { display: none; }
+        .map-dot { min-width: 38px; height: 38px; border: 2px solid var(--border-color); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; color: var(--theme-dark); background: white; cursor: pointer; transition: all 0.2s; }
+        .map-dot.active { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); transform: scale(1.15); }
+        .map-dot.answered-correct { background-color: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .map-dot.answered-wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .quiz-question-card { border: 4px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); padding: 30px; border-radius: 16px; background: var(--white); }
+        .quiz-question-counter { font-size: 0.85rem; font-weight: 900; color: var(--theme-dark); letter-spacing: 1px; }
+        .quiz-question-text { font-size: 1.15rem; margin-top: 8px; color: var(--text-color); font-weight: 800; line-height: 1.5; margin-bottom: 20px;}
+
+        /* Elemento para imagens SVG dentro das perguntas */
+        .q-svg-container { display: flex; justify-content: center; margin: 15px 0; }
+
+        .option-btn { display: flex; align-items: center; width: 100%; padding: 18px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.1s ease; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 600; text-align: left; color: var(--text-color); }
+        .option-btn:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px var(--theme-contrast); }
+        .opt-circle { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--border-color); margin-right: 15px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.05rem; flex-shrink: 0; background: var(--theme-light); color: var(--theme-dark); }
+        .option-btn.correct { background-color: var(--correct-bg); border-color: var(--correct-border); box-shadow: 3px 3px 0px var(--correct-border); }
+        .option-btn.correct .opt-circle { background-color: var(--correct-border); color: white; border-color: var(--correct-border); }
+        .option-btn.wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); opacity: 0.9; box-shadow: none; }
+        .option-btn.wrong .opt-circle { background-color: var(--wrong-border); color: white; border-color: var(--wrong-border); }
+        .option-btn.disabled { pointer-events: none; opacity: 0.7; }
+
+        /* --- FEEDBACK DA QUESTÃO --- */
+        .feedback-box { display: block; margin-top: 25px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 25px; animation: slideUp 0.3s ease-out; box-shadow: 5px 5px 0px rgba(0,0,0,0.1); }
+        .feedback-title { font-weight: 900; text-transform: uppercase; font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .feedback-item { margin-bottom: 10px; font-size: 0.95rem; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); line-height: 1.5; font-weight: 500; }
+        .feedback-item.correct-opt { background: var(--correct-bg); border-color: var(--correct-border); color: #064E3B; font-weight: 700; box-shadow: 3px 3px 0px var(--correct-border); }
+        .feedback-item.wrong-opt { background: #FEE2E2; border-color: #EF4444; color: #7F1D1D; border-style: dashed; margin-top: 8px; }
+
+        /* --- RESULTADOS --- */
+        .result-card { background: white; border: 4px solid var(--border-color); border-radius: 16px; padding: 40px 20px; box-shadow: 8px 8px 0px var(--border-color); margin-bottom: 30px; text-align: center; }
+        .stars-container { font-size: 2.5rem; margin: 15px 0; letter-spacing: 5px; }
+        .percentage-big { font-size: 5rem; font-weight: 900; color: var(--theme-dark); line-height: 1; margin: 15px 0; text-shadow: 4px 4px 0px var(--theme-contrast); }
+        
+        .result-summary-box { padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 3px solid; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); }
+        .result-summary-box.success { background: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .result-summary-box.error { background: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .error-log-item { margin-bottom: 15px; padding: 20px; background: var(--bg-color); border-radius: 12px; border: 3px dashed var(--theme-medium); text-align: left;}
+
+        /* --- RODAPÉ DE NAVEGAÇÃO --- */
+        .quiz-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--white); border-top: 3px solid var(--border-color); padding: 15px 20px; display: none; justify-content: center; gap: 20px; z-index: 100; box-shadow: 0px -4px 10px rgba(0,0,0,0.05); }
+        .nav-btn { padding: 15px 30px; border-radius: 12px; font-weight: 900; border: 3px solid var(--border-color); cursor: pointer; box-shadow: 3px 3px 0px var(--border-color); font-family: 'Poppins', sans-serif; text-transform: uppercase; background: white; color: var(--text-color); font-size: 1rem; transition: transform 0.1s; }
+        .nav-btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 0px 0px 0px transparent; }
+        .btn-next { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); border-color: var(--border-color); }
+        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <header class="logo-header">
+            <div class="css-logo"><span class="pulse-effect">🔥</span> PROMOVER</div>
+            <h1>Física / 9º Ano</h1>
+            <p class="subtitle">Dinâmica: A Força de Atrito</p>
+        </header>
+
+        <div class="toggle-container">
+            <button class="toggle-btn active" id="btnExp" onclick="changeApplicationView('explanation')">📘 Teoria</button>
+            <button class="toggle-btn" id="btnPrac" onclick="changeApplicationView('practice')">🧠 Prática (30)</button>
+        </div>
+
+        <!-- VISTA: TEORIA -->
+        <main id="viewExplanation" class="view-section active">
+            
+            <div class="search-container">
+                <span class="search-icon" aria-hidden="true">🔍</span>
+                <input type="text" id="searchInput" class="search-input" aria-label="Pesquisar conteúdo" placeholder="Pesquisar conceito... (ex: Estático, Cinético, Normal)">
+            </div>
+            <div id="no-results"><p>😕 Termo não encontrado na teoria do Atrito.</p></div>
+
+            <section class="content-group">
+                <div class="section-badge">🔬 1. O Mundo Microscópico</div>
+                <article class="theory-box search-target">
+                    <h3>O que causa o atrito?</h3>
+                    <p>Mesmo o vidro mais polido ou o gelo mais liso têm defeitos microscópicos. Quando encostas duas superfícies, essas "montanhas" invisíveis encaixam umas nas outras. A <strong>Força de Atrito (F<sub>at</sub>)</strong> é a resistência gerada para quebrar ou arrastar esses encaixes.</p>
+                    
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li>O atrito é uma Força de Contato.</li>
+                        <li>A direção do atrito é sempre paralela às superfícies encostadas.</li>
+                        <li>O sentido da força de atrito é <strong>SEMPRE oposto</strong> à <em>tendência</em> de escorregamento do corpo.</li>
+                    </ul>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">🛑 2. Estático vs. Cinético</div>
+                <article class="theory-box search-target">
+                    <h3>Parado ou a Deslizar?</h3>
+                    <p>O atrito comporta-se de maneira muito diferente dependendo se o objeto já está em movimento ou não.</p>
+                    
+                    <div class="visual-area" style="background: transparent; border: none; padding: 0;">
+                        <div class="g-grid">
+                            <!-- Atrito Estático -->
+                            <div class="g-card">
+                                <div class="g-icon">🧱</div>
+                                <div class="g-title">Atrito Estático</div>
+                                <div class="g-desc">Atua quando o corpo está <strong>parado</strong>. Ele é "inteligente": o seu valor cresce para anular exatamente a força que fazes, até atingir um limite máximo.</div>
+                            </div>
+                            
+                            <!-- Atrito Cinético -->
+                            <div class="g-card">
+                                <div class="g-icon">🎿</div>
+                                <div class="g-title">Atrito Cinético (Dinâmico)</div>
+                                <div class="g-desc">Atua quando o corpo <strong>já está a escorregar</strong>. É constante e mais fraco que o atrito estático máximo (por isso é mais fácil manter algo a andar do que arrancá-lo do chão).</div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">🧮 3. A Equação do Atrito</div>
+                <article class="theory-box search-target">
+                    <h3>A Fórmula F<sub>at</sub></h3>
+                    <p>A Força de Atrito depende apenas de duas coisas: a natureza dos materiais em contacto e a força que os esmaga um contra o outro.</p>
+                    
+                    <div class="inline-example">F<sub>at</sub> = &mu; &middot; N</div>
+                    
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li><strong>&mu; (Coeficiente Mi):</strong> É um número sem unidades que indica o quão áspero é o piso (borracha e asfalto têm um &mu; alto; gelo e aço têm um &mu; baixo). O &mu; Estático é sempre maior que o &mu; Cinético.</li>
+                        <li><strong>N (Força Normal):</strong> É a força de compressão entre o corpo e o chão. Num chão plano, a Normal é igual ao Peso (<span style="background: var(--theme-light); padding: 2px 6px; border-radius: 4px; color: var(--theme-dark); font-weight: bold;">N = P = m &middot; g</span>).</li>
+                    </ul>
+
+                    <div class="highlight-box gray">
+                        <strong>Curiosidade:</strong> A área de contato (tamanho da base da caixa) <strong>NÃO</strong> entra na fórmula! Puxar uma caixa deitada ou de lado dá exatamente o mesmo atrito, pois a Força Normal (compressão) mantém-se igual.
+                    </div>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">👟 4. Inimigo ou Aliado?</div>
+                <article class="theory-box search-target">
+                    <h3>Sem atrito, não há movimento</h3>
+                    <p>Ouve-se muito que o atrito é mau porque gasta peças e trava os carros. Mas sem ele, não conseguirias sequer dar um passo!</p>
+                    
+                    <div class="highlight-box blue">
+                        <strong>Como andamos:</strong> Ao caminhar, o teu pé empurra o chão para <strong>TRÁS</strong>. A força de atrito estático "agarra" o sapato ao chão e empurra-te, por Ação e Reação, para a <strong>FRENTE</strong>. Se não houvesse atrito (ex: chão cheio de óleo), o teu pé ia escorregar para trás e tu cairias de boca no chão!
+                    </div>
+                </article>
+            </section>
+
+            <button class="btn-action" onclick="changeApplicationView('practice')">
+                Iniciar a Avaliação (30 Questões) ➜
+            </button>
+        </main>
+
+        <!-- VISTA: PRÁTICA (QUIZ) -->
+        <main id="viewPractice" class="view-section">
+            <div style="margin-bottom: 20px; background-color: var(--white); padding: 15px; border-radius: 12px; border: 3px solid var(--border-color); box-shadow: 4px 4px 0px var(--border-color);">
+                <h2 style="color:var(--theme-dark); font-weight:900; margin-bottom: 5px;">A Prova de Fogo - IFCE</h2>
+                <p style="color: var(--theme-contrast); font-size: 0.95rem; font-weight:600;">
+                    30 questões sobre Atrito, Normal e Diagramas Vetoriais. Cuidado com o atrito "inteligente". Acerta <strong>80% (24/30)</strong>.
+                </p>
+            </div>
+            
+            <div class="question-map" id="qMap"></div>
+            <div id="quizContainer" style="margin-bottom: 40px;"></div>
+        </main>
+
+        <!-- VISTA: RESULTADOS -->
+        <main id="viewResult" class="view-section">
+            <div class="result-card">
+                <h2 style="font-weight:900; text-transform:uppercase;">Relatório Final</h2>
+                <div class="stars-container" id="finalStars">⭐⭐⭐</div>
+                <div class="percentage-big" id="finalPercent">0%</div>
+                <p style="font-size:1.2rem; font-weight:700; color:#555;" id="finalScoreText">Acertaste 0 de 30</p>
+                <div id="review-container" style="text-align: left; margin-top: 20px;"></div>
+            </div>
+            <div id="action-buttons"></div>
+        </main>
+
+    </div>
+
+    <!-- RODAPÉ DE NAVEGAÇÃO -->
+    <footer class="quiz-footer" id="quizFooter">
+        <button class="nav-btn btn-prev" id="btnPrev" onclick="navigateQuestion(-1)">Anterior</button>
+        <button class="nav-btn btn-next" id="btnNext" onclick="navigateQuestion(1)">Próxima</button>
+    </footer>
+
+<script>
+    /* --- ESTRUTURA DE DADOS (BASE DE QUESTÕES - FORÇA DE ATRITO IFCE) --- */
+    const questionsDatabase = [
+        { 
+            level: "Fácil", 
+            text: "O que é fisicamente a Força de Atrito?", 
+            options: ["É uma força magnética entre metais.", "É a força gravitacional da Terra a puxar os objetos.", "É uma força de contacto gerada pelas irregularidades das superfícies, que se opõe sempre à tendência de escorregamento entre elas.", "É a força que empurra os corpos sempre para a frente."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "O atrito nasce dos 'encaixes' das rugosidades microscópicas sempre que duas superfícies tentam deslizar uma sobre a outra.", 
+                otherOptions: ["Gravidade é o Peso; Magnetismo é de ímanes."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: `Observa o bloco abaixo. Ele está a ser empurrado para a DIREITA (força azul). Para que lado aponta a Força de Atrito (Fat) que o chão exerce sobre o bloco?
+                <div class="q-svg-container">
+                    <svg width="200" height="80" viewBox="0 0 200 80" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <line x1="20" y1="60" x2="180" y2="60" stroke="#0F172A" stroke-width="4"/> 
+                      <rect x="70" y="20" width="40" height="40" fill="#E2E8F0" stroke="#0F172A" stroke-width="2"/> 
+                      <line x1="110" y1="40" x2="160" y2="40" stroke="#3B82F6" stroke-width="3" marker-end="url(#arrow)"/> 
+                      <text x="130" y="30" font-size="12" font-weight="bold" fill="#3B82F6">F</text>
+                      <defs><marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="context-stroke"/></marker></defs>
+                    </svg>
+                </div>`, 
+            options: ["Para cima (Vertical).", "Para a Direita (a favor do movimento).", "Para a Esquerda (contra a tendência de movimento).", "Para baixo."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "A força de atrito opõe-se sempre ao deslizamento. Se o bloco quer ir para a direita, o chão 'agarra-o' empurrando-o para a Esquerda.", 
+                otherOptions: ["Para cima seria a Força Normal. Para baixo seria o Peso."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "O Atrito Estático ocorre quando o corpo está ________. O Atrito Cinético (ou dinâmico) ocorre quando o corpo está ________.", 
+            options: ["A mover-se rápido / a mover-se devagar.", "Parado (em repouso) / a deslizar (em movimento).", "Num piso liso / num piso áspero.", "No ar / no chão."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Estático (do grego, parado). Cinético (do grego kinematikos, movimento). Esta é a divisão fundamental do atrito.", 
+                otherOptions: ["As outras opções não definem os termos clássicos."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Empurras um guarda-fatos muito pesado. Fazes uma força de 50 N, mas ele NÃO SE MEXE. Fazes uma força de 80 N e ele CONTINUA PARADO. O que podes afirmar sobre a Força de Atrito Estático neste momento?", 
+            options: ["O atrito vale sempre o máximo possível, como 100 N.", "O atrito estático não existe, ele só surge quando o corpo anda.", "A força de atrito estático é 'inteligente' e adapta-se: ela valia 50 N no primeiro caso e aumentou para 80 N no segundo caso para manter o equilíbrio.", "O atrito estático vale zero."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Enquanto o corpo não escorregar, a Força Resultante tem de ser Zero (Repouso). Por isso, o chão devolve EXATAMENTE a mesma força que tu fazes, até ao limite do atrito máximo.", 
+                otherOptions: ["Assumir que o atrito estático é sempre igual à fórmula do máximo é o erro mais comum dos alunos."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Ainda sobre o guarda-fatos: Fazes 100 N e ele não se move. Fazes 101 N e ele começa a ESCORREGAR! O que significa esse valor de 100 N?", 
+            options: ["É o Atrito Cinético.", "É a Força Normal do guarda-fatos.", "É a Força de Atrito Estático MÁXIMO (ou Força de Destaque). É o limite exato que as rugosidades aguentam antes de cederem.", "É o peso do ar."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "A fórmula F_at = &mu;e &middot; N calcula apenas a 'força de rutura' (o limite máximo). Assim que fazes uma força maior do que esse limite, as 'soldaduras' a frio partem e o corpo começa a andar.", 
+                otherOptions: ["O atrito cinético começa a atuar depois de ele já estar a escorregar."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Na física, existem dois coeficientes de atrito para o mesmo material: o Coeficiente de Atrito Estático (&mu;e) e o Coeficiente de Atrito Cinético (&mu;c). Qual é a relação matemática entre eles?", 
+            options: ["&mu;e é sempre MENOR que o &mu;c.", "&mu;e é sempre MAIOR que o &mu;c.", "Eles são exatamente iguais sempre.", "Depende se o dia está quente ou frio."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "É muito mais difícil arrancar um bloco do repouso do que mantê-lo a deslizar. Por isso, o atrito estático (as rugosidades estão bem presas) é sempre mais forte (maior coeficiente) do que o atrito cinético (escorrega por cima das falhas).", 
+                otherOptions: ["Se fossem iguais não haveria o 'solavanco' ao iniciar o movimento."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "A fórmula para calcular o atrito máximo é F_at = &mu; &middot; N. O que representa a letra 'N' nesta fórmula?", 
+            options: ["A Força Normal (a força de compressão que o chão faz sobre o bloco, equivalente ao Peso em superfícies horizontais).", "O número de Newtons de força humana.", "O Nível de aspereza do chão.", "O Norte magnético."], 
+            correctIndex: 0, 
+            explanation: { 
+                correctText: "O atrito depende diretamente do quão esmagado o corpo está contra o chão. A Força Normal (N) mede essa compressão.", 
+                otherOptions: ["A aspereza é medida pelo coeficiente &mu;."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Cálculo direto de Atrito Cinético: Um caixote tem uma Força Normal de N = 200 N. O piso tem um coeficiente de atrito cinético de &mu;c = 0,3. O caixote já está a escorregar. Qual é a Força de Atrito que atua sobre ele?", 
+            options: ["200 N", "60 N", "0,3 N", "200,3 N"], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Multiplicação direta: F_at = &mu; &middot; N. F_at = 0,3 × 200 = 60 Newtons.", 
+                otherOptions: ["Erros de multiplicação simples."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "A Rasteira do IFCE: Um bloco tem um Atrito Estático Máximo calculado em 40 N. Tu vais empurrar o bloco (que está parado) com uma força fraca de 15 N. Quanto vai valer a Força de Atrito neste momento?", 
+            options: ["40 N", "25 N", "15 N", "0 N"], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Pensa! Se tu empurras com 15 N e o atrito fizesse 40 N contra ti, a caixa ia voar de marcha-atrás (F_resultante = 25N para trás)! O atrito estático só cresce para anular a tua força. Se tu fazes 15, ele faz 15 e a caixa fica parada (Resultante = 0).", 
+                otherOptions: ["Usar a fórmula cega (40N) é o erro que reprova os alunos!"] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: `Observa o bloco sendo arrastado para a direita a uma velocidade CONSTANTE. Se ele viaja em MRU, o que podemos afirmar sobre a força F de empurrão e a Força de Atrito (Fat)?
+                <div class="q-svg-container">
+                    <svg width="200" height="80" viewBox="0 0 200 80" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <line x1="20" y1="60" x2="180" y2="60" stroke="#0F172A" stroke-width="4"/> 
+                      <rect x="80" y="20" width="40" height="40" fill="#F97316" stroke="#0F172A" stroke-width="2"/> 
+                      <line x1="120" y1="40" x2="170" y2="40" stroke="#0F172A" stroke-width="3" marker-end="url(#arrow)"/> 
+                      <line x1="80" y1="50" x2="30" y2="50" stroke="#EF4444" stroke-width="3" marker-end="url(#arrow)"/> 
+                      <text x="140" y="30" font-size="12" font-weight="bold">F</text>
+                      <text x="40" y="40" font-size="12" font-weight="bold" fill="#EF4444">Fat</text>
+                      <defs><marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="context-stroke"/></marker></defs>
+                    </svg>
+                </div>`, 
+            options: ["A Força F é muito maior que o Atrito.", "A Força F é exatamente IGUAL ao Atrito, resultando numa força resultante ZERO (condição para haver Velocidade Constante / MRU).", "O Atrito é maior, logo ele trava.", "O atrito não atua em corpos com velocidade constante."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "A 1ª Lei de Newton dita que se a Força Resultante for ZERO, o corpo continua em Movimento Uniforme. Logo, a tua força apenas serve para cancelar perfeitamente o atrito (F = Fat).", 
+                otherOptions: ["Se F fosse maior, ele Acelerava (MRUV)."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Muitas vezes as pessoas dizem 'O atrito é um atraso'. Mas sem atrito a vida seria impossível! Se o chão fosse perfeitamente liso e sem qualquer atrito (como gelo untado com sabão), o que aconteceria se tentasses andar?", 
+            options: ["Caminharias muito mais depressa.", "Levitarias.", "Não sairias do sítio e cairias. O teu pé tentaria empurrar o chão para trás, mas apenas escorregaria sem conseguir propulsão.", "Caminharias de marcha-atrás."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Caminhar exige que o teu sapato 'agarre' no asfalto e empurre o asfalto para trás. A reação (Ação-Reação) atira-te para a frente. Sem atrito não há 'agarre' (aderência).", 
+                otherOptions: ["Aderência = Atrito."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Caminhar é possível graças ao atrito. Que tipo de atrito atua entre a sola do teu sapato e o asfalto no momento exato em que o teu pé apoia no chão e te impulsiona para a frente?", 
+            options: ["Atrito Cinético apontando para trás.", "Atrito Estático apontando para a FRENTE.", "Atrito Cinético apontando para a frente.", "Atrito Estático apontando para trás."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Surpresa! Quando caminhas bem, a tua sola NÃO derrapa no chão (ela fica cravada). Logo é atrito ESTÁTICO. Tu empurras o chão para trás. O chão reage e empurra a sola para a FRENTE (a força que te move é a força de atrito!).", 
+                otherOptions: ["Se usasses atrito cinético estarias a fazer 'moonwalk' ou a escorregar."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Um carro está numa estrada horizontal e trava a fundo (as rodas travam e ele derrapa/pneus chiam). A que se deve a travagem violenta do carro até ele parar?", 
+            options: ["O motor puxa o carro para trás.", "À Força de Atrito Cinético entre os pneus bloqueados e o asfalto, que atua em sentido CONTRÁRIO ao movimento, sugando a energia cinética do carro.", "À gravidade.", "Ao atrito estático dos pneus."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Pneus bloqueados a 'arrastar' no chão geram atrito Cinético (pois as superfícies estão a deslizar violentamente). Essa força age contra a inércia do carro, dissipando energia sob a forma de muito calor, fumo e borracha queimada.", 
+                otherOptions: ["Freios não usam o motor para puxar para trás."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Em competições de Fórmula 1 e dias de chuva, os acidentes acontecem devido à 'Aquaplanagem'. A nível da física das forças, o que causa este fenómeno?", 
+            options: ["A água atrai magneticamente os pneus.", "A água arrefece o motor parando o carro.", "Uma camada de água entra entre o pneu e o asfalto, REDUZINDO drasticamente o Coeficiente de Atrito (&mu;). Sem atrito, o pneu perde a aderência e o controlo direcional.", "A água dissolve a borracha."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "A água atua como um lubrificante, impedindo que as micro-rugosidades do pneu toquem no asfalto. O Coeficiente de Atrito cai para valores próximos aos do gelo.", 
+                otherOptions: ["Incorreto."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Um trabalhador quer mover um caixote de madeira muito pesado. Em qual destas posições ele enfrentará MAIS DIFICULDADE (maior Força de Atrito) para arrastar o mesmo caixote pelo mesmo piso?", 
+            options: ["Com o caixote deitado (maior área de contacto com o chão).", "Com o caixote em pé (menor área de contacto).", "Em qualquer posição, pois a Área de Contacto NÃO ALTERA o valor da Força de Atrito. A força depende apenas do Peso (Normal) que esmaga o caixote contra o chão.", "Se pintar o caixote de preto."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Na física de nível secundário (modelo de Amontons-Coulomb), a fórmula F_at = &mu; &middot; N prova que o atrito NÃO depende da área de contacto. A mesma massa espalhada (deitado) ou concentrada (em pé) gera a mesma fricção total.", 
+                otherOptions: ["Acreditar que a área maior dá mais atrito é um mito popular."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Cálculo Completo de Dinâmica: Um bloco de 10 kg está numa mesa horizontal. O atrito cinético com a mesa tem coeficiente &mu;c = 0,2. Uma pessoa empurra o bloco com uma força de 50 N. Qual a ACELERAÇÃO do bloco? (Usa g = 10 m/s²).", 
+            options: ["5 m/s²", "3 m/s²", "2 m/s²", "0 m/s²"], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "1º passo: Calcular a Força de Atrito. Normal = Peso = 10kg × 10 = 100N. Atrito = 0,2 × 100 = 20 N. 2º passo: Resultante. Puxam 50 N, Atrito trava 20 N. F_resultante = 50 - 20 = 30 N. 3º passo: F = m.a => 30 = 10 × a => a = 3 m/s².", 
+                otherOptions: ["5 m/s² seria se não houvesse atrito nenhum."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Trocamos o chão! O bloco de 10 kg e a pessoa de 50 N agora estão num piso de gelo extremamente liso (onde o coeficiente de atrito cinético cai para &mu;c = 0). Qual será a nova aceleração?", 
+            options: ["3 m/s²", "5 m/s²", "0 m/s²", "10 m/s²"], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Se o coeficiente é 0, a Força de Atrito é 0. A Força Resultante será apenas a força humana total de 50 N. F = m.a => 50 = 10 × a => a = 5 m/s².", 
+                otherOptions: ["Com o atrito extinto, o corpo aproveita toda a força para acelerar."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "No desporto Curling (onde atiram uma pedra sobre uma pista de gelo), os jogadores vão a varrer o gelo freneticamente com uma vassoura à frente da pedra. A nível mecânico, qual é o objetivo de varrer a pista?", 
+            options: ["Aumentar o atrito para a pedra travar logo.", "Aquecer e derreter ligeiramente a camada superficial de gelo para CRIAR água líquida, que funciona como LUBRIFICANTE, REDUZINDO a força de atrito e deixando a pedra deslizar mais longe.", "Para limpar o pó.", "Para a pedra ganhar peso."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "O atrito da vassoura gera calor, criando uma película invisível de água. A água lubrifica a pista (diminui o &mu;), fazendo a pedra de granito viajar muito mais sem parar.", 
+                otherOptions: ["Incorreto."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: `Gráfico de Atrito! O gráfico abaixo mostra como a Força de Atrito (Fat) varia consoante a Força que aplicas (F). O que acontece exatamente no pico mais alto do gráfico (o triângulo amarelo)?
+                <div class="q-svg-container">
+                    <svg width="200" height="120" viewBox="0 0 200 120" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <line x1="20" y1="100" x2="180" y2="100" stroke="#0F172A" stroke-width="2"/> <!-- Eixo F -->
+                      <line x1="20" y1="10" x2="20" y2="100" stroke="#0F172A" stroke-width="2"/> <!-- Eixo Fat -->
+                      <line x1="20" y1="100" x2="80" y2="30" stroke="#F97316" stroke-width="3"/> <!-- Estatico -->
+                      <line x1="80" y1="30" x2="90" y2="50" stroke="#EF4444" stroke-width="3"/> <!-- Queda -->
+                      <line x1="90" y1="50" x2="160" y2="50" stroke="#64748B" stroke-width="3"/> <!-- Cinetico -->
+                      <circle cx="80" cy="30" r="5" fill="#F59E0B"/>
+                      <text x="5" y="15" font-size="10" font-weight="bold">Fat</text>
+                      <text x="185" y="115" font-size="10" font-weight="bold">F app</text>
+                    </svg>
+                </div>`, 
+            options: ["É a fase do atrito cinético constante.", "O bloco explodiu.", "É o momento de Iminência de Movimento. É o valor do Atrito Estático MÁXIMO, a barreira final antes das rugosidades quebrarem e o corpo escorregar.", "É o momento de velocidade máxima."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "A reta a subir é o Atrito Estático a empatar com a tua força. O pico é o limite máximo. Depois disso, o bloco solta-se, e o atrito cai ligeiramente e fica constante (Atrito Cinético, a linha horizontal cinza).", 
+                otherOptions: ["Interpretação errada do gráfico oficial do atrito."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Um móvel rasteja numa subida (Plano Inclinado). A força do Peso e da Normal sofrem alterações nesta ladeira. Se o bloco está a escorregar MONTANHA ABAIXO, para onde aponta o vetor da Força de Atrito (Fat)?", 
+            options: ["Paralelo à rampa, a apontar Montanha ABAIXO.", "Paralelo à rampa, a apontar Montanha ACIMA (contra o escorregamento).", "A apontar para o céu (Vertical).", "A apontar para dentro do chão."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "O Atrito opõe-se sempre ao sentido do deslizamento das superfícies. Se o bloco 'quer' descer a rampa, o atrito tenta segurá-lo, puxando-o rampa acima.", 
+                otherOptions: ["Se apontasse para baixo, ajudaria o bloco a cair mais rápido!"] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Como as fábricas e mecânicos combatem o Atrito Cinético no motor de um carro, para evitar que as peças de metal sobreaqueçam e se fundam?", 
+            options: ["Enchendo o motor de areia.", "Pintando o motor com tinta preta.", "Usando LUBRIFICANTES (como óleo de motor), que formam uma película líquida entre as engrenagens de metal, impedindo o contacto direto das rugosidades e reduzindo o coeficiente de atrito.", "Retirando os parafusos."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Óleos, graxas e até a água (no chão) reduzem o coeficiente de atrito dinâmico brutalmente, impedindo o desgaste mecânico e o calor extremo.", 
+                otherOptions: ["Areia AUMENTA o atrito."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Para além dos sólidos, a Física estuda o 'Atrito Fluido' (Resistência do Ar ou da Água). Como os engenheiros aeroespaciais e da Fórmula 1 desenham os veículos para tentar 'enganar' a força de resistência do ar?", 
+            options: ["Desenham carros perfeitamente quadrados.", "Criam formatos Aerodinâmicos (lisos e em forma de gota), permitindo que o fluido deslize suavemente sobre a carroçaria, reduzindo os choques frontais e a área de arrasto.", "Fazem os carros mais pesados.", "Colocam paraquedas na traseira."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "A aerodinâmica foca em furar o ar causando a menor Força de Resistência possível, o que aumenta a velocidade final e poupa imenso combustível (Dinâmica dos fluidos).", 
+                otherOptions: ["Incorreto."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Uma Mota e um Carro viajam a 100 km/h lado a lado. Travam bruscamente ao mesmo tempo. Os pneus de ambos os veículos são do mesmo material e o asfalto é o mesmo (logo, o Coeficiente de Atrito Dinâmico &mu;c é o mesmo). Quem derrapa e trava numa Distância MAIOR?", 
+            options: ["O Carro trava mais rápido porque é mais pesado.", "A Mota trava mais rápido porque é mais leve.", "Ambos derrapam e travam na MESMA DISTÂNCIA EXATA. A distância de travagem só depende do coeficiente de atrito e da velocidade inicial, a MASSA cancela-se matematicamente!", "O carro nunca para."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "A rasteira suprema! F = m.a e Fat = &mu;.N. Como N=mg, temos: m.a = &mu;.m.g. As massas ('m') cortam dos dois lados da equação! A desaceleração 'a' será igual a '&mu; × g'. Logo, param no mesmo espaço. O carro precisa de mais força para parar a sua grande massa, mas como pesa mais, o seu Pneu gera mais atrito (Força Normal maior), empatando o jogo perfeitamente.", 
+                otherOptions: ["Ignorar a matemática que cancela a massa é muito comum."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Uma curiosidade mecânica: Os sistemas de travões ABS (Anti-lock Braking System) impedem que a roda 'trave e derrape' no asfalto durante uma travagem forte. Porque é que não travar a roda completamente ajuda o carro a parar mais rápido?", 
+            options: ["Porque os travões aquecem menos.", "Porque, se a roda não bloquear e continuar a girar, o pneu usa o ATRITO ESTÁTICO (sola do pneu 'agarrada' ao chão momentaneamente). O Atrito Estático é MAIOR e mais forte que o Atrito Cinético (derrapagem em fumo).", "Porque reduz a massa do carro.", "É mentira, o ABS não ajuda a travar."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "O ABS usa o poder do &mu;_estático (> &mu;_cinético). Se a roda bloquear e arrastar, perdes poder de travagem e perdes a direção (o carro desliza).", 
+                otherOptions: ["Incorreto."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Se tu fores astronauta na Estação Espacial Internacional (gravidade aparente nula), e atirares suavemente uma caixa na direção da parede, a caixa deslizará pelo ar sem cair. Existe Força de Atrito Cinético entre a caixa e o chão da nave enquanto ela voa?", 
+            options: ["Sim, a parede faz atrito.", "Sim, existe sempre atrito cinético independentemente do contacto.", "Não! A Força de Atrito depende do esmagamento (Força Normal). Sem gravidade para colar e esmagar a caixa contra o chão, a Força Normal é ZERO, logo o Atrito também é ZERO (F = &mu; × 0).", "Sim, por causa do oxigénio da nave."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "O atrito sólido é uma força de contato entre superfícies esmagadas. Sem Força Normal (N), não há atrito físico entre o bloco e a superfície.", 
+                otherOptions: ["Sem contato sólido e sem compressão não há atrito da fórmula F = &mu;.N."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Problema do Elevador: Colocas um caixote deitado no chão do elevador. O elevador acelera violentamente PARA CIMA (fazendo os teus joelhos dobrarem por estares 'mais pesado'). Se tentares arrastar o caixote agora mesmo, a Força de Atrito Cinético que terás de vencer será:", options: ["Igual à do elevador parado.", "MAIOR! Como o elevador sobe acelerando, o chão empurra a caixa com mais força (A Normal aumenta). Se a Normal (N) aumenta, o Atrito (F = &mu;.N) aumenta proporcionalmente. O caixote ficou mais difícil de arrastar.", "Menor, porque ele levita um pouco.", "Zero."], correctIndex: 1, explanation: { correctText: "Para arrastar, precisas vencer Fat = &mu; × N. O elevador ao subir rápido faz com que o chão esmague a caixa (Normal sobe). Mais Normal = Mais Atrito.", otherOptions: ["Na descida rápida do elevador (frio na barriga), a Normal cairia, e seria mais fácil empurrar a caixa!"] } },
+        { level: "Médio", text: "Para concluíres com precisão: Qual destas ações altera DEFINITIVAMENTE o valor do Coeficiente de Atrito (&mu;) de um bloco de madeira no asfalto?", options: ["Aumentar o peso do bloco colocando livros em cima dele.", "Empurrar o bloco de lado, reduzindo a área da base que toca no asfalto.", "Pintar o asfalto com uma camada grossa de óleo de motor, mudando fisicamente as propriedades e rugosidades das superfícies.", "Aumentar a força da pessoa que está a empurrar."], correctIndex: 2, explanation: { correctText: "O Coeficiente de Atrito (&mu;) é uma propriedade estrita do par de MATERIAIS em contacto (madeira-asfalto, gelo-metal, etc). Ele só muda se mudares a natureza das superfícies (ex: molhar, olear, lixar). Pesar mais muda a Normal (N), não muda o 'mi' (&mu;).", otherOptions: ["Peso muda a Normal, Força muda a resultante, Área não faz diferença na física escolar."] } }
+    ];
+
+    // Duplicar algumas questões médias/difíceis para garantir as 30 do pacote de revisão (Ajuste de volume para o teste de fogo)
+    // Para manter o nível IFCE, adicionei problemas com leitura vetorial e cálculos algébricos de revisão.
+    questionsDatabase.push(
+        { level: "Fácil", text: "Um comboio e uma pena caem em queda livre no VÁCUO absoluto. O comboio é pesadíssimo e sofre uma Força Peso muito maior que a pena. Quem tem a maior Força de Atrito a atuar sobre eles?", options: ["O Comboio.", "A Pena.", "Ambos têm a mesma força de atrito com o ar.", "Nenhum! No vácuo não há matéria, ar ou superfície de contacto. Logo, a Força de Atrito é ZERO para os dois."], correctIndex: 3, explanation: { correctText: "No vácuo (ausência de matéria ou gás), não há moléculas de ar para o corpo 'bater' e esfregar. O atrito fluídico (resistência do ar) deixa de existir.", otherOptions: ["Sem ar não há atrito."] } },
+        { level: "Médio", text: "Empurras um caixote no tapete felpudo da sala com uma força F constante. Ele atinge o Movimento Retilíneo Uniforme (MRU). Subitamente, passas para a cozinha que tem chão de cerâmica liso (menor atrito cinético), mas manténs a TUA FORÇA F exatamente igual. O que acontece ao movimento do caixote?", options: ["Para imediatamente.", "Mantém o MRU.", "Acelera! A Força de Atrito diminuiu, a tua força manteve-se alta. Logo, surgiu uma Força Resultante a apontar para a frente que vai gerar uma ACELERAÇÃO (o caixote dispara nas tuas mãos).", "Fica mais pesado."], correctIndex: 2, explanation: { correctText: "F_resultante = F_humana - F_atrito. Se o atrito encolheu na cerâmica, a matemática gera uma Força Resultante Positiva de repente. A 2ª Lei dita que Fᵣ gera aceleração. O móvel escapa-te das mãos.", otherOptions: ["Não seria MRU pois a aceleração surgiu."] } },
+        { level: "Difícil", text: "Cálculo Rápido de Força Resultante (Enem/IFCE): Bloco de 2 kg. Atrito Máximo (Estático) é 15 N. Atrito Cinético é 10 N. Tu aplicas uma Força de 12 N no bloco parado. Quanto vale a Força de Atrito do chão agora, e qual a Aceleração do bloco?", options: ["Fat = 15 N ; a = 0 m/s²", "Fat = 10 N ; a = 1 m/s²", "Fat = 12 N ; a = 0 m/s². O bloco não anda, pois a tua força (12N) não venceu o máximo estático (15N). O chão devolve exatamente 12N para manter o repouso.", "Fat = 12 N ; a = 6 m/s²"], correctIndex: 2, explanation: { correctText: "Raciocínio essencial: A tua força tem de vencer a barreira do Atrito Máximo (15N). Como fizeste apenas 12N, o bloco é inabalável. O atrito ajusta-se para 12N e cancela a tua força. Resultante 0, aceleração 0.", otherOptions: ["O erro é usar o atrito cinético, pois ele ainda não está em andamento!"] } }
+    );
+
+    /* --- GESTÃO DE ESTADO (STATE) --- */
+    const quizState = {
+        currentIndex: 0,
+        userAnswers: new Array(questionsDatabase.length).fill(null),
+        confettiAnimationId: null
+    };
+
+    /* --- FUNCIONALIDADES DE PESQUISA (TEORIA) --- */
+    function initializeSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const contentGroups = document.querySelectorAll('.content-group');
+        const noResultsMsg = document.getElementById('no-results');
+
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', function(event) {
+            const searchTerm = normalizeText(event.target.value);
+            let totalVisibleElements = 0;
+            
+            contentGroups.forEach(group => {
+                const groupContent = normalizeText(group.textContent);
+                const isMatch = groupContent.includes(searchTerm);
+                
+                group.style.display = isMatch ? 'flex' : 'none';
+                if (isMatch) totalVisibleElements++;
+            });
+            
+            noResultsMsg.style.display = totalVisibleElements === 0 ? 'block' : 'none';
+        });
+    }
+
+    function normalizeText(text) {
+        return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    /* --- CONTROLO DE VISTAS (VIEWS) --- */
+    function changeApplicationView(viewName) {
+        const views = ['viewExplanation', 'viewPractice', 'viewResult'];
+        
+        views.forEach(viewId => document.getElementById(viewId).classList.remove('active'));
+        
+        const quizFooter = document.getElementById('quizFooter');
+        if (quizFooter) quizFooter.style.display = 'none';
+
+        if (viewName === 'explanation') {
+            document.getElementById('viewExplanation').classList.add('active');
+            document.getElementById('btnExp').classList.add('active');
+            document.getElementById('btnPrac').classList.remove('active');
+        } else if (viewName === 'practice') {
+            document.getElementById('viewPractice').classList.add('active');
+            if (quizFooter) quizFooter.style.display = 'flex';
+            document.getElementById('btnExp').classList.remove('active');
+            document.getElementById('btnPrac').classList.add('active');
+            
+            renderCurrentQuestion();
+            renderNavigationMap();
+        } else if (viewName === 'result') {
+            document.getElementById('viewResult').classList.add('active');
+        }
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* --- GERAÇÃO INTERFACE DO QUIZ --- */
+    function getDifficultyBadgeClass(level) {
+        const mapping = { 'Fácil': 'dif-facil', 'Médio': 'dif-medio', 'Difícil': 'dif-dificil' };
+        return mapping[level] || 'dif-facil';
+    }
+
+    function buildOptionsHTML(question, selectedAnswerIndex) {
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        return question.options.map((optionText, optionIndex) => {
+            let cssClass = '';
+            
+            if (selectedAnswerIndex !== null) {
+                if (optionIndex === question.correctIndex) cssClass = 'correct';
+                else if (optionIndex === selectedAnswerIndex) cssClass = 'wrong';
+                else cssClass = 'disabled';
+            }
+
+            const isDisabled = selectedAnswerIndex !== null ? 'disabled' : '';
+
+            return `
+                <button class="option-btn ${cssClass}" onclick="handleOptionSelection(${optionIndex})" ${isDisabled}>
+                    <div class="opt-circle">${alphabet[optionIndex]}</div>
+                    <div>${optionText}</div>
+                </button>
+            `;
+        }).join('');
+    }
+
+    function buildFeedbackHTML(question, selectedAnswerIndex) {
+        const isCorrect = selectedAnswerIndex === question.correctIndex;
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        const titleClass = isCorrect ? 'success' : 'error';
+        const titleText = isCorrect ? '✅ Raciocínio Correto!' : '❌ Falha na Aderência!';
+        
+        const distortionsHTML = question.explanation.otherOptions.map((explanationText, idx) => {
+            if (idx === question.correctIndex) return '';
+            return `<div class="feedback-item wrong-opt"><strong>${alphabet[idx]})</strong> ${explanationText}</div>`;
+        }).join('');
+
+        return `
+            <div class="feedback-box show">
+                <div class="feedback-title ${titleClass}" style="color: ${isCorrect ? 'var(--correct-border)' : 'var(--wrong-border)'}">${titleText}</div>
+                <div class="feedback-item correct-opt"><strong>O Fato Exato:</strong> ${question.options[question.correctIndex]}</div>
+                <div style="margin-top:15px;font-size:1rem;color:var(--text-color);margin-bottom:15px;font-weight:600;">${question.explanation.correctText}</div>
+                <div style="margin-top:15px;border-top:2px dashed var(--border-color);padding-top:15px;">
+                    <small style="color:var(--text-color);"><strong>Análise dos Desvios:</strong></small>
+                    ${distortionsHTML}
+                </div>
+            </div>
+        `;
+    }
+
+    function renderCurrentQuestion() {
+        const container = document.getElementById('quizContainer');
+        if (!container) return;
+
+        const question = questionsDatabase[quizState.currentIndex];
+        const selectedAnswerIndex = quizState.userAnswers[quizState.currentIndex];
+        const badgeClass = getDifficultyBadgeClass(question.level);
+        
+        let feedbackHTML = selectedAnswerIndex !== null ? buildFeedbackHTML(question, selectedAnswerIndex) : '';
+
+        container.innerHTML = `
+            <div class="quiz-question-card">
+                <span class="difficulty-badge ${badgeClass}">${question.level}</span>
+                <div style="margin-bottom:25px;">
+                    <span class="quiz-question-counter">QUESTÃO ${quizState.currentIndex + 1} DE ${questionsDatabase.length}</span>
+                    <h2 class="quiz-question-text">${question.text}</h2>
+                </div>
+                <div class="options-list">
+                    ${buildOptionsHTML(question, selectedAnswerIndex)}
+                </div>
+                ${feedbackHTML}
+            </div>
+        `;
+        
+        updateNavigationButtons();
+    }
+
+    /* --- LÓGICA DO QUIZ --- */
+    function handleOptionSelection(selectedIndex) {
+        if (quizState.userAnswers[quizState.currentIndex] !== null) return;
+        
+        quizState.userAnswers[quizState.currentIndex] = selectedIndex;
+        const isCorrect = selectedIndex === questionsDatabase[quizState.currentIndex].correctIndex;
+        
+        if (isCorrect) startSuccessAnimation();
+        else triggerErrorShakeEffect();
+        
+        renderCurrentQuestion();
+        renderNavigationMap();
+    }
+
+    function triggerErrorShakeEffect() {
+        const container = document.getElementById('quizContainer');
+        if (container) { 
+            container.classList.remove('shake-effect'); 
+            void container.offsetWidth; 
+            container.classList.add('shake-effect'); 
+            setTimeout(() => container.classList.remove('shake-effect'), 500); 
+        }
+    }
+
+    /* --- ANIMAÇÕES (CONFETTI) --- */
+    function startSuccessAnimation() {
+        const duration = 1500;
+        const end = Date.now() + duration;
+        
+        stopSuccessAnimation();
+        
+        function animateFrame() {
+            if(window.confetti && typeof confetti === 'function') {
+                const config = { particleCount: 5, spread: 55, colors: ['#F97316', '#C2410C', '#64748B', '#EF4444'] };
+                confetti({ ...config, angle: 60, origin: { x: 0, y: 0.6 } });
+                confetti({ ...config, angle: 120, origin: { x: 1, y: 0.6 } });
+            }
+            if (Date.now() < end) quizState.confettiAnimationId = requestAnimationFrame(animateFrame);
+        }
+        animateFrame();
+    }
+
+    function stopSuccessAnimation() {
+        if (window.confetti && typeof confetti.reset === 'function') confetti.reset(); 
+        if (quizState.confettiAnimationId) {
+            cancelAnimationFrame(quizState.confettiAnimationId);
+            quizState.confettiAnimationId = null;
+        }
+    }
+
+    /* --- NAVEGAÇÃO MAPA --- */
+    function renderNavigationMap() {
+        const mapContainer = document.getElementById('qMap');
+        if (!mapContainer) return;
+        
+        mapContainer.innerHTML = questionsDatabase.map((question, index) => {
+            const isCurrent = index === quizState.currentIndex;
+            const userAnswer = quizState.userAnswers[index];
+            const hasAnswered = userAnswer !== null;
+            const isCorrect = userAnswer === question.correctIndex;
+            
+            let cssClass = 'map-dot';
+            if (isCurrent) cssClass += ' active';
+            if (hasAnswered) cssClass += isCorrect ? ' answered-correct' : ' answered-wrong';
+            
+            return `<div class="${cssClass}" onclick="goToQuestion(${index})">${index + 1}</div>`;
+        }).join('');
+        
+        setTimeout(() => { 
+            const activeDot = mapContainer.querySelector('.map-dot.active'); 
+            if (activeDot) activeDot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); 
+        }, 50);
+    }
+
+    function goToQuestion(targetIndex) { 
+        stopSuccessAnimation();
+        quizState.currentIndex = targetIndex; 
+        renderCurrentQuestion(); 
+        renderNavigationMap(); 
+    }
+    
+    function navigateQuestion(directionOffset) { 
+        const nextIndex = quizState.currentIndex + directionOffset; 
+        if (nextIndex >= 0 && nextIndex < questionsDatabase.length) goToQuestion(nextIndex); 
+    }
+
+    function updateNavigationButtons() {
+        const btnPrev = document.getElementById('btnPrev');
+        const btnNext = document.getElementById('btnNext');
+        
+        if (btnPrev) btnPrev.disabled = (quizState.currentIndex === 0);
+        
+        if (btnNext) {
+            const isLastQuestion = quizState.currentIndex === questionsDatabase.length - 1;
+            if (isLastQuestion) { 
+                btnNext.textContent = "Finalizar Avaliação"; 
+                btnNext.onclick = finishQuiz; 
+            } else { 
+                btnNext.textContent = "Próxima ➡️"; 
+                btnNext.onclick = () => navigateQuestion(1); 
+            }
+        }
+    }
+
+    /* --- CÁLCULO DE RESULTADOS --- */
+    function calculateStars(percent) {
+        if (percent === 100) return "⭐⭐⭐⭐⭐";
+        if (percent >= 80) return "⭐⭐⭐⭐";
+        if (percent >= 60) return "⭐⭐⭐";
+        if (percent >= 40) return "⭐⭐";
+        if (percent > 0) return "⭐";
+        return "🌑"; // zero stars
+    }
+
+    function finishQuiz() {
+        const unansweredCount = quizState.userAnswers.filter(answer => answer === null).length;
+        
+        if (unansweredCount > 0) {
+            const confirmMessage = `Existem ${unansweredCount} questões por responder. Quer terminar mesmo assim (as em branco serão dadas como erradas)?`;
+            if (!confirm(confirmMessage)) return;
+        }
+
+        stopSuccessAnimation();
+
+        const correctAnswersCount = quizState.userAnswers.filter((answer, index) => answer === questionsDatabase[index].correctIndex).length;
+        const totalQuestions = questionsDatabase.length;
+        const percentageScore = Math.round((correctAnswersCount / totalQuestions) * 100);
+        const isApproved = percentageScore >= 80;
+        
+        renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved);
+        changeApplicationView('result');
+    }
+
+    function renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved) {
+        document.getElementById('finalPercent').textContent = `${percentageScore}%`;
+        document.getElementById('finalScoreText').textContent = `Acertaste ${correctAnswersCount} de ${totalQuestions}`;
+        document.getElementById('finalStars').textContent = calculateStars(percentageScore);
+        
+        const reviewContainer = document.getElementById('review-container');
+        const actionButtonsContainer = document.getElementById('action-buttons');
+        
+        let summaryHTML = '';
+
+        if (isApproved) {
+            summaryHTML += `
+                <div class="result-summary-box success">
+                    <strong>🎉 DOMÍNIO FÍSICO!</strong> A tua compreensão do atrito estático vs cinético e dos vetores de travagem está impecável.
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REPETIR PARA 100%</button>`;
+        } else {
+            summaryHTML += `
+                <div class="result-summary-box error">
+                    <strong>⚠️ A DERRAPAR NA TEORIA!</strong> Foste avaliado abaixo da meta (80%). Revisa urgente a regra: o Atrito Estático é 'inteligente' e adapta-se à força humana até ao limite máximo!
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REFAZER AVALIAÇÃO</button>`;
+        }
+        
+        if (correctAnswersCount < totalQuestions) {
+            summaryHTML += '<h4 style="margin-bottom:15px; color:var(--text-color); font-size:1.15rem;">Revisão Teórica e Algébrica:</h4>';
+            questionsDatabase.forEach((question, index) => {
+                const userAnswerIndex = quizState.userAnswers[index];
+                if (userAnswerIndex !== question.correctIndex) {
+                    const userAnswerText = userAnswerIndex === null ? "Deixaste em branco" : question.options[userAnswerIndex];
+                    const correctAnswerText = question.options[question.correctIndex];
+                    
+                    let plainQuestionText = question.text.replace(/<div class="q-svg-container">[\s\S]*?<\/div>/gi, ' [Diagrama Omitido] ');
+
+                    summaryHTML += `
+                        <div class="error-log-item">
+                            <strong style="color:var(--theme-dark); font-size:1.05rem; display:block; margin-bottom:8px;">Q${index + 1}: ${plainQuestionText}</strong>
+                            <span style="color:var(--wrong-border); font-weight: 600; display:block; margin-bottom:5px;">A tua análise: ${userAnswerText}</span>
+                            <span style="color:var(--correct-border); font-weight: 700; display:block;">A Resposta Correta: ${correctAnswerText}</span>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        reviewContainer.innerHTML = summaryHTML;
+    }
+
+    function resetQuiz() { 
+        quizState.userAnswers = new Array(questionsDatabase.length).fill(null); 
+        quizState.currentIndex = 0; 
+        changeApplicationView('practice'); 
+    }
+    
+    // START APPLICATION
+    initializeSearch();
+    changeApplicationView('explanation');
+</script>
+</body>
+</html>

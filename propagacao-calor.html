@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Física: Propagação do Calor - Promover</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* --- VARIÁVEIS DE COR E TEMA: ONDAS TÉRMICAS (Calor e Frio) --- */
+        :root {
+            --bg-color: #FFF7ED; /* Laranja muito claro (fundo) */
+            --text-color: #431407; /* Laranja/Castanho escuro quase preto */
+            --border-color: #7C2D12; /* Rústico / Contorno */
+            --white: #FFFFFF;
+            
+            --theme-light: #FFEDD5; /* Laranja pastel */
+            --theme-medium: #F97316; /* Laranja vivo (Calor) */
+            --theme-dark: #C2410C; /* Laranja profundo */
+            --theme-contrast: #0EA5E9; /* Ciano (Frio / Contraste) */
+            --theme-accent: #EF4444; /* Vermelho (Fogo) */
+            --theme-text-active: #FFFFFF;
+            
+            --correct-bg: #D1FAE5;
+            --correct-border: #059669;
+            --wrong-bg: #FFE4E6;
+            --wrong-border: #BE123C;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 15px 120px 15px;
+            background-image: linear-gradient(rgba(249, 115, 22, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(249, 115, 22, 0.1) 1px, transparent 1px);
+            background-size: 25px 25px;
+        }
+
+        /* --- ANIMAÇÕES --- */
+        @keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1) rotate(-5deg); color: var(--theme-contrast); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+        .pulse-effect { animation: pulse 2s infinite; display: inline-block; }
+        .shake-effect { animation: shake 0.4s ease-in-out; }
+
+        /* --- LAYOUT PRINCIPAL --- */
+        .container { width: 100%; max-width: 650px; display: flex; flex-direction: column; gap: 25px; }
+        .logo-header { display: flex; flex-direction: column; align-items: center; padding: 15px 0 25px 0; text-align: center; }
+        .css-logo { font-size: 1.5rem; font-weight: 900; color: var(--theme-text-active); text-transform: uppercase; letter-spacing: -1px; border: 3px solid var(--border-color); padding: 8px 24px; border-radius: 12px; background: var(--theme-dark); box-shadow: 4px 4px 0px var(--theme-contrast); margin-bottom: 15px; transform: rotate(-2deg); }
+        h1 { font-size: 2rem; font-weight: 900; color: var(--text-color); text-transform: uppercase; letter-spacing: -0.5px; line-height: 1.1; }
+        .subtitle { font-size: 1rem; color: var(--white); font-weight: 700; margin-top: 5px; background: var(--theme-contrast); padding: 4px 12px; border-radius: 8px; border: 2px solid var(--border-color); }
+
+        /* --- NAVEGAÇÃO --- */
+        .toggle-container { background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 6px; display: flex; box-shadow: 4px 4px 0px var(--border-color); position: sticky; top: 15px; z-index: 50; }
+        .toggle-btn { flex: 1; border: none; background: none; padding: 12px 0; border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.05rem; color: var(--text-color); cursor: pointer; transition: all 0.2s ease; }
+        .toggle-btn.active { background-color: var(--theme-dark); color: var(--theme-text-active); border: 2px solid var(--border-color); box-shadow: 2px 2px 0px var(--border-color); }
+
+        .view-section { display: none; animation: fadeIn 0.3s ease; flex-direction: column; gap: 35px; }
+        .view-section.active { display: flex; }
+
+        /* --- PESQUISA --- */
+        .search-container { position: relative; width: 100%; }
+        .search-input { width: 100%; padding: 16px 20px 16px 55px; border: 3px solid var(--border-color); border-radius: 12px; background-color: var(--white); font-family: 'Poppins', sans-serif; font-size: 1.05rem; font-weight: 600; color: var(--text-color); box-shadow: 4px 4px 0px var(--border-color); outline: none; transition: all 0.2s ease; }
+        .search-input:focus { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--theme-contrast); border-color: var(--theme-dark); }
+        .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 1.4rem; }
+        #no-results { text-align: center; color: var(--wrong-border); font-weight: 800; display: none; background: var(--wrong-bg); padding: 15px; border: 3px solid var(--wrong-border); border-radius: 8px; }
+
+        /* --- TEORIA --- */
+        .content-group { display: flex; flex-direction: column; position: relative; padding-top: 15px; }
+        .section-badge { display: inline-flex; align-items: center; gap: 10px; background-color: var(--theme-dark); color: var(--white); font-size: 1.1rem; font-weight: 800; padding: 8px 20px; border-radius: 8px; border: 3px solid var(--border-color); box-shadow: 3px 3px 0px var(--theme-contrast); text-transform: uppercase; position: absolute; top: -5px; left: 15px; z-index: 10; transform: rotate(-1.5deg); }
+        .theory-box { display: flex; flex-direction: column; padding: 35px 25px 25px 35px; border-radius: 12px; background-color: var(--white); border: 3px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); font-weight: 500; font-size: 1rem; line-height: 1.7; position: relative; overflow: hidden; gap: 20px; border-left: 14px solid var(--theme-medium); }
+        .theory-box h3 { font-size: 1.35rem; font-weight: 900; color: var(--theme-dark); margin-bottom: 5px; display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px; }
+        .theory-box h4 { font-size: 1.1rem; font-weight: 800; color: var(--text-color); margin-top: 10px; border-bottom: 2px solid var(--theme-light); padding-bottom: 5px; }
+        
+        .inline-example { display: block; width: fit-content; max-width: 100%; margin-top: 6px; margin-bottom: 6px; padding: 12px 20px; background-color: var(--theme-light); border: 2px solid var(--border-color); border-radius: 8px; font-size: 1.2rem; color: var(--theme-dark); font-weight: 900; letter-spacing: 1px; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); text-align: center; }
+        .visual-area { background: var(--bg-color); border: 3px dashed var(--theme-medium); border-radius: 12px; padding: 25px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; width: 100%; }
+        
+        .highlight-box { background-color: #FEF3C7; border: 3px solid var(--border-color); border-left: 8px solid var(--theme-contrast); padding: 18px 20px; border-radius: 8px; font-size: 0.95rem; color: #78350F; font-weight: 600; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); }
+        .highlight-box.blue { background-color: #E0F2FE; border-left-color: var(--theme-contrast); color: #0C4A6E; }
+
+        /* --- CARDS TÓPICOS --- */
+        .g-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; width: 100%; margin-top: 10px; }
+        .g-card { flex: 1 1 calc(50% - 15px); min-width: 130px; border-radius: 12px; padding: 15px 10px; text-align: center; border: 3px solid var(--border-color); display: flex; flex-direction: column; align-items: center; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); background-color: var(--white); transition: transform 0.2s; }
+        .g-card:hover { transform: translateY(-3px); }
+        .g-card.full-width { flex: 1 1 100%; max-width: 280px; }
+        .g-icon { font-size: 2.5rem; margin-bottom: 8px; line-height: 1; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.15)); }
+        .g-title { font-size: 1.05rem; font-weight: 900; margin-bottom: 4px; text-transform: uppercase; color: var(--theme-dark); }
+        .g-desc { font-size: 0.85rem; font-weight: 600; color: var(--text-color); margin-top: 6px; line-height: 1.3; }
+
+        /* Elemento para imagens SVG */
+        .q-svg-container { display: flex; justify-content: center; margin: 15px 0; }
+
+        /* --- BOTÕES GERAIS --- */
+        .btn-action { width: 100%; padding: 20px; background-color: var(--theme-dark); color: white; border: 3px solid var(--border-color); border-radius: 12px; font-size: 1.15rem; font-weight: 900; cursor: pointer; box-shadow: 6px 6px 0px var(--theme-contrast); transition: all 0.1s; text-transform: uppercase; margin-top: 10px; }
+        .btn-action:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0px var(--theme-contrast); }
+
+        /* --- QUIZ UI --- */
+        .difficulty-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; border: 2px solid var(--border-color); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
+        .dif-facil { background: #D1FAE5; color: #065F46; }
+        .dif-medio { background: #FEF08A; color: #713F12; }
+        .dif-dificil { background: #FECACA; color: #7F1D1D; }
+
+        .question-map { display: flex; gap: 8px; overflow-x: auto; padding: 10px 5px; margin-bottom: 20px; white-space: nowrap; scroll-behavior: smooth; }
+        .question-map::-webkit-scrollbar { display: none; }
+        .map-dot { min-width: 38px; height: 38px; border: 2px solid var(--border-color); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; color: var(--theme-dark); background: white; cursor: pointer; transition: all 0.2s; }
+        .map-dot.active { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); transform: scale(1.15); }
+        .map-dot.answered-correct { background-color: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .map-dot.answered-wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .quiz-question-card { border: 4px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); padding: 30px; border-radius: 16px; background: var(--white); }
+        .quiz-question-counter { font-size: 0.85rem; font-weight: 900; color: var(--theme-dark); letter-spacing: 1px; }
+        .quiz-question-text { font-size: 1.15rem; margin-top: 8px; color: var(--text-color); font-weight: 800; line-height: 1.5; margin-bottom: 20px;}
+
+        .option-btn { display: flex; align-items: center; width: 100%; padding: 18px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.1s ease; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 600; text-align: left; color: var(--text-color); }
+        .option-btn:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px var(--theme-contrast); }
+        .opt-circle { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--border-color); margin-right: 15px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.05rem; flex-shrink: 0; background: var(--theme-light); color: var(--theme-dark); }
+        .option-btn.correct { background-color: var(--correct-bg); border-color: var(--correct-border); box-shadow: 3px 3px 0px var(--correct-border); }
+        .option-btn.correct .opt-circle { background-color: var(--correct-border); color: white; border-color: var(--correct-border); }
+        .option-btn.wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); opacity: 0.9; box-shadow: none; }
+        .option-btn.wrong .opt-circle { background-color: var(--wrong-border); color: white; border-color: var(--wrong-border); }
+        .option-btn.disabled { pointer-events: none; opacity: 0.7; }
+
+        /* --- FEEDBACK DA QUESTÃO --- */
+        .feedback-box { display: block; margin-top: 25px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 25px; animation: slideUp 0.3s ease-out; box-shadow: 5px 5px 0px rgba(0,0,0,0.1); }
+        .feedback-title { font-weight: 900; text-transform: uppercase; font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .feedback-item { margin-bottom: 10px; font-size: 0.95rem; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); line-height: 1.5; font-weight: 500; }
+        .feedback-item.correct-opt { background: var(--correct-bg); border-color: var(--correct-border); color: #064E3B; font-weight: 700; box-shadow: 3px 3px 0px var(--correct-border); }
+        .feedback-item.wrong-opt { background: #FFE4E6; border-color: #BE123C; color: #7F1D1D; border-style: dashed; margin-top: 8px; }
+
+        /* --- RESULTADOS --- */
+        .result-card { background: white; border: 4px solid var(--border-color); border-radius: 16px; padding: 40px 20px; box-shadow: 8px 8px 0px var(--border-color); margin-bottom: 30px; text-align: center; }
+        .stars-container { font-size: 2.5rem; margin: 15px 0; letter-spacing: 5px; }
+        .percentage-big { font-size: 5rem; font-weight: 900; color: var(--theme-dark); line-height: 1; margin: 15px 0; text-shadow: 4px 4px 0px var(--theme-contrast); }
+        
+        .result-summary-box { padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 3px solid; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); }
+        .result-summary-box.success { background: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .result-summary-box.error { background: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .error-log-item { margin-bottom: 15px; padding: 20px; background: var(--bg-color); border-radius: 12px; border: 3px dashed var(--theme-medium); text-align: left;}
+
+        /* --- RODAPÉ DE NAVEGAÇÃO --- */
+        .quiz-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--white); border-top: 3px solid var(--border-color); padding: 15px 20px; display: none; justify-content: center; gap: 20px; z-index: 100; box-shadow: 0px -4px 10px rgba(0,0,0,0.05); }
+        .nav-btn { padding: 15px 30px; border-radius: 12px; font-weight: 900; border: 3px solid var(--border-color); cursor: pointer; box-shadow: 3px 3px 0px var(--border-color); font-family: 'Poppins', sans-serif; text-transform: uppercase; background: white; color: var(--text-color); font-size: 1rem; transition: transform 0.1s; }
+        .nav-btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 0px 0px 0px transparent; }
+        .btn-next { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); border-color: var(--border-color); }
+        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <header class="logo-header">
+            <div class="css-logo"><span class="pulse-effect">♨️</span> PROMOVER</div>
+            <h1>Física / 9º Ano</h1>
+            <p class="subtitle">Termologia: Propagação do Calor</p>
+        </header>
+
+        <div class="toggle-container">
+            <button class="toggle-btn active" id="btnExp" onclick="changeApplicationView('explanation')">📘 Teoria</button>
+            <button class="toggle-btn" id="btnPrac" onclick="changeApplicationView('practice')">🧠 Prática (30)</button>
+        </div>
+
+        <!-- VISTA: TEORIA -->
+        <main id="viewExplanation" class="view-section active">
+            
+            <div class="search-container">
+                <span class="search-icon" aria-hidden="true">🔍</span>
+                <input type="text" id="searchInput" class="search-input" aria-label="Pesquisar conteúdo" placeholder="Pesquisar conceito... (ex: Condução, Convecção)">
+            </div>
+            <div id="no-results"><p>😕 Termo não encontrado na teoria térmica.</p></div>
+
+            <section class="content-group">
+                <div class="section-badge">🔥 1. Condução Térmica</div>
+                <article class="theory-box search-target">
+                    <h3>O dominó das moléculas</h3>
+                    <p>A Condução acontece quase exclusivamente nos <strong>SÓLIDOS</strong>. Quando aqueces a ponta de uma barra de ferro, as moléculas dessa ponta vibram loucamente e chocam com as moléculas vizinhas, passando a energia térmica como um dominó, até aquecer a outra ponta.</p>
+                    
+                    <div class="visual-area">
+                        <span style="font-size: 0.85rem; font-weight: 700; color: #64748B; text-transform: uppercase; margin-bottom: 10px;">Condução na Barra de Metal</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="300" height="80" viewBox="0 0 300 80">
+                            <!-- Fogo -->
+                            <path d="M 40 70 Q 20 40 40 10 Q 60 40 40 70" fill="#EF4444"/>
+                            <path d="M 40 70 Q 30 50 40 30 Q 50 50 40 70" fill="#F59E0B"/>
+                            <!-- Barra com gradiente de calor -->
+                            <defs>
+                                <linearGradient id="heatGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#EF4444" />
+                                    <stop offset="50%" stop-color="#F59E0B" />
+                                    <stop offset="100%" stop-color="#94A3B8" />
+                                </linearGradient>
+                            </defs>
+                            <rect x="40" y="35" width="220" height="15" rx="5" fill="url(#heatGrad)" stroke="#0F172A" stroke-width="2"/>
+                            <!-- Setas de propagação -->
+                            <line x1="80" y1="20" x2="130" y2="20" stroke="#0F172A" stroke-width="2" marker-end="url(#arrow-cond)"/>
+                            <line x1="140" y1="20" x2="190" y2="20" stroke="#0F172A" stroke-width="2" marker-end="url(#arrow-cond)"/>
+                            <text x="270" y="47" font-size="12" font-weight="bold" fill="#0F172A">Mão</text>
+                            <defs>
+                                <marker id="arrow-cond" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#0F172A"/></marker>
+                            </defs>
+                        </svg>
+                    </div>
+
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li><strong>Bons Condutores:</strong> Metais (ferro, alumínio, cobre). A energia viaja rápido neles. É por isso que um piso de tijoleira parece mais "frio" que a madeira: ele rouba o calor do teu pé muito mais depressa.</li>
+                        <li><strong>Isolantes Térmicos:</strong> Madeira, plástico, lã, esferovite e o <strong>AR parado</strong>. Demoram imenso a transferir calor. A camisola de lã não produz calor, apenas <em>isolas</em> o teu corpo para o calor não fugir!</li>
+                    </ul>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">🌪️ 2. Convecção Térmica</div>
+                <article class="theory-box search-target">
+                    <h3>O transporte nos Fluidos</h3>
+                    <p>A Convecção acontece apenas em <strong>FLUIDOS (Líquidos e Gases)</strong>. A regra é simples, e baseia-se na Densidade: <strong>O Quente Sobe e o Frio Desce</strong>.</p>
+                    
+                    <div class="visual-area">
+                        <span style="font-size: 0.85rem; font-weight: 700; color: #64748B; text-transform: uppercase; margin-bottom: 10px;">Correntes de Convecção numa Sala</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="300" height="150" viewBox="0 0 300 150">
+                            <!-- Quarto -->
+                            <rect x="20" y="10" width="260" height="130" fill="#F8FAFC" stroke="#1E293B" stroke-width="3"/>
+                            <!-- Ar Condicionado (Alto) -->
+                            <rect x="30" y="20" width="60" height="20" fill="#E0F2FE" stroke="#0EA5E9" stroke-width="2"/>
+                            <text x="60" y="34" text-anchor="middle" font-size="10" font-weight="bold" fill="#0EA5E9">Ar Cond.</text>
+                            <!-- Aquecedor (Baixo) -->
+                            <rect x="210" y="110" width="60" height="20" fill="#FEE2E2" stroke="#EF4444" stroke-width="2"/>
+                            <text x="240" y="124" text-anchor="middle" font-size="10" font-weight="bold" fill="#EF4444">Aquecedor</text>
+                            
+                            <!-- Setas de Frio (Descem) -->
+                            <path d="M 60 45 Q 60 90 120 120" fill="none" stroke="#0EA5E9" stroke-width="3" stroke-dasharray="4" marker-end="url(#arrow-frio)"/>
+                            <!-- Setas de Calor (Sobem) -->
+                            <path d="M 210 100 Q 150 50 100 40" fill="none" stroke="#F59E0B" stroke-width="3" stroke-dasharray="4" marker-end="url(#arrow-quente)"/>
+                            
+                            <defs>
+                                <marker id="arrow-frio" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#0EA5E9"/></marker>
+                                <marker id="arrow-quente" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#F59E0B"/></marker>
+                            </defs>
+                        </svg>
+                    </div>
+
+                    <div class="highlight-box blue">
+                        <strong>Brisa Marítima (Exemplo de Prova):</strong> De dia, a areia da praia aquece muito mais depressa que a água do mar. O ar sobre a areia fica quente e sobe. Para preencher esse buraco, o ar mais frio que está sobre o oceano corre para a praia. É por isso que de dia o vento sopra do mar para a terra!
+                    </div>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">☀️ 3. Irradiação Térmica (Radiação)</div>
+                <article class="theory-box search-target">
+                    <h3>A luz que aquece</h3>
+                    <p>A Irradiação é a transferência de energia através de Ondas Eletromagnéticas (especialmente os raios Infravermelhos). É a <strong>ÚNICA</strong> forma de calor capaz de viajar no <strong>VÁCUO</strong> absoluto (no espaço).</p>
+                    
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li>É assim que a luz e o calor do Sol chegam à Terra atravessando milhões de quilómetros sem ar.</li>
+                        <li><strong>Cores Importam:</strong> Roupas pretas absorvem muita irradiação e aquecem muito. Roupas brancas ou prateadas <em>refletem</em> a irradiação, mantendo-te fresco.</li>
+                    </ul>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">🫙 4. A Garrafa Térmica (Vaso de Dewar)</div>
+                <article class="theory-box search-target">
+                    <h3>O Escudo Perfeito</h3>
+                    <p>A garrafa térmica foi criada para isolar o café quente (ou a água gelada) do ambiente, travando os três processos de propagação do calor ao mesmo tempo:</p>
+                    
+                    <div class="visual-area">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="auto" viewBox="0 0 350 180" style="max-width: 350px;">
+                            <!-- Corpo exterior -->
+                            <path d="M 30 30 L 80 30 L 80 160 Q 55 170 30 160 Z" fill="#94A3B8" stroke="#1E293B" stroke-width="2"/>
+                            <!-- Parede dupla (vácuo) -->
+                            <path d="M 40 40 L 70 40 L 70 150 Q 55 155 40 150 Z" fill="#F8FAFC" stroke="#3B82F6" stroke-width="2"/>
+                            <!-- Parede espelhada -->
+                            <path d="M 45 45 L 65 45 L 65 145 Q 55 148 45 145 Z" fill="#FDE68A" stroke="#F59E0B" stroke-width="2"/>
+                            <!-- Tampa -->
+                            <rect x="30" y="20" width="50" height="10" rx="3" fill="#EF4444" stroke="#1E293B" stroke-width="2"/>
+                            
+                            <!-- Legendas -->
+                            <!-- Tampa -->
+                            <line x1="55" y1="20" x2="100" y2="15" stroke="#0F172A" stroke-width="1.5"/>
+                            <text x="105" y="15" font-size="12" font-weight="bold" fill="#1E293B">Tampa plástica</text>
+                            <text x="105" y="29" font-size="10" font-weight="600" fill="#64748B">(Impede Convecção)</text>
+                            
+                            <!-- Vácuo -->
+                            <line x1="80" y1="60" x2="120" y2="70" stroke="#0F172A" stroke-width="1.5"/>
+                            <text x="125" y="75" font-size="12" font-weight="bold" fill="#1E293B">Vácuo</text>
+                            <text x="125" y="89" font-size="10" font-weight="600" fill="#64748B">(Impede Condução e Convecção)</text>
+                            
+                            <!-- Espelho -->
+                            <line x1="65" y1="120" x2="120" y2="130" stroke="#0F172A" stroke-width="1.5"/>
+                            <text x="125" y="135" font-size="12" font-weight="bold" fill="#1E293B">Parede Espelhada</text>
+                            <text x="125" y="149" font-size="10" font-weight="600" fill="#64748B">(Reflete Irradiação térmica)</text>
+                        </svg>
+                    </div>
+                </article>
+            </section>
+
+            <button class="btn-action" onclick="changeApplicationView('practice')">
+                Iniciar a Avaliação (30 Questões) ➜
+            </button>
+        </main>
+
+        <!-- VISTA: PRÁTICA (QUIZ) -->
+        <main id="viewPractice" class="view-section">
+            <div style="margin-bottom: 20px; background-color: var(--white); padding: 15px; border-radius: 12px; border: 3px solid var(--border-color); box-shadow: 4px 4px 0px var(--border-color);">
+                <h2 style="color:var(--theme-dark); font-weight:900; margin-bottom: 5px;">A Prova de Fogo - IFCE</h2>
+                <p style="color: var(--theme-contrast); font-size: 0.95rem; font-weight:600;">
+                    30 questões essenciais sobre Condução, Convecção e Irradiação. Domina a Garrafa Térmica e a Brisa Marítima! Acerta <strong>80% (24/30)</strong>.
+                </p>
+            </div>
+            
+            <div class="question-map" id="qMap"></div>
+            <div id="quizContainer" style="margin-bottom: 40px;"></div>
+        </main>
+
+        <!-- VISTA: RESULTADOS -->
+        <main id="viewResult" class="view-section">
+            <div class="result-card">
+                <h2 style="font-weight:900; text-transform:uppercase;">Relatório Final</h2>
+                <div class="stars-container" id="finalStars">⭐⭐⭐</div>
+                <div class="percentage-big" id="finalPercent">0%</div>
+                <p style="font-size:1.2rem; font-weight:700; color:#555;" id="finalScoreText">Acertaste 0 de 30</p>
+                <div id="review-container" style="text-align: left; margin-top: 20px;"></div>
+            </div>
+            <div id="action-buttons"></div>
+        </main>
+
+    </div>
+
+    <!-- RODAPÉ DE NAVEGAÇÃO -->
+    <footer class="quiz-footer" id="quizFooter">
+        <button class="nav-btn btn-prev" id="btnPrev" onclick="navigateQuestion(-1)">Anterior</button>
+        <button class="nav-btn btn-next" id="btnNext" onclick="navigateQuestion(1)">Próxima</button>
+    </footer>
+
+<script>
+    /* --- ESTRUTURA DE DADOS (BASE DE QUESTÕES - PROPAGAÇÃO DO CALOR IFCE) --- */
+    const questionsDatabase = [
+        { 
+            level: "Fácil", 
+            text: "O Calor é definido como a transferência de energia térmica entre dois corpos devido a uma diferença de temperatura. Como se processa rigorosamente a Condução Térmica?", 
+            options: ["Ocorre apenas em gases, através de correntes circulares.", "Ocorre através de ondas eletromagnéticas que viajam no vácuo do espaço.", "Ocorre predominantemente nos sólidos. A energia é passada de átomo em átomo através da vibração, sem que o material se desloque do sítio.", "Ocorre pela fusão dos materiais metálicos."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Na condução, a matéria não viaja. Apenas a 'agitação' (energia) passa da molécula mais quente para a molécula vizinha mais fria, como um efeito dominó.", 
+                otherOptions: ["No vácuo atua a Irradiação.", "Em gases atua a Convecção.", "", "A fusão é uma mudança de estado físico, não propagação."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Se colocares uma colher de metal e uma colher de pau (madeira) dentro de uma panela com sopa a ferver, a colher de metal vai aquecer na pega (cabo) muito rapidamente, enquanto a de madeira demorará imenso a aquecer. Porquê?", 
+            options: ["Porque o metal é um excelente Isolante Térmico.", "Porque os metais possuem muitos eletrões livres, sendo Excelentes Condutores Térmicos, facilitando a rápida propagação da energia por condução. A madeira é um Isolante Térmico.", "A madeira absorve o calor para dentro de si e destrói-o.", "O metal cria energia cinética a partir da sopa."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "A condução nos metais é violentamente rápida graças aos eletrões livres. A madeira e os plásticos dificultam essa passagem molecular, sendo ótimos para fazer as pegas das panelas.", 
+                otherOptions: ["Metal não é isolante.", "", "A madeira não 'destrói' energia.", "O metal não cria energia do nada."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "No inverno polar (como nos iglus dos Esquimós ou nos casacos de penas de ganso), utiliza-se gelo e penas fofas para proteger as pessoas do frio extremo. O segredo mecânico de um excelente casaco de inverno é:", 
+            options: ["Possuir baterias ocultas para gerar calor ativamente.", "O casaco reter uma grande camada de AR PARADO (estático) entre as fibras. O ar é um péssimo condutor térmico, atuando como um escudo que impede o calor do corpo humano de fugir para a atmosfera.", "O casaco absorver a irradiação da neve.", "O tecido fazer o frio refletir de volta."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "O Ar (se não estiver em movimento/vento) é um dos melhores isolantes térmicos da natureza. Aves eriçam as penas no frio exatamente para aprisionar ar e não deixarem os seus 40ºC fugirem.", 
+                otherOptions: ["Casacos não 'geram' calor.", "", "A neve irradia pouquíssimo calor.", "O frio não reflete, apenas o calor foge."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Num dia em que os termómetros da rua marcam -5 ºC, tu abres a porta da rua e a tua mãe grita: 'Fecha a porta senão o frio entra!'. Pela Física Termodinâmica, o que acontece realmente quando abres a porta no inverno?", 
+            options: ["O frio intenso da rua entra rapidamente pela porta por irradiação.", "As correntes de frio empurram o calor da casa contra as paredes.", "O calor (energia térmica) da tua casa, que está a 20 ºC, foge imediatamente para a rua fria a -5 ºC por convecção, arrefecendo a sala.", "As duas temperaturas explodem no choque térmico."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "O calor viaja sempre do Quente para o Frio. O Frio não viaja! Logo, o calor precioso do teu aquecedor é que está a fugir disparado para o quintal gelado.", 
+                otherOptions: ["Acreditar que o frio entra é o maior mito da termologia.", "O frio não empurra o calor.", "", "A mistura natural visa o equilíbrio sem explodir."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Qual é o motor que move a Convecção Térmica dentro dos líquidos e gases (como a água a ferver na panela)?", 
+            options: ["O atrito do fluido com as paredes do recipiente.", "As correntes magnéticas do centro da Terra.", "A Diferença de Densidade: o fluido quente expande-se, torna-se menos denso (mais leve) e sobe; enquanto o fluido frio contrai, torna-se mais denso e desce (cai).", "A condução pura."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "O fluido aquecido sobe porque ficou 'leve'. Lá em cima arrefece, fica 'pesado' (denso) e volta a cair. Este ciclo mecânico infinito chama-se 'Corrente de Convecção'.", 
+                otherOptions: ["O atrito não impulsiona correntes verticais.", "Magnetismo não interfere na panela fervente.", "", "Condução acontece essencialmente em sólidos."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Por norma, num projeto elétrico bem feito, os aparelhos de Ar Condicionado (que sopram ar gelado) são colocados o mais ALTO possível perto do teto. Já os Aquecedores (que sopram ar quente) são colocados o mais BAIXO possível, no chão. Qual é a razão física para isto?", 
+            options: ["Porque o ar quente gerado no chão sofre convecção e SOBE (aquecendo o corpo todo), e o ar frio gerado no teto é denso e DESCE, criando a corrente perfeita de circulação na sala.", "Para evitar que as crianças tropecem no ar condicionado.", "Porque o teto absorve o ar quente.", "Por uma questão puramente estética de arquitetura."], 
+            correctIndex: 0, 
+            explanation: { 
+                correctText: "A gravidade ajuda! Se puseres o Ar Condicionado no chão, o ar frio (pesado) fica todo colado ao tapete, e os teus ombros e cabeça continuam no calor abrasador, porque não se gera convecção.", 
+                otherOptions: ["", "Não é por causa de crianças.", "O teto ser aquecido não é o objetivo final.", "O design é ditado pela função na física."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "A Brisa Marítima (o vento que sentes na cara quando estás virado para o mar de dia) é um exemplo monumental de Convecção. Qual é a sequência física que explica este vento DIURNO?", 
+            options: ["O mar aquece mais rápido que a areia, o ar do mar sobe, e o vento sopra da areia para o mar.", "As ondas empurram mecanicamente o ar na direção da costa.", "De dia, a areia da praia aquece muito mais rápido. O ar escaldante sobre a areia fica leve e SOBE. Isto cria um 'vazio' (baixa pressão) na praia, fazendo com que o ar mais frio que estava sobre o mar seja sugado em direção à areia para preencher o buraco.", "O sol sopra os ventos do mar."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "A areia (menor calor específico) vira um forno ao meio dia. O ar sobe feito fumo. A pressão cai. A massa de ar frio gigante que repousa sobre a água do mar corre para a areia. Nasce a brisa!", 
+                otherOptions: ["O mar aquece mais DEVAGAR que a areia.", "Ondas não criam ventos contínuos.", "", "Vento solar é no espaço, não na praia."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "O espaço entre o nosso Sol e a Terra é composto por um Vácuo profundo (sem oxigénio, sem moléculas soltas). Apesar dessa barreira, sentimos um enorme calor ao meio dia. Qual é o ÚNICO meio de propagação do calor que consegue atravessar o Vácuo?", 
+            options: ["A Condução Sólida.", "A Irradiação Térmica (Radiação por ondas eletromagnéticas).", "As Correntes de Convecção de Neutrinos.", "A Gravitação Solar."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Tanto a condução como a convecção precisam de MATÉRIA (átomos para esbarrarem uns nos outros). A Irradiação é energia pura viajando em ondas (como a luz e os raios infravermelhos), que adora viajar livremente no vácuo vazio.", 
+                otherOptions: ["Condução precisa de sólidos.", "", "Convecção precisa de fluidos.", "Gravitação puxa matéria, não calor."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Num dia rigorosamente frio (5 ºC) decides acender uma fogueira no acampamento do IFCE. Se colocares as tuas mãos LATERALMENTE à chama (e não por cima), sentirás o teu rosto e mãos a ficarem rapidamente muito quentes. Como é que o calor chegou às tuas mãos lateralmente?", 
+            options: ["O vento empurrou o calor de lado.", "Ocorreu Condução Térmica pelo ar.", "Maioritariamente por Irradiação Térmica (Radiação Infravermelha), uma vez que as correntes de convecção do fogo (ar quente) estão a subir verticais para o céu e não vão para os lados.", "Através de Convecção Lateral."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "O calor convectivo do fogo atua como uma chaminé invisível e sobe reto. O aquecimento que recebes na lateral (ou que queima a salsicha no espeto) é a pura energia das ondas infravermelhas irradiadas pelo fogo.", 
+                otherOptions: ["O vento apagaria o fogo ou espalharia fumo.", "O ar é um péssimo condutor térmico.", "", "Correntes quentes vão para cima e não para os lados."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "É muito comum nos desertos africanos as tribos usarem roupas compridas e de cores muito CLARAS (brancas) para se protegerem no pico do calor do dia. Qual a função destas roupas claras sob o sol?", 
+            options: ["As cores claras aumentam o suor natural do corpo.", "Cores claras absorvem quase toda a radiação térmica para longe da pele.", "Cores claras e brancas são excelentes REFLETORAS da luz e da Irradiação Térmica. Elas 'rebatem' as ondas solares de volta para a atmosfera, em vez de as absorverem (como o preto faria).", "Elas geram correntes de convecção internas maiores."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Corpos escuros (cor preta mate) são sorvedouros de radiação: absorvem e aquecem violentamente. Corpos brancos espelham a energia, garantindo uma sombra térmica interior bem mais tolerável no deserto.", 
+                otherOptions: ["A cor não afeta o suor diretamente.", "Branco reflete, não absorve.", "", "Roupa não 'gera' convecção do nada."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "As estufas de plantas (feitas inteiramente de vidro transparente) ficam muito mais quentes no seu interior do que a rua lá fora num dia de sol frio. Este famoso 'Efeito Estufa' ocorre porque:", 
+            options: ["O vidro é uma lupa gigante que aumenta a força do sol.", "A luz do Sol entra pelo vidro. Aquece o chão e as plantas, que passam a irradiar raios Infravermelhos (Calor). Contudo, o vidro é OPACO/bloqueador para as ondas infravermelhas de retorno, não deixando esse calor fugir de volta para a rua.", "O vidro gera o seu próprio calor por condução elétrica.", "As plantas respiram e geram fogo químico interno."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "A luz visível entra fácil pelo vidro. Mas quando a terra quente emite as ondas de calor (infravermelho), elas batem no vidro e voltam para baixo, ficando encurraladas. (É exatamente assim que o nosso carro fica um forno no parque de estacionamento no verão!)", 
+                otherOptions: ["O vidro liso não é uma lupa focada.", "", "Vidro não gera eletricidade.", "Plantas não geram fogo químico espontâneo."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "A lendária 'Garrafa Térmica' (Vaso de Dewar) é a invenção da termodinâmica que visa isolar o café quente ou a água gelada. O Frasco interior da garrafa possui PAREDES DUPLAS COM VÁCUO (não há ar) entre as paredes. O que é que o Vácuo bloqueia?", 
+            options: ["Bloqueia exclusivamente a Irradiação.", "Bloqueia em 100% a Condução e a Convecção, pois ambas precisam desesperadamente de partículas de matéria para conseguirem viajar do vidro quente de dentro para o vidro frio de fora.", "Bloqueia a perda de energia química do café.", "Impede que o frasco parta com as pancadas do dia a dia."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "O 'nada' (vácuo) é o melhor muro de contenção possível para a Condução e Convecção. A agitação das moléculas do café não tem moléculas para chocar no vácuo, logo a energia não passa para o plástico de fora.", 
+                otherOptions: ["O vácuo não consegue bloquear a Irradiação.", "", "Não há perda de energia química.", "O vidro interno é extremamente frágil."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Ainda a investigar a Garrafa Térmica: Como o Vácuo não consegue bloquear a Irradiação (luz e infravermelhos viajam no espaço), a garrafa tem um truque extra. O vidro interior é ALTAMENTE ESPELHADO. Qual o papel físico das paredes prateadas/espelhadas?", 
+            options: ["Deixar o café visivelmente mais bonito ao servir.", "Refletir a Irradiação Térmica (ondas de calor) que tenta fugir da água a ferver, fazendo as ondas de energia baterem no espelho e regressarem para dentro da bebida, mantendo o líquido escaldante.", "Evitar que bactérias cresçam na parede de vidro.", "Refletir o frio do exterior."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "A única forma de travar a Radiação Térmica (que ignora o vácuo) é usar um escudo refletor. O vidro espelhado atua como os abrigos refletores do sol que usamos no para-brisas do carro.", 
+                otherOptions: ["Estética não é o foco da termodinâmica.", "", "Espelhos não matam bactérias diretamente.", "O frio não viaja e não é refletido."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "A última peça de defesa da Garrafa Térmica é a TAMPA (rolha de plástico ou cortiça bem apertada). Além de não deixar o líquido derramar, na física a tampa bem isolante impede fundamentalmente qual propagação de energia para o ar ambiente?", 
+            options: ["A Irradiação estática.", "As fugas por Convecção (o vapor de ar quente do café subiria e levaria a energia térmica consigo para a rua).", "A Condução eletromagnética.", "O arrefecimento por luz."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "O café quente gera vapores escaldantes (ar quente expande-se e sobe por convecção). Sem tampa, um jorro constante de energia fugiria para o teto da cozinha a cada segundo.", 
+                otherOptions: ["O principal aqui é a nuvem de vapor.", "", "Condução eletromagnética não se aplica assim.", "Não há perda por luz numa caixa preta."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Durante a preparação do churrasco no IFCE, um aluno usa um espeto totalmente de Alumínio, e outro usa um espeto longo de Madeira. Ambos ficam expostos à carne na grelha. Passados 10 minutos, o aluno com o espeto de Alumínio queima a mão e atira-o para o chão. O da madeira continua firme. A explicação física é:", 
+            options: ["O Alumínio tem Alta Condutividade Térmica e Baixo Calor Específico, transferindo os Joules da brasa muito rapidamente para os dedos do aluno por Condução.", "O fogo ataca preferencialmente metais pesados.", "A madeira absorve o calor pelo efeito de estufa celular e não o liberta.", "A madeira fez convecção interna rápida."], 
+            correctIndex: 0, 
+            explanation: { 
+                correctText: "O alumínio é uma autoestrada térmica (excelente condutor). O calor do carvão atravessou o metal a toda a velocidade. A madeira (excelente isolante) barra o caminho do calor.", 
+                otherOptions: ["", "O fogo não tem preferências químicas ou 'ataca'.", "Madeira não cria efeito estufa isolado.", "Sólidos não fazem convecção."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Uma pergunta rápida sobre a inversão dos fatores: O que acontece se abrires a porta do Frigorífico que está a 4 ºC, na tua cozinha que está num dia de verão a 35 ºC?", 
+            options: ["O Frio do frigorífico escorre para fora arrefecendo a casa toda por convecção reversa.", "O Frio irradia congelando os móveis em volta.", "O Calor intenso da tua cozinha invade rapidamente a zona do frigorífico (buscando o equilíbrio térmico), aquecendo os teus alimentos guardados.", "Eles misturam-se e a cozinha fica a 4 ºC rapidamente."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Regra sagrada! Quem se mexe é a Energia (Calor). O Calor avança do corpo Quente (Cozinha a 35) para o Corpo Frio (Interior do frigorífico a 4). Entra calor, e os iogurtes estragam-se.", 
+                otherOptions: ["Frio não é uma entidade que viaja.", "Frio não irradia ondas.", "", "O frigorífico pequeno nunca arrefeceria uma cozinha inteira tão depressa."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Num problema prático: A panela de água a ferver é posta em cima de uma pedra fria de granito da bancada. A pedra aquece. Houve Convecção, Radiação e Condução misturadas. Qual delas agiu de forma TOTALMENTE predominante entre o fundo de metal da panela e os átomos da pedra do balcão onde tocam?", 
+            options: ["Irradiação", "Convecção do granito", "Condução Térmica (contacto íntimo entre dois sólidos).", "Ebulição"], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Contato sólido + Sólido = Transporte de vibração dominó. É a Condução em estado puro e máximo rendimento. A energia passa agressivamente pelas áreas encostadas.", 
+                otherOptions: ["Oculto pelo metal, a radiação é mínima na base.", "Granito sólido não tem correntes de fluido.", "", "Ebulição afeta a água, não a pedra."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "O que diz a lei do Resfriamento de Newton no dia a dia? Uma caneca de café escaldante a 90 ºC foi posta na varanda que está a -10 ºC. O choque e a transferência de calor nos primeiros 5 minutos será:", 
+            options: ["Muito Lenta, pois a diferença é muito grande e o calor tem medo de saltar.", "Violenta e muito RÁPIDA, pois a taxa de transferência de calor por todos os meios (irradiação, convecção e condução) é muito mais acelerada quanto MAIOR for a diferença de temperaturas entre os dois meios.", "Constante e igual a uma caneca que estivesse num ambiente a 80 ºC.", "Zero."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "A natureza procura o equilíbrio agressivamente. Se a diferença de T é imensa (90 graus contra -10 graus = 100 de choque), o calor escapa furiosamente no início. À medida que o café fica morno, a fuga acalma.", 
+                otherOptions: ["O calor não tem 'medo'.", "", "Choques de temperatura pequenos (80ºC) trocam calor bem mais lentamente.", "Absurdo físico."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "As aves pinguins na Antártida vivem num chão de gelo. Eles encostam os corpos juntos num grande abraço de grupo chamado 'Huddle'. Na perspetiva das perdas de calor, este ajuntamento populacional:", 
+            options: ["Atrai a gravidade da lua para os aquecer magneticamente.", "Aumenta absurdamente a radiação no gelo à sua volta.", "Reduz drasticamente a 'Área de Superfície Exposta' da colónia inteira aos ventos gelados, minimizando as perdas de energia por Convecção forçada e Irradiação.", "Transforma-os em animais de sangue frio no processo térmico."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Quanto mais pele/penas expostas ao vento, mais o frio (fuga de calor) ataca. No grupo, só as aves que estão no rebordo da roda sofrem a convecção brutal do vento gelado.", 
+                otherOptions: ["A gravidade não tem nada a ver com isso.", "O grupo não afeta o gelo desta forma.", "", "Pinguins mantêm o sangue quente a 39ºC sempre."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Um aluno comprou um espelho mágico capaz de refletir luz visível perfeitamente, mas que deixa passar ondas infravermelhas (calor radiante). Se ele usar esse espelho como escudo contra o sol numa praia no Ceará, ele irá:", 
+            options: ["Congelar de frio.", "Queimar-se, porque a energia térmica do sol (Radiação Infravermelha) atravessaria o espelho sem ser refletida, atingindo a sua pele em cheio, bloqueando apenas a luz visível.", "Ficar perfeitamente protegido do calor.", "Absorver ultravioletas apenas."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "O calor sentido à distância é essencialmente transportado por fotões no espetro do Infravermelho. Se o 'escudo' não for desenhado para espelhar ondas infravermelhas térmicas, a energia atravessa o obstáculo.", 
+                otherOptions: ["O calor passaria livremente.", "", "O calor não foi bloqueado, logo a proteção térmica falha.", "Passaria também o infravermelho pesado."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Numa Geleira de Esferovite (Caixa térmica plástica comum em campismo), as bebidas estão a 5 ºC num dia de verão. A parede de Esferovite é muito grossa e cheia de pequenas bolhas de AR preso. Neste contexto, o principal objetivo da caixa é atuar contra a:", 
+            options: ["Formação de buracos negros quânticos.", "Irradiação do gelo interior para o exterior.", "Condutividade Térmica através das paredes sólidas da caixa. As bolhas de ar aprisionado quebram violentamente a propagação da energia por Condução.", "Convecção das garrafas de metal internas."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "O esferovite é um material fabuloso: 98% dele é apenas AR PRESO. O calor da rua tenta invadir a caixa para aquecer as cervejas, mas esbarra no isolamento massivo que quebra a condução sólida das paredes.", 
+                otherOptions: ["Erro grosseiro.", "Irradiação térmica seria tratada com espelhos metálicos e não bolhas.", "", "A caixa atua nas trocas das PAREDES e não do interior metálico das latas."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Rasteira Típica do IFCE: Num supermercado com ar-condicionado, colocas a tua mão num pacote de farinha (papel) e na prateleira de metal onde ele está assente. Estão os dois há horas nesse supermercado fechado. O metal parece um cubo de gelo. A farinha parece estar morna. O que é que um físico concluiria se medisse as suas temperaturas reais com um termômetro?", 
+            options: ["O metal estaria a 10 ºC e a farinha a 25 ºC.", "O metal estaria a 25 ºC e a farinha a 10 ºC.", "Ambos estariam à EXATA MESMA TEMPERATURA do supermercado (Ex: 18 ºC), pois estão há horas em Equilíbrio Térmico com a sala. O metal só parece frio porque conduz o calor do teu dedo mais rapidamente.", "O metal estaria mais frio por causa da gravidade."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Tudo o que fica abandonado num quarto muito tempo chega ao Equilíbrio Térmico e atinge a temperatura ambiente global (seja vidro, madeira ou ferro). O toque engana o cérebro devido à alta condutividade térmica dos metais.", 
+                otherOptions: ["O metal não pode quebrar o equilíbrio térmico estando lá estático.", "A farinha e o metal estão isolados na mesma sala.", "", "Gravidade não afeta temperaturas paradas num supermercado."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Quando colocas a ponta de uma barra de ferro de 1 metro numa lareira, a ponta em chamas fica vermelha de tão quente. Um minuto depois, a ponta que está na tua mão também ferve e tu soltas a barra. As moléculas da ponta que estava no fogo correram pela barra até à tua mão?", 
+            options: ["Sim, elas viajaram como um comboio microscópico a trazer o fogo.", "Não! Os átomos dos sólidos não viajam. Apenas vibraram e bateram nos átomos seguintes, transferindo a Energia Cinética (o Calor) de posto em posto, sem sair do seu lugar geográfico. (Condução).", "As moléculas rodopiaram no metal.", "O calor criou novas moléculas de ferro quentes."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "A magia da condução nos sólidos é que a estrutura do material não é destruída nem as moléculas viajam de férias. Os átomos mantêm a forma da barra, apenas funcionam como correias transportadoras de vibração energética.", 
+                otherOptions: ["Sólidos derreteriam se os átomos abandonassem os seus postos estruturais.", "", "Rodopiar livremente acontece em fluidos gasosos.", "Conservação da massa não cria ferro novo."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "O que é mais perigoso: segurar a tua mão 5 centímetros LADO A LADO de uma chapa de fogão em brasa ou segurar a mão 5 centímetros EXATAMENTE EM CIMA da mesma chapa ardente?", 
+            options: ["Do lado, pois a irradiação é mais violenta que o fogo.", "Em cima! Porque se mistura o terror da pesada Irradiação Térmica (raios vermelhos) com uma agressiva coluna vertical de ar escaldante a subir diretamente da placa para os teus dedos (Correntes de Convecção).", "Não faz diferença, o ar transmite calor igual a 360 graus.", "Ao lado queima mais por causa da condução do ar horizontal."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Quando encostas do lado, sofres de Irradiação pura. Mas quando metes a mão CIMA do fogão, além da luz do infravermelho (Irradiação), tu engoles em cheio as moléculas de ar a ferver que sobem disparadas da chapa (Convecção formidável). O dedo assa.", 
+                otherOptions: ["Irradiação afeta ambas as direções.", "", "O ar aquecido vai diretamente para cima e nunca para os lados e baixo.", "Condução do ar é péssima."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Nas famosas estufas caseiras de flores (de vidro), a cor e a transparência do material devem ser levados em grande conta se queremos muito calor no inverno. Se pintarmos todo o teto de vidro exterior da estufa de tinta BRANCA brilhante, o que sucederá à temperatura das flores no interior?", 
+            options: ["Subirá drasticamente, pois o branco reflete o frio.", "A temperatura cairia brutalmente, pois o teto espelhado Branco iria REFLETIR a grande maioria da irradiação solar de volta para o céu, não deixando o calor nem a luz vital atravessarem a estufa.", "As flores ficariam quentes devido à condensação de fotões brancos.", "Manter-se-ia inalterada, o vidro já é estufa."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "As coisas pintadas a branco ou prata são defletores natos de ondas de radiação eletromagnética. O calor bate e sofre reflexão na tinta clara, mantendo o interior do habitáculo sombreado e protegido (e as flores sem luz).", 
+                otherOptions: ["O frio não existe como radiação refletível.", "", "Fotões não se condensam em gotas brancas.", "Sem a luz entrar o efeito de estufa termodinâmico morre."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Ao ligar uma lâmpada antiga incandescente (daquelas amarelas de filamento que aquecem imenso e queimam a mão) num dia de inverno... Num quarto isolado com as janelas e portas fechadas. Se a deixares ligada por 10 horas, a temperatura daquele quarto irá:", 
+            options: ["Baixar, por ser de vidro.", "Ficar rigorosamente inalterada.", "AUMENTAR progressivamente. As lâmpadas incandescentes gastam 90% da sua energia elétrica a gerar não luz, mas sim 'Calor/Efeito Joule'. Elas atuam como mini-aquecedores de Convecção e Irradiação naquele quarto fechado.", "Desintegrar o teto pela irradiação."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "A ineficiência do filamento de tungsténio é famosa: apenas ~5% da conta de luz sai em forma visível para tu leres um livro. O resto é despejado sob a forma de calor violento no globo de vidro, aquecendo todo o quarto à sua volta.", 
+                otherOptions: ["O vidro fica escaldante.", "Adicionar energia aquece obrigatoriamente.", "", "Não gera calor nível laser de destruição."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Para terminar: No clássico churrasco do fim de semana, um pai envolve três cervejas em papel-alumínio reflexivo e põe-nas na caixa de gelo, dizendo que 'o metal as vai gelar muito mais rápido'. Mas passadas três horas, as três cervejas embrulhadas estão MUITO MENOS geladas do que as restantes que estavam sem nada no gelo. A explicação termodinâmica?", 
+            options: ["O gelo absorveu o alumínio.", "O alumínio (um forte metal condutor) é excelente a transmitir calor. MAS, ele tem uma superfície brilhante. Neste caso peculiar, a camada extra de material (em conjunto com o ar que o papel prendeu ao redor da garrafa) gerou um isolamento físico que abrandou brutalmente as fugas de energia térmica do interior do líquido para as pedras de gelo.", "O alumínio derreteu.", "O alumínio gerou calor químico com o refrigerante da bebida."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "A adição de camadas (como papel metálico amassado) cria mini-bolsas de ar isolantes que evitam o toque violento direto da temperatura congelante da água contra a espessura do casco de vidro. Embrulhar travou a condução pura.", 
+                otherOptions: ["O alumínio não desapareceu.", "", "As temperaturas de gelo não derretem metais pesados.", "Não ocorreu mistura de elementos químicos fechados."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Os balões de ar quente conseguem voar graças a um princípio fundamental da Termologia. Como se explica a subida do balão ao aquecer o ar no seu interior?", 
+            options: ["O ar aquecido sofre contração, tornando a lona do balão mais rígida e leve para levitar.", "O ar aquecido no interior expande-se, tornando-se menos denso do que o ar frio exterior. Essa diferença de densidade cria um empuxo para cima (Convecção).", "A chama gera irradiação térmica que empurra o solo, impulsionando o balão como um foguete.", "O calor destrói a gravidade local temporariamente."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "A convecção dita que fluidos quentes ficam menos densos (mais leves). O ar quente dentro do balão é mais 'leve' que o ar frio e pesado de fora, fazendo o balão subir flutuando.", 
+                otherOptions: ["Fluidos quentes expandem-se, não se contraem.", "", "Irradiação não tem força propulsora física mecânica para levantar o peso humano.", "Magia não faz parte da física do IFCE."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Se andares descalço em casa, o piso de cerâmica (mosaico) parece estar muito mais gelado do que o tapete de lã da sala, mesmo sabendo que ambos estão exatamente na mesma temperatura ambiente. Porquê?", 
+            options: ["A cerâmica produz frio naturalmente devido à sua estrutura mineral.", "O tapete de lã produz calor através do atrito com o ar da casa.", "A cerâmica é um bom condutor térmico e retira o calor do teu pé rapidamente, causando forte sensação de frio. A lã é um isolante térmico que bloqueia a perda.", "A cerâmica está sempre a uma temperatura fisicamente mais baixa devido à convecção rasteira no chão."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "A sensação de frio está ligada à velocidade com que o nosso corpo (36ºC) perde calor. Como a cerâmica é boa condutora, ela 'rouba' a energia do teu pé muito rápido. O tapete atua como barreira (isolante).", 
+                otherOptions: ["Cerâmica é pedra inativa, não gera frio.", "O tapete não cria energia sem um motor.", "", "Numa sala fechada o chão atinge o mesmo equilíbrio térmico geral."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Os painéis solares para aquecimento de água (comuns nos telhados das casas modernas) são geralmente construídos com placas pintadas de preto fosco ou cores muito escuras. O motivo técnico para esta escolha é:", 
+            options: ["A cor preta fosca é a que melhor absorve a Irradiação Térmica (ondas eletromagnéticas) do Sol, maximizando o aquecimento da água nos canos.", "A cor preta reflete a maior quantidade de raios solares perigosos, protegendo os canos.", "Cores escuras evitam o congelamento da água durante a noite devido a um aumento da condução térmica.", "O preto impede a formação de correntes de convecção internas, estabilizando a pressão da água."], 
+            correctIndex: 0, 
+            explanation: { 
+                correctText: "Na irradiação, superfícies escuras e foscas são excelentes 'absorvedoras' de ondas eletromagnéticas. Elas retêm a energia da luz solar vorazmente e transformam-na rapidamente em calor transferível para a água.", 
+                otherOptions: ["", "Cores claras refletiriam (perda brutal de eficiência energética no telhado).", "A noite não tem sol, a cor preta não os protege de noite.", "A cor externa não afeta a pressão hidrostática do sistema."] 
+            } 
+        }
+    ];
+
+    /* --- GESTÃO DE ESTADO (STATE) --- */
+    const quizState = {
+        currentIndex: 0,
+        userAnswers: new Array(questionsDatabase.length).fill(null),
+        confettiAnimationId: null
+    };
+
+    /* --- FUNCIONALIDADES DE PESQUISA (TEORIA) --- */
+    function initializeSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const contentGroups = document.querySelectorAll('.content-group');
+        const noResultsMsg = document.getElementById('no-results');
+
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', function(event) {
+            const searchTerm = normalizeText(event.target.value);
+            let totalVisibleElements = 0;
+            
+            contentGroups.forEach(group => {
+                const groupContent = normalizeText(group.textContent);
+                const isMatch = groupContent.includes(searchTerm);
+                
+                group.style.display = isMatch ? 'flex' : 'none';
+                if (isMatch) totalVisibleElements++;
+            });
+            
+            noResultsMsg.style.display = totalVisibleElements === 0 ? 'block' : 'none';
+        });
+    }
+
+    function normalizeText(text) {
+        return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    /* --- CONTROLO DE VISTAS (VIEWS) --- */
+    function changeApplicationView(viewName) {
+        const views = ['viewExplanation', 'viewPractice', 'viewResult'];
+        
+        views.forEach(viewId => document.getElementById(viewId).classList.remove('active'));
+        
+        const quizFooter = document.getElementById('quizFooter');
+        if (quizFooter) quizFooter.style.display = 'none';
+
+        if (viewName === 'explanation') {
+            document.getElementById('viewExplanation').classList.add('active');
+            document.getElementById('btnExp').classList.add('active');
+            document.getElementById('btnPrac').classList.remove('active');
+        } else if (viewName === 'practice') {
+            document.getElementById('viewPractice').classList.add('active');
+            if (quizFooter) quizFooter.style.display = 'flex';
+            document.getElementById('btnExp').classList.remove('active');
+            document.getElementById('btnPrac').classList.add('active');
+            
+            renderCurrentQuestion();
+            renderNavigationMap();
+        } else if (viewName === 'result') {
+            document.getElementById('viewResult').classList.add('active');
+        }
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* --- GERAÇÃO INTERFACE DO QUIZ --- */
+    function getDifficultyBadgeClass(level) {
+        const mapping = { 'Fácil': 'dif-facil', 'Médio': 'dif-medio', 'Difícil': 'dif-dificil' };
+        return mapping[level] || 'dif-facil';
+    }
+
+    function buildOptionsHTML(question, selectedAnswerIndex) {
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        return question.options.map((optionText, optionIndex) => {
+            let cssClass = '';
+            
+            if (selectedAnswerIndex !== null) {
+                if (optionIndex === question.correctIndex) cssClass = 'correct';
+                else if (optionIndex === selectedAnswerIndex) cssClass = 'wrong';
+                else cssClass = 'disabled';
+            }
+
+            const isDisabled = selectedAnswerIndex !== null ? 'disabled' : '';
+
+            return `
+                <button class="option-btn ${cssClass}" onclick="handleOptionSelection(${optionIndex})" ${isDisabled}>
+                    <div class="opt-circle">${alphabet[optionIndex]}</div>
+                    <div>${optionText}</div>
+                </button>
+            `;
+        }).join('');
+    }
+
+    function buildFeedbackHTML(question, selectedAnswerIndex) {
+        const isCorrect = selectedAnswerIndex === question.correctIndex;
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        const titleClass = isCorrect ? 'success' : 'error';
+        const titleText = isCorrect ? '✅ Raciocínio Termológico Certo!' : '❌ Falha de Equilíbrio Térmico!';
+        
+        const distortionsHTML = question.explanation.otherOptions.map((explanationText, idx) => {
+            if (idx === question.correctIndex || !explanationText) return '';
+            return `<div class="feedback-item wrong-opt"><strong>${alphabet[idx]})</strong> ${explanationText}</div>`;
+        }).join('');
+
+        return `
+            <div class="feedback-box show">
+                <div class="feedback-title ${titleClass}" style="color: ${isCorrect ? 'var(--correct-border)' : 'var(--wrong-border)'}">${titleText}</div>
+                <div class="feedback-item correct-opt"><strong>O Fato Exato:</strong> ${question.options[question.correctIndex]}</div>
+                <div style="margin-top:15px;font-size:1rem;color:var(--text-color);margin-bottom:15px;font-weight:600;">${question.explanation.correctText}</div>
+                ${distortionsHTML.trim() ? `
+                <div style="margin-top:15px;border-top:2px dashed var(--border-color);padding-top:15px;">
+                    <small style="color:var(--text-color);"><strong>Análise dos Erros:</strong></small>
+                    ${distortionsHTML}
+                </div>` : ''}
+            </div>
+        `;
+    }
+
+    function renderCurrentQuestion() {
+        const container = document.getElementById('quizContainer');
+        if (!container) return;
+
+        const question = questionsDatabase[quizState.currentIndex];
+        const selectedAnswerIndex = quizState.userAnswers[quizState.currentIndex];
+        const badgeClass = getDifficultyBadgeClass(question.level);
+        
+        let feedbackHTML = selectedAnswerIndex !== null ? buildFeedbackHTML(question, selectedAnswerIndex) : '';
+
+        container.innerHTML = `
+            <div class="quiz-question-card">
+                <span class="difficulty-badge ${badgeClass}">${question.level}</span>
+                <div style="margin-bottom:25px;">
+                    <span class="quiz-question-counter">QUESTÃO ${quizState.currentIndex + 1} DE ${questionsDatabase.length}</span>
+                    <h2 class="quiz-question-text">${question.text}</h2>
+                </div>
+                <div class="options-list">
+                    ${buildOptionsHTML(question, selectedAnswerIndex)}
+                </div>
+                ${feedbackHTML}
+            </div>
+        `;
+        
+        updateNavigationButtons();
+    }
+
+    /* --- LÓGICA DO QUIZ --- */
+    function handleOptionSelection(selectedIndex) {
+        if (quizState.userAnswers[quizState.currentIndex] !== null) return;
+        
+        quizState.userAnswers[quizState.currentIndex] = selectedIndex;
+        const isCorrect = selectedIndex === questionsDatabase[quizState.currentIndex].correctIndex;
+        
+        if (isCorrect) startSuccessAnimation();
+        else triggerErrorShakeEffect();
+        
+        renderCurrentQuestion();
+        renderNavigationMap();
+    }
+
+    function triggerErrorShakeEffect() {
+        const container = document.getElementById('quizContainer');
+        if (container) { 
+            container.classList.remove('shake-effect'); 
+            void container.offsetWidth; 
+            container.classList.add('shake-effect'); 
+            setTimeout(() => container.classList.remove('shake-effect'), 500); 
+        }
+    }
+
+    /* --- ANIMAÇÕES (CONFETTI) --- */
+    function startSuccessAnimation() {
+        const duration = 1500;
+        const end = Date.now() + duration;
+        
+        stopSuccessAnimation();
+        
+        function animateFrame() {
+            if(window.confetti && typeof confetti === 'function') {
+                const config = { particleCount: 5, spread: 55, colors: ['#EF4444', '#F97316', '#0EA5E9', '#E11D48'] };
+                confetti({ ...config, angle: 60, origin: { x: 0, y: 0.6 } });
+                confetti({ ...config, angle: 120, origin: { x: 1, y: 0.6 } });
+            }
+            if (Date.now() < end) quizState.confettiAnimationId = requestAnimationFrame(animateFrame);
+        }
+        animateFrame();
+    }
+
+    function stopSuccessAnimation() {
+        if (window.confetti && typeof confetti.reset === 'function') confetti.reset(); 
+        if (quizState.confettiAnimationId) {
+            cancelAnimationFrame(quizState.confettiAnimationId);
+            quizState.confettiAnimationId = null;
+        }
+    }
+
+    /* --- NAVEGAÇÃO MAPA --- */
+    function renderNavigationMap() {
+        const mapContainer = document.getElementById('qMap');
+        if (!mapContainer) return;
+        
+        mapContainer.innerHTML = questionsDatabase.map((question, index) => {
+            const isCurrent = index === quizState.currentIndex;
+            const userAnswer = quizState.userAnswers[index];
+            const hasAnswered = userAnswer !== null;
+            const isCorrect = userAnswer === question.correctIndex;
+            
+            let cssClass = 'map-dot';
+            if (isCurrent) cssClass += ' active';
+            if (hasAnswered) cssClass += isCorrect ? ' answered-correct' : ' answered-wrong';
+            
+            return `<div class="${cssClass}" onclick="goToQuestion(${index})">${index + 1}</div>`;
+        }).join('');
+        
+        setTimeout(() => { 
+            const activeDot = mapContainer.querySelector('.map-dot.active'); 
+            if (activeDot) activeDot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); 
+        }, 50);
+    }
+
+    function goToQuestion(targetIndex) { 
+        stopSuccessAnimation();
+        quizState.currentIndex = targetIndex; 
+        renderCurrentQuestion(); 
+        renderNavigationMap(); 
+    }
+    
+    function navigateQuestion(directionOffset) { 
+        const nextIndex = quizState.currentIndex + directionOffset; 
+        if (nextIndex >= 0 && nextIndex < questionsDatabase.length) goToQuestion(nextIndex); 
+    }
+
+    function updateNavigationButtons() {
+        const btnPrev = document.getElementById('btnPrev');
+        const btnNext = document.getElementById('btnNext');
+        
+        if (btnPrev) btnPrev.disabled = (quizState.currentIndex === 0);
+        
+        if (btnNext) {
+            const isLastQuestion = quizState.currentIndex === questionsDatabase.length - 1;
+            if (isLastQuestion) { 
+                btnNext.textContent = "Finalizar Avaliação"; 
+                btnNext.onclick = finishQuiz; 
+            } else { 
+                btnNext.textContent = "Próxima ➡️"; 
+                btnNext.onclick = () => navigateQuestion(1); 
+            }
+        }
+    }
+
+    /* --- CÁLCULO DE RESULTADOS --- */
+    function calculateStars(percent) {
+        if (percent === 100) return "⭐⭐⭐⭐⭐";
+        if (percent >= 80) return "⭐⭐⭐⭐";
+        if (percent >= 60) return "⭐⭐⭐";
+        if (percent >= 40) return "⭐⭐";
+        if (percent > 0) return "⭐";
+        return "🌑"; // zero stars
+    }
+
+    function finishQuiz() {
+        const unansweredCount = quizState.userAnswers.filter(answer => answer === null).length;
+        
+        if (unansweredCount > 0) {
+            const confirmMessage = `Existem ${unansweredCount} questões por responder. Quer terminar mesmo assim (as em branco serão dadas como erradas)?`;
+            if (!confirm(confirmMessage)) return;
+        }
+
+        stopSuccessAnimation();
+
+        const correctAnswersCount = quizState.userAnswers.filter((answer, index) => answer === questionsDatabase[index].correctIndex).length;
+        const totalQuestions = questionsDatabase.length;
+        const percentageScore = Math.round((correctAnswersCount / totalQuestions) * 100);
+        const isApproved = percentageScore >= 80;
+        
+        renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved);
+        changeApplicationView('result');
+    }
+
+    function renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved) {
+        document.getElementById('finalPercent').textContent = `${percentageScore}%`;
+        document.getElementById('finalScoreText').textContent = `Acertaste ${correctAnswersCount} de ${totalQuestions}`;
+        document.getElementById('finalStars').textContent = calculateStars(percentageScore);
+        
+        const reviewContainer = document.getElementById('review-container');
+        const actionButtonsContainer = document.getElementById('action-buttons');
+        
+        let summaryHTML = '';
+
+        if (isApproved) {
+            summaryHTML += `
+                <div class="result-summary-box success">
+                    <strong>🎉 DOMÍNIO TÉRMICO!</strong> A tua base em troca de calor, as correntes de convecção e o isolamento da garrafa térmica estão brilhantes. Preparado para o IFCE!
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REPETIR PARA 100%</button>`;
+        } else {
+            summaryHTML += `
+                <div class="result-summary-box error">
+                    <strong>⚠️ FUGA DE ENERGIA (CALOR)!</strong> Foste avaliado abaixo da meta (80%). Revisa urgente a diferença brutal de que o Vácuo não isola contra a Irradiação Térmica (Luz).
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REFAZER AVALIAÇÃO</button>`;
+        }
+        
+        if (correctAnswersCount < totalQuestions) {
+            summaryHTML += '<h4 style="margin-bottom:15px; color:var(--text-color); font-size:1.15rem;">Revisão das Falhas Físicas:</h4>';
+            questionsDatabase.forEach((question, index) => {
+                const userAnswerIndex = quizState.userAnswers[index];
+                if (userAnswerIndex !== question.correctIndex) {
+                    const userAnswerText = userAnswerIndex === null ? "Deixaste em branco" : question.options[userAnswerIndex];
+                    const correctAnswerText = question.options[question.correctIndex];
+                    
+                    let plainQuestionText = question.text.replace(/<div class="q-svg-container">[\s\S]*?<\/div>/gi, ' [Desenho Omitido] ');
+
+                    summaryHTML += `
+                        <div class="error-log-item">
+                            <strong style="color:var(--theme-dark); font-size:1.05rem; display:block; margin-bottom:8px;">Q${index + 1}: ${plainQuestionText}</strong>
+                            <span style="color:var(--wrong-border); font-weight: 600; display:block; margin-bottom:5px;">A tua análise: ${userAnswerText}</span>
+                            <span style="color:var(--correct-border); font-weight: 700; display:block;">A Resposta Correta: ${correctAnswerText}</span>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        reviewContainer.innerHTML = summaryHTML;
+    }
+
+    function resetQuiz() { 
+        quizState.userAnswers = new Array(questionsDatabase.length).fill(null); 
+        quizState.currentIndex = 0; 
+        changeApplicationView('practice'); 
+    }
+    
+    // START APPLICATION
+    initializeSearch();
+    changeApplicationView('explanation');
+</script>
+</body>
+</html>

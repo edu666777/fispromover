@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Física: Gráficos da Cinemática - Promover</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* --- VARIÁVEIS DE COR E TEMA: PLANO CARTESIANO (Gráficos) --- */
+        :root {
+            --bg-color: #F8FAFC; /* Slate muito claro */
+            --text-color: #0F172A; /* Slate quase preto */
+            --border-color: #1E293B; /* Contorno escuro asfalto/slate */
+            --white: #FFFFFF;
+            
+            --theme-light: #E2E8F0; /* Slate pastel */
+            --theme-medium: #3B82F6; /* Azul vivo (Linhas de gráfico) */
+            --theme-dark: #1D4ED8; /* Azul profundo (Eixos) */
+            --theme-contrast: #F59E0B; /* Âmbar (Áreas sob o gráfico) */
+            --theme-accent: #10B981; /* Verde (Velocidade constante) */
+            --theme-text-active: #FFFFFF;
+            
+            --correct-bg: #D1FAE5;
+            --correct-border: #059669;
+            --wrong-bg: #FFE4E6;
+            --wrong-border: #BE123C;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 15px 120px 15px;
+            /* Fundo a simular folha de papel milimétrico */
+            background-image: 
+                linear-gradient(rgba(59, 130, 246, 0.15) 1px, transparent 1px), 
+                linear-gradient(90deg, rgba(59, 130, 246, 0.15) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* --- ANIMAÇÕES --- */
+        @keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1) rotate(-5deg); color: var(--theme-contrast); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+        .pulse-effect { animation: pulse 2s infinite; display: inline-block; }
+        .shake-effect { animation: shake 0.4s ease-in-out; }
+
+        /* --- LAYOUT PRINCIPAL --- */
+        .container { width: 100%; max-width: 650px; display: flex; flex-direction: column; gap: 25px; }
+        .logo-header { display: flex; flex-direction: column; align-items: center; padding: 15px 0 25px 0; text-align: center; }
+        .css-logo { font-size: 1.5rem; font-weight: 900; color: var(--theme-text-active); text-transform: uppercase; letter-spacing: -1px; border: 3px solid var(--border-color); padding: 8px 24px; border-radius: 12px; background: var(--theme-dark); box-shadow: 4px 4px 0px var(--theme-contrast); margin-bottom: 15px; transform: rotate(-2deg); }
+        h1 { font-size: 2rem; font-weight: 900; color: var(--text-color); text-transform: uppercase; letter-spacing: -0.5px; line-height: 1.1; }
+        .subtitle { font-size: 1rem; color: var(--white); font-weight: 700; margin-top: 5px; background: var(--theme-contrast); padding: 4px 12px; border-radius: 8px; border: 2px solid var(--border-color); }
+
+        /* --- NAVEGAÇÃO --- */
+        .toggle-container { background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 6px; display: flex; box-shadow: 4px 4px 0px var(--border-color); position: sticky; top: 15px; z-index: 50; }
+        .toggle-btn { flex: 1; border: none; background: none; padding: 12px 0; border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.05rem; color: var(--text-color); cursor: pointer; transition: all 0.2s ease; }
+        .toggle-btn.active { background-color: var(--theme-dark); color: var(--theme-text-active); border: 2px solid var(--border-color); box-shadow: 2px 2px 0px var(--border-color); }
+
+        .view-section { display: none; animation: fadeIn 0.3s ease; flex-direction: column; gap: 35px; }
+        .view-section.active { display: flex; }
+
+        /* --- PESQUISA --- */
+        .search-container { position: relative; width: 100%; }
+        .search-input { width: 100%; padding: 16px 20px 16px 55px; border: 3px solid var(--border-color); border-radius: 12px; background-color: var(--white); font-family: 'Poppins', sans-serif; font-size: 1.05rem; font-weight: 600; color: var(--text-color); box-shadow: 4px 4px 0px var(--border-color); outline: none; transition: all 0.2s ease; }
+        .search-input:focus { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--theme-contrast); border-color: var(--theme-dark); }
+        .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 1.4rem; }
+        #no-results { text-align: center; color: var(--wrong-border); font-weight: 800; display: none; background: var(--wrong-bg); padding: 15px; border: 3px solid var(--wrong-border); border-radius: 8px; }
+
+        /* --- TEORIA --- */
+        .content-group { display: flex; flex-direction: column; position: relative; padding-top: 15px; }
+        .section-badge { display: inline-flex; align-items: center; gap: 10px; background-color: var(--theme-dark); color: var(--white); font-size: 1.1rem; font-weight: 800; padding: 8px 20px; border-radius: 8px; border: 3px solid var(--border-color); box-shadow: 3px 3px 0px var(--theme-contrast); text-transform: uppercase; position: absolute; top: -5px; left: 15px; z-index: 10; transform: rotate(-1.5deg); }
+        .theory-box { display: flex; flex-direction: column; padding: 35px 25px 25px 35px; border-radius: 12px; background-color: var(--white); border: 3px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); font-weight: 500; font-size: 1rem; line-height: 1.7; position: relative; overflow: hidden; gap: 20px; border-left: 14px solid var(--theme-medium); }
+        .theory-box h3 { font-size: 1.35rem; font-weight: 900; color: var(--theme-dark); margin-bottom: 5px; display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px; }
+        .theory-box h4 { font-size: 1.1rem; font-weight: 800; color: var(--text-color); margin-top: 10px; border-bottom: 2px solid var(--theme-light); padding-bottom: 5px; }
+        
+        .inline-example { display: block; width: fit-content; max-width: 100%; margin-top: 6px; margin-bottom: 6px; padding: 12px 20px; background-color: var(--theme-light); border: 2px solid var(--border-color); border-radius: 8px; font-size: 1.25rem; color: var(--theme-dark); font-weight: 900; letter-spacing: 1px; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); text-align: center; }
+        .visual-area { background: var(--bg-color); border: 3px dashed var(--theme-medium); border-radius: 12px; padding: 25px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; width: 100%; }
+        
+        .highlight-box { background-color: #FEF3C7; border: 3px solid var(--border-color); border-left: 8px solid var(--theme-contrast); padding: 18px 20px; border-radius: 8px; font-size: 0.95rem; color: #78350F; font-weight: 600; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); }
+        .highlight-box.blue { background-color: #EFF6FF; border-left-color: #3B82F6; color: #1E3A8A; }
+
+        /* --- CARDS DE FÓRMULAS E GRÁFICOS --- */
+        .g-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; width: 100%; margin-top: 10px; }
+        .g-card { flex: 1 1 calc(50% - 15px); min-width: 130px; border-radius: 12px; padding: 15px 10px; text-align: center; border: 3px solid var(--border-color); display: flex; flex-direction: column; align-items: center; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); background-color: var(--white); transition: transform 0.2s; }
+        .g-card:hover { transform: translateY(-3px); }
+        .g-card.full-width { flex: 1 1 100%; max-width: 280px; }
+        .g-icon { font-size: 2.5rem; margin-bottom: 8px; line-height: 1; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.15)); }
+        .g-title { font-size: 1rem; font-weight: 900; margin-bottom: 4px; text-transform: uppercase; color: var(--theme-dark); }
+        .g-desc { font-size: 0.85rem; font-weight: 600; color: var(--text-color); margin-top: 6px; line-height: 1.3; }
+
+        /* --- BOTÕES GERAIS --- */
+        .btn-action { width: 100%; padding: 20px; background-color: var(--theme-dark); color: white; border: 3px solid var(--border-color); border-radius: 12px; font-size: 1.15rem; font-weight: 900; cursor: pointer; box-shadow: 6px 6px 0px var(--theme-contrast); transition: all 0.1s; text-transform: uppercase; margin-top: 10px; }
+        .btn-action:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0px var(--theme-contrast); }
+
+        /* --- QUIZ UI --- */
+        .difficulty-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; border: 2px solid var(--border-color); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
+        .dif-facil { background: #D1FAE5; color: #065F46; }
+        .dif-medio { background: #FEF08A; color: #713F12; }
+        .dif-dificil { background: #FECACA; color: #7F1D1D; }
+
+        .question-map { display: flex; gap: 8px; overflow-x: auto; padding: 10px 5px; margin-bottom: 20px; white-space: nowrap; scroll-behavior: smooth; }
+        .question-map::-webkit-scrollbar { display: none; }
+        .map-dot { min-width: 38px; height: 38px; border: 2px solid var(--border-color); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; color: var(--theme-dark); background: white; cursor: pointer; transition: all 0.2s; }
+        .map-dot.active { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); transform: scale(1.15); }
+        .map-dot.answered-correct { background-color: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .map-dot.answered-wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .quiz-question-card { border: 4px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); padding: 30px; border-radius: 16px; background: var(--white); }
+        .quiz-question-counter { font-size: 0.85rem; font-weight: 900; color: var(--theme-dark); letter-spacing: 1px; }
+        .quiz-question-text { font-size: 1.15rem; margin-top: 8px; color: var(--text-color); font-weight: 800; line-height: 1.5; margin-bottom: 20px;}
+
+        /* Elemento para imagens SVG dentro das perguntas */
+        .q-svg-container { display: flex; justify-content: center; margin: 15px 0; }
+
+        .option-btn { display: flex; align-items: center; width: 100%; padding: 18px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.1s ease; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 600; text-align: left; color: var(--text-color); }
+        .option-btn:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px var(--theme-contrast); }
+        .opt-circle { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--border-color); margin-right: 15px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.05rem; flex-shrink: 0; background: var(--theme-light); color: var(--theme-dark); }
+        .option-btn.correct { background-color: var(--correct-bg); border-color: var(--correct-border); box-shadow: 3px 3px 0px var(--correct-border); }
+        .option-btn.correct .opt-circle { background-color: var(--correct-border); color: white; border-color: var(--correct-border); }
+        .option-btn.wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); opacity: 0.9; box-shadow: none; }
+        .option-btn.wrong .opt-circle { background-color: var(--wrong-border); color: white; border-color: var(--wrong-border); }
+        .option-btn.disabled { pointer-events: none; opacity: 0.7; }
+
+        /* --- FEEDBACK DA QUESTÃO --- */
+        .feedback-box { display: block; margin-top: 25px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 25px; animation: slideUp 0.3s ease-out; box-shadow: 5px 5px 0px rgba(0,0,0,0.1); }
+        .feedback-title { font-weight: 900; text-transform: uppercase; font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .feedback-item { margin-bottom: 10px; font-size: 0.95rem; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); line-height: 1.5; font-weight: 500; }
+        .feedback-item.correct-opt { background: var(--correct-bg); border-color: var(--correct-border); color: #064E3B; font-weight: 700; box-shadow: 3px 3px 0px var(--correct-border); }
+        .feedback-item.wrong-opt { background: #F1F5F9; border-color: #94A3B8; color: #475569; border-style: dashed; margin-top: 8px; }
+
+        /* --- RESULTADOS --- */
+        .result-card { background: white; border: 4px solid var(--border-color); border-radius: 16px; padding: 40px 20px; box-shadow: 8px 8px 0px var(--border-color); margin-bottom: 30px; text-align: center; }
+        .stars-container { font-size: 2.5rem; margin: 15px 0; letter-spacing: 5px; }
+        .percentage-big { font-size: 5rem; font-weight: 900; color: var(--theme-dark); line-height: 1; margin: 15px 0; text-shadow: 4px 4px 0px var(--theme-contrast); }
+        
+        .result-summary-box { padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 3px solid; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); }
+        .result-summary-box.success { background: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .result-summary-box.error { background: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .error-log-item { margin-bottom: 15px; padding: 20px; background: var(--bg-color); border-radius: 12px; border: 3px dashed var(--theme-medium); text-align: left;}
+
+        /* --- RODAPÉ DE NAVEGAÇÃO --- */
+        .quiz-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--white); border-top: 3px solid var(--border-color); padding: 15px 20px; display: none; justify-content: center; gap: 20px; z-index: 100; box-shadow: 0px -4px 10px rgba(0,0,0,0.05); }
+        .nav-btn { padding: 15px 30px; border-radius: 12px; font-weight: 900; border: 3px solid var(--border-color); cursor: pointer; box-shadow: 3px 3px 0px var(--border-color); font-family: 'Poppins', sans-serif; text-transform: uppercase; background: white; color: var(--text-color); font-size: 1rem; transition: transform 0.1s; }
+        .nav-btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 0px 0px 0px transparent; }
+        .btn-next { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); border-color: var(--border-color); }
+        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <header class="logo-header">
+            <div class="css-logo"><span class="pulse-effect">📈</span> PROMOVER</div>
+            <h1>Física / 9º Ano</h1>
+            <p class="subtitle">Gráficos da Cinemática (MRU e MRUV)</p>
+        </header>
+
+        <div class="toggle-container">
+            <button class="toggle-btn active" id="btnExp" onclick="changeApplicationView('explanation')">📘 Teoria</button>
+            <button class="toggle-btn" id="btnPrac" onclick="changeApplicationView('practice')">🧠 Prática (30)</button>
+        </div>
+
+        <!-- VISTA: TEORIA -->
+        <main id="viewExplanation" class="view-section active">
+            
+            <div class="search-container">
+                <span class="search-icon" aria-hidden="true">🔍</span>
+                <input type="text" id="searchInput" class="search-input" aria-label="Pesquisar conteúdo" placeholder="Pesquisar conceito... (ex: Reta, Parábola, Área)">
+            </div>
+            <div id="no-results"><p>😕 Termo não encontrado na teoria de Gráficos.</p></div>
+
+            <section class="content-group">
+                <div class="section-badge">📍 1. Gráfico Posição x Tempo (S x t)</div>
+                <article class="theory-box search-target">
+                    <h3>Onde o corpo está?</h3>
+                    <p>Neste gráfico, o eixo Y mostra o quilómetro/metro (S) e o eixo X mostra o relógio (t).</p>
+                    
+                    <div class="visual-area" style="background: transparent; border: none; padding: 0;">
+                        <div class="g-grid">
+                            <div class="g-card">
+                                <div class="g-icon">
+                                    <svg width="60" height="60" viewBox="0 0 100 100">
+                                        <line x1="10" y1="90" x2="90" y2="90" stroke="#1E293B" stroke-width="4"/>
+                                        <line x1="10" y1="10" x2="10" y2="90" stroke="#1E293B" stroke-width="4"/>
+                                        <line x1="10" y1="90" x2="80" y2="20" stroke="#3B82F6" stroke-width="6"/>
+                                    </svg>
+                                </div>
+                                <div class="g-title">MRU Progressivo</div>
+                                <div class="g-desc">Reta a subir. A posição aumenta. (V > 0).</div>
+                            </div>
+                            <div class="g-card">
+                                <div class="g-icon">
+                                    <svg width="60" height="60" viewBox="0 0 100 100">
+                                        <line x1="10" y1="90" x2="90" y2="90" stroke="#1E293B" stroke-width="4"/>
+                                        <line x1="10" y1="10" x2="10" y2="90" stroke="#1E293B" stroke-width="4"/>
+                                        <line x1="10" y1="20" x2="80" y2="90" stroke="#EF4444" stroke-width="6"/>
+                                    </svg>
+                                </div>
+                                <div class="g-title">MRU Retrógrado</div>
+                                <div class="g-desc">Reta a descer. O carro está de volta (V < 0).</div>
+                            </div>
+                            <div class="g-card full-width">
+                                <div class="g-icon">
+                                    <svg width="60" height="60" viewBox="0 0 100 100">
+                                        <line x1="10" y1="90" x2="90" y2="90" stroke="#1E293B" stroke-width="4"/>
+                                        <line x1="10" y1="10" x2="10" y2="90" stroke="#1E293B" stroke-width="4"/>
+                                        <path d="M 10 20 Q 50 110 90 20" fill="none" stroke="#F59E0B" stroke-width="6"/>
+                                    </svg>
+                                </div>
+                                <div class="g-title">MRUV: A Parábola</div>
+                                <div class="g-desc">Sempre que a linha for curva, o movimento tem Aceleração! O Vértice (ponta do 'U') é o instante em que ele parou (V=0) para inverter a direção.</div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">🏎️ 2. Gráfico Velocidade x Tempo (V x t)</div>
+                <article class="theory-box search-target">
+                    <h3>Quão rápido ele vai?</h3>
+                    <p>O gráfico mais importante do exame. Se a velocidade nunca muda (MRU), o gráfico é uma reta deitada. Se o carro acelera ou trava (MRUV), o gráfico é uma reta inclinada.</p>
+                    
+                    <div class="highlight-box">
+                        <strong>A Regra de Ouro Inquebrável:</strong><br>
+                        Em QUALQUER gráfico V x t, se calculares a <strong>ÁREA</strong> pintada debaixo da linha (triângulo, retângulo ou trapézio), essa área será numericamente igual à Distância Percorrida (Deslocamento ΔS)!
+                    </div>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">📐 3. O Declive da Reta</div>
+                <article class="theory-box search-target">
+                    <h3>Lendo a Inclinação</h3>
+                    <p>A inclinação da reta diz-nos segredos importantes:</p>
+                    
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li><strong>No Gráfico S x t:</strong> Quanto mais íngreme for a ladeira (mais vertical), <strong>maior é a Velocidade</strong> do corpo. Reta deitada = corpo parado (V=0).</li>
+                        <li><strong>No Gráfico V x t:</strong> Quanto mais íngreme for a reta da velocidade, <strong>maior é a Aceleração</strong>. Reta deitada = aceleração zero (a=0).</li>
+                    </ul>
+                </article>
+            </section>
+
+            <button class="btn-action" onclick="changeApplicationView('practice')">
+                Iniciar a Avaliação (30 Questões) ➜
+            </button>
+        </main>
+
+        <!-- VISTA: PRÁTICA (QUIZ) -->
+        <main id="viewPractice" class="view-section">
+            <div style="margin-bottom: 20px; background-color: var(--white); padding: 15px; border-radius: 12px; border: 3px solid var(--border-color); box-shadow: 4px 4px 0px var(--border-color);">
+                <h2 style="color:var(--theme-dark); font-weight:900; margin-bottom: 5px;">A Prova de Fogo - IFCE</h2>
+                <p style="color: var(--theme-contrast); font-size: 0.95rem; font-weight:600;">
+                    30 questões com interpretação de gráficos geométricos. Acerta <strong>80% (24/30)</strong>. Tem papel e caneta para calcular as Áreas!
+                </p>
+            </div>
+            
+            <div class="question-map" id="qMap"></div>
+            <div id="quizContainer" style="margin-bottom: 40px;"></div>
+        </main>
+
+        <!-- VISTA: RESULTADOS -->
+        <main id="viewResult" class="view-section">
+            <div class="result-card">
+                <h2 style="font-weight:900; text-transform:uppercase;">Relatório Final</h2>
+                <div class="stars-container" id="finalStars">⭐⭐⭐</div>
+                <div class="percentage-big" id="finalPercent">0%</div>
+                <p style="font-size:1.2rem; font-weight:700; color:#555;" id="finalScoreText">Acertaste 0 de 30</p>
+                <div id="review-container" style="text-align: left; margin-top: 20px;"></div>
+            </div>
+            <div id="action-buttons"></div>
+        </main>
+
+    </div>
+
+    <!-- RODAPÉ DE NAVEGAÇÃO -->
+    <footer class="quiz-footer" id="quizFooter">
+        <button class="nav-btn btn-prev" id="btnPrev" onclick="navigateQuestion(-1)">Anterior</button>
+        <button class="nav-btn btn-next" id="btnNext" onclick="navigateQuestion(1)">Próxima</button>
+    </footer>
+
+<script>
+    /* --- ESTRUTURA DE DADOS (BASE DE QUESTÕES - GRÁFICOS IFCE) --- */
+    const questionsDatabase = [
+        { 
+            level: "Fácil", 
+            text: `Num gráfico de Posição x Tempo (S x t), observas uma linha reta rigorosamente HORIZONTAL paralela ao eixo do tempo. O que isto significa fisicamente?
+                <div class="q-svg-container">
+                    <svg width="200" height="120" viewBox="0 0 200 120" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <line x1="20" y1="100" x2="180" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="10" x2="20" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="50" x2="160" y2="50" stroke="#3B82F6" stroke-width="3"/>
+                      <text x="5" y="15" font-size="12" font-weight="bold">S</text>
+                      <text x="185" y="115" font-size="12" font-weight="bold">t</text>
+                    </svg>
+                </div>`, 
+            options: ["O objeto move-se a uma velocidade constante e muito rápida.", "O objeto está em repouso (parado), pois a sua posição (S) não muda ao longo do tempo.", "O objeto tem movimento uniformemente variado (acelerado).", "O objeto move-se de marcha-atrás."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Se a linha do 'S' (Posição) não sobe nem desce, significa que o carro, por exemplo, ficou sempre no km 50 enquanto o relógio passava. Ele está parado (Velocidade = 0).", 
+                otherOptions: ["Se estivesse a andar, a linha teria de subir ou descer."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: `Se o mesmo gráfico de Posição x Tempo (S x t) for agora uma RETA INCLINADA que vai subindo da esquerda para a direita. Que tipo de movimento o corpo realiza?
+                <div class="q-svg-container">
+                    <svg width="200" height="120" viewBox="0 0 200 120" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <line x1="20" y1="100" x2="180" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="10" x2="20" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="90" x2="160" y2="20" stroke="#3B82F6" stroke-width="3"/>
+                      <text x="5" y="15" font-size="12" font-weight="bold">S</text>
+                      <text x="185" y="115" font-size="12" font-weight="bold">t</text>
+                    </svg>
+                </div>`, 
+            options: ["Repouso.", "Movimento Retilíneo Uniformemente Variado (MRUV).", "Movimento Retilíneo Uniforme (MRU) e Progressivo (v > 0).", "Movimento Retilíneo Uniforme (MRU) e Retrógrado (v < 0)."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Reta inclinada no S x t indica que a velocidade é constante (MRU). Como a reta 'sobe', a posição S está a aumentar (ex: do km 10 para o km 20). Movimento Progressivo.", 
+                otherOptions: ["Curva/Parábola seria MRUV.", "Reta a descer seria Retrógrado."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: `Dois carros (A e B) estão em MRU. No gráfico S x t, a reta do carro A é muito íngreme (quase vertical), e a reta do carro B é muito suave (quase deitada). O que podemos afirmar sobre as velocidades?
+                <div class="q-svg-container">
+                    <svg width="200" height="120" viewBox="0 0 200 120" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <line x1="20" y1="100" x2="180" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="10" x2="20" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="100" x2="70" y2="20" stroke="#EF4444" stroke-width="3"/>
+                      <line x1="20" y1="100" x2="160" y2="70" stroke="#3B82F6" stroke-width="3"/>
+                      <text x="75" y="25" font-size="12" font-weight="bold" fill="#EF4444">A</text>
+                      <text x="165" y="75" font-size="12" font-weight="bold" fill="#3B82F6">B</text>
+                      <text x="5" y="15" font-size="12" font-weight="bold">S</text>
+                      <text x="185" y="115" font-size="12" font-weight="bold">t</text>
+                    </svg>
+                </div>`, 
+            options: ["O carro A tem uma velocidade MAIOR que o carro B.", "O carro B tem uma velocidade MAIOR que o carro A.", "Ambos têm a mesma velocidade, pois são retas.", "Aceleração de A é maior."], 
+            correctIndex: 0, 
+            explanation: { 
+                correctText: "A inclinação da reta (o declive) no gráfico Posição x Tempo representa o valor da Velocidade. Quanto mais 'em pé' for a ladeira, mais distância ele percorre em menos tempo (é mais rápido).", 
+                otherOptions: ["No MRU, a aceleração de ambos é zero."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: `Observa o gráfico Velocidade x Tempo (V x t) abaixo. O que representa A ÁREA PINTADA DE AMARELO sob a reta?
+                <div class="q-svg-container">
+                    <svg width="200" height="120" viewBox="0 0 200 120" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <rect x="20" y="40" width="120" height="60" fill="#FDE68A" />
+                      <line x1="20" y1="100" x2="180" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="10" x2="20" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="40" x2="140" y2="40" stroke="#3B82F6" stroke-width="3"/>
+                      <line x1="140" y1="40" x2="140" y2="100" stroke="#64748B" stroke-dasharray="4"/>
+                      <text x="5" y="45" font-size="12" font-weight="bold">V</text>
+                      <text x="135" y="115" font-size="12" font-weight="bold">t</text>
+                    </svg>
+                </div>`, 
+            options: ["A aceleração instantânea do corpo.", "O deslocamento (distância percorrida, ΔS) do corpo naquele intervalo de tempo.", "A força aplicada no motor do carro.", "O tempo de repouso absoluto."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "É a Regra de Ouro dos gráficos de Cinemática: A área de qualquer gráfico V x t é sempre numericamente igual à distância/deslocamento (ΔS). Como é um retângulo (Base x Altura), t × V = ΔS.", 
+                otherOptions: ["Aceleração seria a inclinação desta reta (que neste caso é zero, reta deitada)."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: `Calcula! O gráfico abaixo (V x t) representa um carro em MRU com velocidade constante de 10 m/s. Qual foi o Deslocamento Total (ΔS) ao fim de 5 segundos?
+                <div class="q-svg-container">
+                    <svg width="200" height="120" viewBox="0 0 200 120" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <rect x="20" y="30" width="100" height="70" fill="#D1FAE5" />
+                      <line x1="20" y1="100" x2="180" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="10" x2="20" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="30" x2="120" y2="30" stroke="#059669" stroke-width="3"/>
+                      <line x1="120" y1="30" x2="120" y2="100" stroke="#64748B" stroke-dasharray="4"/>
+                      <text x="2" y="35" font-size="12">10</text>
+                      <text x="115" y="115" font-size="12">5</text>
+                    </svg>
+                </div>`, 
+            options: ["5 m", "10 m", "50 m", "100 m"], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Basta calcular a área do Retângulo pintado a verde! Área = Base × Altura. A base mede 5, a altura mede 10. Deslocamento = 5 × 10 = 50 metros.", 
+                otherOptions: ["Cálculo simples geométrico."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: `Num gráfico V x t (Velocidade x Tempo), a reta NÃO é horizontal. Ela é oblíqua (inclinada). O que é que isto nos indica sobre o movimento?
+                <div class="q-svg-container">
+                    <svg width="200" height="120" viewBox="0 0 200 120" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <line x1="20" y1="100" x2="180" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="10" x2="20" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="80" x2="160" y2="20" stroke="#F59E0B" stroke-width="3"/>
+                      <text x="5" y="15" font-size="12" font-weight="bold">V</text>
+                      <text x="185" y="115" font-size="12" font-weight="bold">t</text>
+                    </svg>
+                </div>`, 
+            options: ["É um MRU perfeito.", "O corpo está parado.", "É um Movimento Retilíneo Uniformemente Variado (MRUV), pois a velocidade está a mudar (aceleração ≠ 0).", "A posição do corpo está a diminuir."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Se o valor do eixo Y (Velocidade) sobe ou desce com o passar do tempo, existe aceleração. Reta inclinada no gráfico V x t significa MRUV.", 
+                otherOptions: ["Se estivesse parado, a reta estaria deitada em cima do zero."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: `Calcula a Aceleração! O gráfico V x t abaixo mostra a velocidade de um carro a subir de 0 para 20 m/s em 4 segundos. Qual foi a aceleração média?
+                <div class="q-svg-container">
+                    <svg width="200" height="120" viewBox="0 0 200 120" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <line x1="20" y1="100" x2="180" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="10" x2="20" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="100" x2="140" y2="20" stroke="#EF4444" stroke-width="3"/>
+                      <line x1="140" y1="20" x2="140" y2="100" stroke="#64748B" stroke-dasharray="4"/>
+                      <line x1="20" y1="20" x2="140" y2="20" stroke="#64748B" stroke-dasharray="4"/>
+                      <text x="2" y="25" font-size="12">20</text>
+                      <text x="135" y="115" font-size="12">4</text>
+                    </svg>
+                </div>`, 
+            options: ["5 m/s²", "20 m/s²", "80 m/s²", "4 m/s²"], 
+            correctIndex: 0, 
+            explanation: { 
+                correctText: "Aceleração = Variação de V / Tempo (a = ΔV / Δt). O corpo foi de 0 a 20 (ΔV = 20). O tempo foi 4s. a = 20 / 4 = 5 m/s². Fisicamente: a inclinação desta reta vale 5.", 
+                otherOptions: ["80 m/s² seria se tivesses calculado a área do triângulo (e a área dá a Distância de 40m, não a aceleração!)."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: `Calcula o Deslocamento no MRUV! No mesmo gráfico da questão anterior (Triângulo), a velocidade do carro subiu de 0 para 20 m/s em 4 segundos. Qual foi a Distância (ΔS) que ele percorreu nestes 4 segundos?
+                <div class="q-svg-container">
+                    <svg width="200" height="120" viewBox="0 0 200 120" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <polygon points="20,100 140,20 140,100" fill="#FEE2E2" />
+                      <line x1="20" y1="100" x2="180" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="10" x2="20" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="100" x2="140" y2="20" stroke="#EF4444" stroke-width="3"/>
+                      <text x="2" y="25" font-size="12">20</text>
+                      <text x="135" y="115" font-size="12">4</text>
+                    </svg>
+                </div>`, 
+            options: ["80 m", "20 m", "40 m", "5 m"], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Sempre que quiseres o Deslocamento no gráfico V x t, calculas a ÁREA da figura formada. A figura é um Triângulo (Base × Altura / 2). Base=4, Altura=20. (4 × 20) / 2 = 80 / 2 = 40 metros.", 
+                otherOptions: ["Se usasses a fórmula do retângulo (80m) esquecerias que o carro começou parado e foi acelerando aos poucos."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: `Como se comporta o gráfico da Posição x Tempo (S x t) se o movimento do objeto for um Movimento Retilíneo Uniformemente Variado (MRUV)?
+                <div class="q-svg-container">
+                    <svg width="200" height="120" viewBox="0 0 200 120" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <line x1="20" y1="100" x2="180" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="10" x2="20" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <path d="M 20 90 Q 100 90 160 20" fill="none" stroke="#3B82F6" stroke-width="3"/>
+                      <text x="5" y="15" font-size="12" font-weight="bold">S</text>
+                      <text x="185" y="115" font-size="12" font-weight="bold">t</text>
+                    </svg>
+                </div>`, 
+            options: ["É uma Reta inclinada constante.", "É uma Linha Horizontal no zero.", "É uma Curva (uma Parábola).", "É um círculo fechado."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Devido à aceleração (o termo t² na fórmula do sorvetão), o gráfico da posição deixa de ser uma reta e passa a ser uma função do 2º grau: uma curva em forma de parábola.", 
+                otherOptions: ["Reta inclinada é para o MRU."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: `Observa a Parábola no gráfico S x t. A curva tem a forma de 'U' (concavidade virada para CIMA). O que isto nos revela sobre a Aceleração (a) deste movimento?
+                <div class="q-svg-container">
+                    <svg width="150" height="120" viewBox="0 0 150 120" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <line x1="10" y1="100" x2="140" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="10" y1="10" x2="10" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <path d="M 20 20 Q 70 140 120 20" fill="none" stroke="#3B82F6" stroke-width="4"/>
+                    </svg>
+                </div>`, 
+            options: ["A aceleração é Negativa (a < 0).", "A aceleração é Positiva (a > 0).", "A aceleração é Zero.", "O corpo está sempre a andar para trás."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Regra da Matemática: Parábola a 'sorrir' (boca para cima) significa que o termo ao quadrado (a aceleração) é Positivo (a > 0).", 
+                otherOptions: ["Parábola 'triste' (boca para baixo) seria aceleração negativa."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: `No gráfico parabólico de S x t, existe um ponto crítico: O VÉRTICE da parábola (a pontinha exata da curva antes dela virar). Fisicamente, o que está a acontecer com o objeto nesse instante?
+                <div class="q-svg-container">
+                    <svg width="200" height="120" viewBox="0 0 200 120" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <line x1="20" y1="100" x2="180" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="10" x2="20" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <path d="M 40 20 Q 100 140 160 20" fill="none" stroke="#10B981" stroke-width="3"/>
+                      <circle cx="100" cy="80" r="5" fill="#EF4444"/>
+                      <text x="110" y="85" font-size="10" font-weight="bold" fill="#EF4444">Vértice</text>
+                      <text x="5" y="15" font-size="12" font-weight="bold">S</text>
+                      <text x="185" y="115" font-size="12" font-weight="bold">t</text>
+                    </svg>
+                </div>`, 
+            options: ["Ele atingiu a velocidade máxima possível.", "A sua aceleração desligou-se.", "Ele bateu numa parede e explodiu.", "Ele inverteu o sentido do seu movimento (A sua velocidade V = 0 nesse microsegundo)."], 
+            correctIndex: 3, 
+            explanation: { 
+                correctText: "O vértice marca o momento em que o carro travou até parar (V=0) e meteu a marcha-atrás (ou vice-versa). A curva para de descer e começa a subir (ou o oposto).", 
+                otherOptions: ["Velocidade no vértice de S x t é sempre nula."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: `Lê o gráfico! O gráfico Posição x Tempo (S x t) corta o eixo vertical (S) no valor 20. O que representa fisicamente o ponto onde a reta ou parábola cruza o eixo Y no instante t=0?
+                <div class="q-svg-container">
+                    <svg width="200" height="120" viewBox="0 0 200 120" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <line x1="20" y1="100" x2="180" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="10" x2="20" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="60" x2="140" y2="20" stroke="#3B82F6" stroke-width="3"/>
+                      <circle cx="20" cy="60" r="5" fill="#F59E0B"/>
+                      <text x="25" y="75" font-size="12" font-weight="bold" fill="#F59E0B">S = 20</text>
+                      <text x="5" y="15" font-size="12" font-weight="bold">S</text>
+                      <text x="185" y="115" font-size="12" font-weight="bold">t</text>
+                    </svg>
+                </div>`, 
+            options: ["A velocidade final do carro.", "O tempo total da viagem.", "A Posição Inicial (S₀) do carro.", "Aceleração igual a 20 m/s²."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Quando o tempo é zero (origem do eixo horizontal), o valor da linha no eixo Y diz-nos exatamente de que marco (metro ou quilómetro) o objeto partiu: o seu S₀.", 
+                otherOptions: ["Aceleração e Velocidade são lidos pelos declives (inclinações) da reta ou curva."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: `Se um corpo em MRUV tiver um gráfico de Aceleração por Tempo (a x t), como será o desenho dessa linha?
+                <div class="q-svg-container">
+                    <svg width="200" height="120" viewBox="0 0 200 120" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <line x1="20" y1="100" x2="180" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="10" x2="20" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="40" x2="160" y2="40" stroke="#EF4444" stroke-width="3"/>
+                      <text x="5" y="15" font-size="12" font-weight="bold">a</text>
+                      <text x="185" y="115" font-size="12" font-weight="bold">t</text>
+                    </svg>
+                </div>`, 
+            options: ["Uma reta inclinada a subir, pois a aceleração aumenta muito.", "Uma parábola.", "Uma reta deitada (horizontal) paralela ao eixo do tempo, pois a aceleração tem um valor Fixo.", "Um triângulo."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "MRUV significa Movimento Retilíneo UNIFORMEMENTE Variado. Ou seja, a aceleração NUNCA muda (é Uniforme). Exemplo: a gravidade é constante sempre (9,8 m/s²). Logo, é uma reta horizontal no gráfico 'a x t'.", 
+                otherOptions: ["Inclinada no 'a x t' seria um movimento super complexo de ensino superior (Jerk)."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: `Gráfico Misto: A linha da velocidade V x t de um carro atravessa o eixo do tempo, passando de valores Positivos (+10 m/s) para valores Negativos (-10 m/s). O que aconteceu fisicamente no momento em que a linha tocou o zero?
+                <div class="q-svg-container">
+                    <svg width="200" height="120" viewBox="0 0 200 120" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <line x1="20" y1="60" x2="180" y2="60" stroke="#0F172A" stroke-width="2"/> <!-- Eixo T central -->
+                      <line x1="20" y1="10" x2="20" y2="110" stroke="#0F172A" stroke-width="2"/> <!-- Eixo V -->
+                      <line x1="20" y1="20" x2="160" y2="100" stroke="#EF4444" stroke-width="3"/> <!-- Reta cruzando -->
+                      <circle cx="90" cy="60" r="5" fill="#F59E0B" />
+                    </svg>
+                </div>`, 
+            options: ["O carro voou.", "O carro parou para sempre e o motor avariou.", "O carro inverteu o sentido do seu movimento (parou num instante e andou de marcha-atrás).", "A aceleração do carro passou a ser zero."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Quando o gráfico da velocidade cruza o eixo do tempo, a velocidade passa a ser zero (ele para por um milésimo de segundo). Se passa de positivo para negativo, ele estava a ir para a frente e passou a ir para trás.", 
+                otherOptions: ["Aceleração não é zero, pois a linha continua inclinada (tem declive constante)."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: `Um problema armadilha: No gráfico de Posição x Tempo (S x t) existem duas retas PARALELAS desenhadas. Uma para o Carro A e outra para o Carro B. O que se pode concluir com 100% de certeza?
+                <div class="q-svg-container">
+                    <svg width="200" height="120" viewBox="0 0 200 120" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <line x1="20" y1="100" x2="180" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="10" x2="20" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="40" y1="100" x2="120" y2="20" stroke="#3B82F6" stroke-width="3"/>
+                      <line x1="80" y1="100" x2="160" y2="20" stroke="#EF4444" stroke-width="3"/>
+                      <text x="5" y="15" font-size="12" font-weight="bold">S</text>
+                      <text x="185" y="115" font-size="12" font-weight="bold">t</text>
+                    </svg>
+                </div>`, 
+            options: ["Eles vão colidir no infinito.", "Eles partiram do mesmo ponto inicial (mesmo S₀).", "Eles têm exatamente a MESMA VELOCIDADE, logo nunca se vão encontrar ou bater.", "Eles têm a mesma aceleração."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Em Matemática e Física, no gráfico de Posição, a inclinação = Velocidade. Se as retas são paralelas, têm a mesma inclinação, logo a MESMA VELOCIDADE. Se estão paralelos e a andar à mesma velocidade, a distância entre eles não muda, nunca se tocam.", 
+                otherOptions: ["Partiram de pontos diferentes, pois retas paralelas não nascem do mesmo ponto no eixo Y."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: `Área do Trapézio! Um carro já vinha a 10 m/s, e acelerou até 30 m/s. Esse processo demorou 4 segundos. A figura formada no gráfico V x t é um Trapézio. Qual foi o Deslocamento total do carro?
+                <div class="q-svg-container">
+                    <svg width="200" height="120" viewBox="0 0 200 120" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <polygon points="20,100 20,60 140,20 140,100" fill="#E0F2FE" />
+                      <line x1="20" y1="100" x2="180" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="10" x2="20" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="60" x2="140" y2="20" stroke="#0284C7" stroke-width="3"/>
+                      <text x="2" y="65" font-size="10">10</text>
+                      <text x="2" y="25" font-size="10">30</text>
+                      <text x="135" y="115" font-size="12">4</text>
+                    </svg>
+                </div>`, 
+            options: ["40 m", "120 m", "80 m", "160 m"], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Área do Trapézio = (Base Maior + Base Menor) × Altura / 2. Base Maior (lado V alto) = 30. Base Menor (lado V inicial) = 10. Altura (eixo do tempo) = 4. Logo: (30 + 10) × 4 / 2 => 40 × 4 / 2 = 160 / 2 = 80 metros.", 
+                otherOptions: ["Se usasses a fórmula de um triângulo simples darias erro, porque o carro não começou de V=0."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: `Um móvel realiza dois movimentos consecutivos. Nos primeiros 5s ele viaja com velocidade constante de 10 m/s. Nos 5s seguintes, ele viaja a 0 m/s (pára). O seu gráfico de V x t terá o formato de:
+                <div class="q-svg-container">
+                    <svg width="200" height="120" viewBox="0 0 200 120" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <line x1="20" y1="100" x2="180" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="10" x2="20" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="40" x2="90" y2="40" stroke="#10B981" stroke-width="3"/> 
+                      <line x1="90" y1="40" x2="90" y2="100" stroke="#10B981" stroke-width="3" stroke-dasharray="2"/> 
+                      <line x1="90" y1="100" x2="160" y2="100" stroke="#10B981" stroke-width="4"/> 
+                      <text x="2" y="45" font-size="10">10</text>
+                      <text x="85" y="115" font-size="10">5</text>
+                      <text x="150" y="115" font-size="10">10</text>
+                      <text x="5" y="15" font-size="12" font-weight="bold">V</text>
+                      <text x="185" y="115" font-size="12" font-weight="bold">t</text>
+                    </svg>
+                </div>`, 
+            options: ["Um retângulo gigante de 10 segundos.", "Um retângulo de 5s de base, seguido de uma linha colada ao eixo do tempo (zero).", "Um triângulo de 10s de base.", "Uma parábola."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "A primeira parte faz um retângulo gordinho (altura 10, base 5). Quando ele pára, a velocidade cai para 0, logo a linha cai bruscamente e fica em cima do eixo do tempo (zero) durante os outros 5 segundos.", 
+                otherOptions: ["Incorreto."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: `No gráfico Posição x Tempo (S x t), duas linhas que representam dois carros diferentes cruzam-se (formando um X). O que esse ponto exato de cruzamento significa fisicamente?
+                <div class="q-svg-container">
+                    <svg width="200" height="120" viewBox="0 0 200 120" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <line x1="20" y1="100" x2="180" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="10" x2="20" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="20" x2="160" y2="90" stroke="#EF4444" stroke-width="3"/>
+                      <line x1="20" y1="80" x2="160" y2="30" stroke="#3B82F6" stroke-width="3"/>
+                      <circle cx="101" cy="61" r="5" fill="#F59E0B"/>
+                      <text x="5" y="15" font-size="12" font-weight="bold">S</text>
+                      <text x="185" y="115" font-size="12" font-weight="bold">t</text>
+                    </svg>
+                </div>`, 
+            options: ["Os carros explodiram.", "É o momento exato do Encontro entre os dois móveis na pista (ou ultrapassagem).", "É o instante em que ambos pararam.", "Significa que a gravidade foi invertida."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Quando as linhas se cruzam num gráfico S x t, significa que ambos os carros estavam no mesmo quilómetro (S) exatamente no mesmo segundo de relógio (t). Ou seja, encontraram-se ou bateram.", 
+                otherOptions: ["Parar seria se a linha ficasse horizontal."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: `Temos um gráfico da Aceleração x Tempo (a x t). A reta é horizontal no valor de a = 2 m/s², e o tempo vai até 5 segundos. O que nos dá a Área deste retângulo (2 x 5 = 10)?
+                <div class="q-svg-container">
+                    <svg width="200" height="120" viewBox="0 0 200 120" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <rect x="20" y="40" width="100" height="60" fill="#DBEAFE" />
+                      <line x1="20" y1="100" x2="180" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="10" x2="20" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="40" x2="120" y2="40" stroke="#1D4ED8" stroke-width="3"/>
+                      <line x1="120" y1="40" x2="120" y2="100" stroke="#64748B" stroke-dasharray="4"/>
+                      <text x="5" y="45" font-size="12">2</text>
+                      <text x="115" y="115" font-size="12">5</text>
+                      <text x="5" y="15" font-size="12" font-weight="bold">a</text>
+                      <text x="185" y="115" font-size="12" font-weight="bold">t</text>
+                    </svg>
+                </div>`, 
+            options: ["Diz-nos que o carro andou 10 metros.", "Diz-nos que a Posição Inicial era o km 10.", "Diz-nos que a Variação da Velocidade (ΔV) do carro foi de 10 m/s.", "Diz-nos que a Força do motor era 10 Newtons."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Muita atenção! A área do gráfico Velocidade dá a Distância (ΔS). Mas a área do gráfico Aceleração (a x t) dá a Mudança de Velocidade (ΔV). Aceleração × Tempo = ΔV.", 
+                otherOptions: ["Erro clássico: confundir a área do axt com o gráfico de Vxt."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Uma bola é lançada para CIMA (Lançamento Vertical). Qual será o desenho rigoroso do gráfico de Velocidade x Tempo (V x t) desta bola, considerando que a gravidade a puxa sempre para baixo?", 
+            options: ["Uma reta horizontal constante.", "Uma reta inclinada que começa lá no alto (V positivo forte) e vem DESCENDO, cruzando o zero até ficar negativa.", "Uma parábola para cima.", "Uma escada a subir rapidamente."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "O arremesso para cima dá uma V grande e positiva. A gravidade (constante e para baixo) atua reduzindo essa V de 10 em 10 m/s. O gráfico Vxt é uma reta a descer. Passa no zero (ponto mais alto) e depois fica V negativo (começa a cair).", 
+                otherOptions: ["Parábola seria no gráfico Posição (S x t)."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: `Observando o movimento de uma pessoa a correr: Quando a linha no seu gráfico V x t for HORIZONTAL, o que podemos dizer do seu movimento nesse trecho?
+                <div class="q-svg-container">
+                    <svg width="200" height="120" viewBox="0 0 200 120" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <line x1="20" y1="100" x2="180" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="10" x2="20" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="50" x2="160" y2="50" stroke="#10B981" stroke-width="3"/>
+                      <text x="5" y="15" font-size="12" font-weight="bold">V</text>
+                      <text x="185" y="115" font-size="12" font-weight="bold">t</text>
+                    </svg>
+                </div>`, 
+            options: ["Ela está a aumentar o ritmo cardíaco.", "Ela mantém a velocidade constante, logo o seu movimento é MRU (Aceleração = 0).", "Ela parou totalmente e deitou-se.", "A pessoa inverteu o sentido da corrida."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Reta horizontal no gráfico V significa que não sobe nem desce. Velocidade fixa. Ou seja, Movimento Retilíneo Uniforme.", 
+                otherOptions: ["Se a linha estivesse no zero, sim, estaria parada. Se estiver noutro valor, está em MRU."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: `Duas parábolas no gráfico S x t. A parábola A tem a boca 'muito fechada' (estreita e esticada em altura). A parábola B é 'muito aberta' (larga e achatada). Qual dos corpos tem a maior aceleração em módulo?
+                <div class="q-svg-container">
+                    <svg width="200" height="120" viewBox="0 0 200 120" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <line x1="20" y1="100" x2="180" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="10" x2="20" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <path d="M 20 100 Q 60 90 90 20" fill="none" stroke="#EF4444" stroke-width="3"/> <!-- A -->
+                      <path d="M 20 100 Q 100 90 160 20" fill="none" stroke="#3B82F6" stroke-width="3"/> <!-- B -->
+                      <text x="75" y="25" font-size="12" font-weight="bold" fill="#EF4444">A</text>
+                      <text x="165" y="25" font-size="12" font-weight="bold" fill="#3B82F6">B</text>
+                      <text x="5" y="15" font-size="12" font-weight="bold">S</text>
+                      <text x="185" y="115" font-size="12" font-weight="bold">t</text>
+                    </svg>
+                </div>`, 
+            options: ["O corpo B (achatado).", "O corpo A (estreito/vertical).", "As acelerações são iguais, pois ambas são parábolas.", "Parábolas não informam aceleração."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "A 'abertura' da parábola S x t está ligada à aceleração (termos de t²). Quanto mais fechada/vertical for a curva (sobe mais rápido no espaço com menos tempo), MAIOR e mais brutal é a aceleração do corpo.", 
+                otherOptions: ["B achatado é como um carro a acelerar devagarinho."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: `Atenção máxima: O gráfico V x t de um carro desce desde V = 20 m/s até V = 0 m/s. Fica 0 m/s por 2 segundos. Depois a linha VAI PARA VALORES NEGATIVOS (abaixo do eixo do tempo) até -20 m/s. O que ele fez fisicamente?
+                <div class="q-svg-container">
+                    <svg width="200" height="150" viewBox="0 0 200 150" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <line x1="20" y1="75" x2="180" y2="75" stroke="#0F172A" stroke-width="2"/> <!-- Eixo t no meio -->
+                      <line x1="20" y1="10" x2="20" y2="140" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="20" x2="70" y2="75" stroke="#EF4444" stroke-width="3"/> <!-- 20 a 0 -->
+                      <line x1="70" y1="75" x2="110" y2="75" stroke="#EF4444" stroke-width="3"/> <!-- 0 por 2s -->
+                      <line x1="110" y1="75" x2="160" y2="130" stroke="#EF4444" stroke-width="3"/> <!-- 0 a -20 -->
+                      <text x="2" y="25" font-size="10">20</text>
+                      <text x="2" y="135" font-size="10">-20</text>
+                      <text x="5" y="15" font-size="12" font-weight="bold">V</text>
+                      <text x="185" y="85" font-size="12" font-weight="bold">t</text>
+                    </svg>
+                </div>`, 
+            options: ["Andou para a frente, travou até parar, esperou 2 segundos, meteu a marcha-atrás e acelerou no sentido oposto.", "Andou para a frente, levitou 2 segundos, e afundou.", "Acelerou, bateu num muro por 2 segundos, e furou o muro.", "Nunca se moveu, é tudo irreal."], 
+            correctIndex: 0, 
+            explanation: { 
+                correctText: "Descer o V positivo: travar. Linha no V=0: carro parado em repouso. Linha desce para V negativo: Ele acelera em marcha-atrás (a favor do referencial negativo), ganhando velocidade no sentido retrógrado.", 
+                otherOptions: ["É uma descrição perfeita de um vai-e-volta na estrada."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "No lançamento de um foguete, o gráfico S x t (Posição em relação ao tempo) na subida acelerada seria parecido com que forma matemática?", 
+            options: ["Um triângulo invertido.", "Uma linha reta horizontal.", "Uma semi-parábola com concavidade virada para CIMA (a 'sorrir', pois a > 0).", "Um gráfico circular."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Como o foguete vai a aumentar a velocidade constantemente para o espaço (aceleração forte e positiva), a sua Posição sobe de forma exponencial (não reta). O gráfico é a metade direita de uma parábola feliz.", 
+                otherOptions: ["Incorreto."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Qual das equações horárias a seguir dará OBRIGATORIAMENTE origem a uma RETA (e nunca a uma curva) no gráfico de POSIÇÃO X TEMPO?", 
+            options: ["S = 10 + 2t - 5t²", "S = -5 + 8t", "V = 10 + 2t", "S = 2t²"], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Para que o gráfico S x t seja uma RETA, não pode haver a aceleração (o termo t² tem de estar ausente). Apenas a equação S = -5 + 8t é do 1º grau (linha reta). As outras de posição têm t² (parábolas).", 
+                otherOptions: ["O termo ao quadrado faz sempre uma parábola em gráficos de Posição."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Qual destes eixos num gráfico de Cinemática tradicional é geralmente desenhado no Eixo Horizontal (o eixo das abcissas ou 'X' na matemática)?", 
+            options: ["Velocidade (V)", "Posição (S)", "Tempo (t)", "Aceleração (a)"], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "O Tempo é a variável independente do universo (não para por nada). Na cinemática, o tempo ocupa quase sempre o eixo X (base do gráfico), enquanto S, V e a ficam no eixo Y.", 
+                otherOptions: ["As outras ficam sempre no eixo vertical (Y)."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: `O velocímetro de um carro está estragado, mas ele tem um computador que desenhou o gráfico S x t da viagem. O gráfico é uma linha reta que passa nos pontos (t=0s, S=10m) e (t=5s, S=30m). Qual a velocidade do carro (lembra-te: inclinação da reta = velocidade)?
+                <div class="q-svg-container">
+                    <svg width="200" height="120" viewBox="0 0 200 120" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <line x1="20" y1="100" x2="180" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="10" x2="20" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="70" x2="120" y2="20" stroke="#3B82F6" stroke-width="3"/>
+                      <line x1="120" y1="20" x2="120" y2="100" stroke="#64748B" stroke-dasharray="4"/>
+                      <line x1="20" y1="20" x2="120" y2="20" stroke="#64748B" stroke-dasharray="4"/>
+                      <circle cx="20" cy="70" r="4" fill="#0F172A"/>
+                      <circle cx="120" cy="20" r="4" fill="#0F172A"/>
+                      <text x="2" y="75" font-size="10">10</text>
+                      <text x="2" y="25" font-size="10">30</text>
+                      <text x="115" y="115" font-size="10">5</text>
+                      <text x="5" y="15" font-size="12" font-weight="bold">S</text>
+                      <text x="185" y="115" font-size="12" font-weight="bold">t</text>
+                    </svg>
+                </div>`, 
+            options: ["10 m/s", "4 m/s", "2 m/s", "20 m/s"], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "A inclinação é a divisão de ΔS por Δt. ΔS = 30m - 10m = 20m. Δt = 5s - 0s = 5s. Velocidade = 20 / 5 = 4 m/s.", 
+                otherOptions: ["Apenas dividir 30 por 5 falha por ignorar que ele partiu do S=10m."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: `O que o Sinal da área debaixo do gráfico V x t significa? Se a área calculada for ABAIXO do eixo do tempo (uma figura desenhada nos valores negativos de velocidade), o que dizemos do Deslocamento (ΔS)?
+                <div class="q-svg-container">
+                    <svg width="200" height="120" viewBox="0 0 200 120" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <rect x="60" y="40" width="80" height="40" fill="#FEE2E2" />
+                      <line x1="20" y1="40" x2="180" y2="40" stroke="#0F172A" stroke-width="2"/> <!-- Eixo t em cima -->
+                      <line x1="20" y1="10" x2="20" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="60" y1="80" x2="140" y2="80" stroke="#EF4444" stroke-width="3"/>
+                      <line x1="60" y1="40" x2="60" y2="80" stroke="#64748B" stroke-dasharray="4"/>
+                      <line x1="140" y1="40" x2="140" y2="80" stroke="#64748B" stroke-dasharray="4"/>
+                      <text x="5" y="15" font-size="12" font-weight="bold">V</text>
+                      <text x="185" y="35" font-size="12" font-weight="bold">t</text>
+                    </svg>
+                </div>`, 
+            options: ["O deslocamento foi em linha reta.", "O deslocamento foi Zero absoluto.", "O deslocamento (ΔS) também é Negativo, indicando que o corpo andou 'para trás' (contra o referencial).", "Não existe área negativa na física."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Na física, áreas geométricas de V x t abaixo do eixo têm sinal negativo, traduzindo fielmente que o objeto estava em movimento Retrógrado (recuando quilómetros em vez de avançar).", 
+                otherOptions: ["A matemática pura rejeita áreas negativas, mas a vetorial cinemática exige esse sinal."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: `Num gráfico de Velocidade (V x t) em forma de V (a reta desce do 10m/s ao 0m/s e depois volta a subir ao 10m/s, formando um triângulo em baixo). O que houve com a ACELERAÇÃO?
+                <div class="q-svg-container">
+                    <svg width="200" height="120" viewBox="0 0 200 120" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <line x1="20" y1="100" x2="180" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="10" x2="20" y2="100" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="20" y1="20" x2="100" y2="100" stroke="#F59E0B" stroke-width="3"/>
+                      <line x1="100" y1="100" x2="180" y2="20" stroke="#F59E0B" stroke-width="3"/>
+                      <text x="2" y="25" font-size="10">10</text>
+                      <text x="5" y="15" font-size="12" font-weight="bold">V</text>
+                      <text x="185" y="115" font-size="12" font-weight="bold">t</text>
+                    </svg>
+                </div>`, 
+            options: ["Foi sempre negativa, pois desceu.", "A aceleração MUDOU bruscamente de valor (de negativa, a travar, para positiva, a acelerar no Vértice do gráfico).", "Foi sempre nula.", "A aceleração era de 10 m/s²."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Para a reta da velocidade (o eixo Y) parar de descer (travar) e de repente voltar a subir rapidamente para cima, o motorista teve de tirar o pé do travão e pisar fundo no acelerador. A Aceleração mudou de sinal bruscamente.", 
+                otherOptions: ["Se a reta fosse uma linha só a passar pelo zero, a aceleração manter-se-ia a mesma (reta única)."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Resumo Dourado da Cinemática Gráfica para as provas do IFCE: Quando tu precisares de encontrar a DISTÂNCIA que o carro andou sem saber a fórmula de cor, para que gráfico deves olhar desesperadamente e calcular a ÁREA da figura?", 
+            options: ["Gráfico a x t (Aceleração x Tempo)", "Gráfico da Força.", "Gráfico V x t (Velocidade x Tempo).", "Gráfico S x t (Posição x Tempo)"], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "O salva-vidas oficial do IFCE: Calcular a Área sob o gráfico V x t resolve quase 90% dos problemas de encontrar a Distância ou o Deslocamento (ΔS) numa prova de física sem precisares usar o Sorvetão de cor.", 
+                otherOptions: ["Errar qual gráfico dá a Área é um erro fatal."] 
+            } 
+        }
+    ];
+
+    /* --- GESTÃO DE ESTADO (STATE) --- */
+    const quizState = {
+        currentIndex: 0,
+        userAnswers: new Array(questionsDatabase.length).fill(null),
+        confettiAnimationId: null
+    };
+
+    /* --- FUNCIONALIDADES DE PESQUISA (TEORIA) --- */
+    function initializeSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const contentGroups = document.querySelectorAll('.content-group');
+        const noResultsMsg = document.getElementById('no-results');
+
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', function(event) {
+            const searchTerm = normalizeText(event.target.value);
+            let totalVisibleElements = 0;
+            
+            contentGroups.forEach(group => {
+                const groupContent = normalizeText(group.textContent);
+                const isMatch = groupContent.includes(searchTerm);
+                
+                group.style.display = isMatch ? 'flex' : 'none';
+                if (isMatch) totalVisibleElements++;
+            });
+            
+            noResultsMsg.style.display = totalVisibleElements === 0 ? 'block' : 'none';
+        });
+    }
+
+    function normalizeText(text) {
+        return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    /* --- CONTROLO DE VISTAS (VIEWS) --- */
+    function changeApplicationView(viewName) {
+        const views = ['viewExplanation', 'viewPractice', 'viewResult'];
+        
+        views.forEach(viewId => document.getElementById(viewId).classList.remove('active'));
+        
+        const quizFooter = document.getElementById('quizFooter');
+        if (quizFooter) quizFooter.style.display = 'none';
+
+        if (viewName === 'explanation') {
+            document.getElementById('viewExplanation').classList.add('active');
+            document.getElementById('btnExp').classList.add('active');
+            document.getElementById('btnPrac').classList.remove('active');
+        } else if (viewName === 'practice') {
+            document.getElementById('viewPractice').classList.add('active');
+            if (quizFooter) quizFooter.style.display = 'flex';
+            document.getElementById('btnExp').classList.remove('active');
+            document.getElementById('btnPrac').classList.add('active');
+            
+            renderCurrentQuestion();
+            renderNavigationMap();
+        } else if (viewName === 'result') {
+            document.getElementById('viewResult').classList.add('active');
+        }
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* --- GERAÇÃO INTERFACE DO QUIZ --- */
+    function getDifficultyBadgeClass(level) {
+        const mapping = { 'Fácil': 'dif-facil', 'Médio': 'dif-medio', 'Difícil': 'dif-dificil' };
+        return mapping[level] || 'dif-facil';
+    }
+
+    function buildOptionsHTML(question, selectedAnswerIndex) {
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        return question.options.map((optionText, optionIndex) => {
+            let cssClass = '';
+            
+            if (selectedAnswerIndex !== null) {
+                if (optionIndex === question.correctIndex) cssClass = 'correct';
+                else if (optionIndex === selectedAnswerIndex) cssClass = 'wrong';
+                else cssClass = 'disabled';
+            }
+
+            const isDisabled = selectedAnswerIndex !== null ? 'disabled' : '';
+
+            return `
+                <button class="option-btn ${cssClass}" onclick="handleOptionSelection(${optionIndex})" ${isDisabled}>
+                    <div class="opt-circle">${alphabet[optionIndex]}</div>
+                    <div>${optionText}</div>
+                </button>
+            `;
+        }).join('');
+    }
+
+    function buildFeedbackHTML(question, selectedAnswerIndex) {
+        const isCorrect = selectedAnswerIndex === question.correctIndex;
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        const titleClass = isCorrect ? 'success' : 'error';
+        const titleText = isCorrect ? '✅ Interpretação Correta!' : '❌ Diagnóstico de Falha Gráfica!';
+        
+        const distortionsHTML = question.explanation.otherOptions.map((explanationText, idx) => {
+            if (idx === question.correctIndex) return '';
+            return `<div class="feedback-item wrong-opt"><strong>${alphabet[idx]})</strong> ${explanationText}</div>`;
+        }).join('');
+
+        return `
+            <div class="feedback-box show">
+                <div class="feedback-title ${titleClass}" style="color: ${isCorrect ? 'var(--correct-border)' : 'var(--wrong-border)'}">${titleText}</div>
+                <div class="feedback-item correct-opt"><strong>A Verdade Gráfica:</strong> ${question.options[question.correctIndex]}</div>
+                <div style="margin-top:15px;font-size:1rem;color:var(--text-color);margin-bottom:15px;font-weight:600;">${question.explanation.correctText}</div>
+                <div style="margin-top:15px;border-top:2px dashed var(--border-color);padding-top:15px;">
+                    <small style="color:var(--text-color);"><strong>Análise dos Desvios:</strong></small>
+                    ${distortionsHTML}
+                </div>
+            </div>
+        `;
+    }
+
+    function renderCurrentQuestion() {
+        const container = document.getElementById('quizContainer');
+        if (!container) return;
+
+        const question = questionsDatabase[quizState.currentIndex];
+        const selectedAnswerIndex = quizState.userAnswers[quizState.currentIndex];
+        const badgeClass = getDifficultyBadgeClass(question.level);
+        
+        let feedbackHTML = selectedAnswerIndex !== null ? buildFeedbackHTML(question, selectedAnswerIndex) : '';
+
+        container.innerHTML = `
+            <div class="quiz-question-card">
+                <span class="difficulty-badge ${badgeClass}">${question.level}</span>
+                <div style="margin-bottom:25px;">
+                    <span class="quiz-question-counter">QUESTÃO ${quizState.currentIndex + 1} DE ${questionsDatabase.length}</span>
+                    <h2 class="quiz-question-text">${question.text}</h2>
+                </div>
+                <div class="options-list">
+                    ${buildOptionsHTML(question, selectedAnswerIndex)}
+                </div>
+                ${feedbackHTML}
+            </div>
+        `;
+        
+        updateNavigationButtons();
+    }
+
+    /* --- LÓGICA DO QUIZ --- */
+    function handleOptionSelection(selectedIndex) {
+        if (quizState.userAnswers[quizState.currentIndex] !== null) return;
+        
+        quizState.userAnswers[quizState.currentIndex] = selectedIndex;
+        const isCorrect = selectedIndex === questionsDatabase[quizState.currentIndex].correctIndex;
+        
+        if (isCorrect) startSuccessAnimation();
+        else triggerErrorShakeEffect();
+        
+        renderCurrentQuestion();
+        renderNavigationMap();
+    }
+
+    function triggerErrorShakeEffect() {
+        const container = document.getElementById('quizContainer');
+        if (container) { 
+            container.classList.remove('shake-effect'); 
+            void container.offsetWidth; 
+            container.classList.add('shake-effect'); 
+            setTimeout(() => container.classList.remove('shake-effect'), 500); 
+        }
+    }
+
+    /* --- ANIMAÇÕES (CONFETTI) --- */
+    function startSuccessAnimation() {
+        const duration = 1500;
+        const end = Date.now() + duration;
+        
+        stopSuccessAnimation();
+        
+        function animateFrame() {
+            if(window.confetti && typeof confetti === 'function') {
+                const config = { particleCount: 5, spread: 55, colors: ['#3B82F6', '#1D4ED8', '#F59E0B', '#10B981'] };
+                confetti({ ...config, angle: 60, origin: { x: 0, y: 0.6 } });
+                confetti({ ...config, angle: 120, origin: { x: 1, y: 0.6 } });
+            }
+            if (Date.now() < end) quizState.confettiAnimationId = requestAnimationFrame(animateFrame);
+        }
+        animateFrame();
+    }
+
+    function stopSuccessAnimation() {
+        if (window.confetti && typeof confetti.reset === 'function') confetti.reset(); 
+        if (quizState.confettiAnimationId) {
+            cancelAnimationFrame(quizState.confettiAnimationId);
+            quizState.confettiAnimationId = null;
+        }
+    }
+
+    /* --- NAVEGAÇÃO MAPA --- */
+    function renderNavigationMap() {
+        const mapContainer = document.getElementById('qMap');
+        if (!mapContainer) return;
+        
+        mapContainer.innerHTML = questionsDatabase.map((question, index) => {
+            const isCurrent = index === quizState.currentIndex;
+            const userAnswer = quizState.userAnswers[index];
+            const hasAnswered = userAnswer !== null;
+            const isCorrect = userAnswer === question.correctIndex;
+            
+            let cssClass = 'map-dot';
+            if (isCurrent) cssClass += ' active';
+            if (hasAnswered) cssClass += isCorrect ? ' answered-correct' : ' answered-wrong';
+            
+            return `<div class="${cssClass}" onclick="goToQuestion(${index})">${index + 1}</div>`;
+        }).join('');
+        
+        setTimeout(() => { 
+            const activeDot = mapContainer.querySelector('.map-dot.active'); 
+            if (activeDot) activeDot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); 
+        }, 50);
+    }
+
+    function goToQuestion(targetIndex) { 
+        stopSuccessAnimation();
+        quizState.currentIndex = targetIndex; 
+        renderCurrentQuestion(); 
+        renderNavigationMap(); 
+    }
+    
+    function navigateQuestion(directionOffset) { 
+        const nextIndex = quizState.currentIndex + directionOffset; 
+        if (nextIndex >= 0 && nextIndex < questionsDatabase.length) goToQuestion(nextIndex); 
+    }
+
+    function updateNavigationButtons() {
+        const btnPrev = document.getElementById('btnPrev');
+        const btnNext = document.getElementById('btnNext');
+        
+        if (btnPrev) btnPrev.disabled = (quizState.currentIndex === 0);
+        
+        if (btnNext) {
+            const isLastQuestion = quizState.currentIndex === questionsDatabase.length - 1;
+            if (isLastQuestion) { 
+                btnNext.textContent = "Finalizar Avaliação"; 
+                btnNext.onclick = finishQuiz; 
+            } else { 
+                btnNext.textContent = "Próxima ➡️"; 
+                btnNext.onclick = () => navigateQuestion(1); 
+            }
+        }
+    }
+
+    /* --- CÁLCULO DE RESULTADOS --- */
+    function calculateStars(percent) {
+        if (percent === 100) return "⭐⭐⭐⭐⭐";
+        if (percent >= 80) return "⭐⭐⭐⭐";
+        if (percent >= 60) return "⭐⭐⭐";
+        if (percent >= 40) return "⭐⭐";
+        if (percent > 0) return "⭐";
+        return "🌑"; // zero stars
+    }
+
+    function finishQuiz() {
+        const unansweredCount = quizState.userAnswers.filter(answer => answer === null).length;
+        
+        if (unansweredCount > 0) {
+            const confirmMessage = `Existem ${unansweredCount} questões por responder. Quer terminar mesmo assim (as em branco serão dadas como erradas)?`;
+            if (!confirm(confirmMessage)) return;
+        }
+
+        stopSuccessAnimation();
+
+        const correctAnswersCount = quizState.userAnswers.filter((answer, index) => answer === questionsDatabase[index].correctIndex).length;
+        const totalQuestions = questionsDatabase.length;
+        const percentageScore = Math.round((correctAnswersCount / totalQuestions) * 100);
+        const isApproved = percentageScore >= 80;
+        
+        renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved);
+        changeApplicationView('result');
+    }
+
+    function renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved) {
+        document.getElementById('finalPercent').textContent = `${percentageScore}%`;
+        document.getElementById('finalScoreText').textContent = `Acertaste ${correctAnswersCount} de ${totalQuestions}`;
+        document.getElementById('finalStars').textContent = calculateStars(percentageScore);
+        
+        const reviewContainer = document.getElementById('review-container');
+        const actionButtonsContainer = document.getElementById('action-buttons');
+        
+        let summaryHTML = '';
+
+        if (isApproved) {
+            summaryHTML += `
+                <div class="result-summary-box success">
+                    <strong>🎉 VISÃO MATEMÁTICA AGUÇADA!</strong> O teu domínio na leitura de Gráficos e Cálculo de Áreas está forte. Estás preparado para decifrar qualquer parábola ou triângulo no IFCE.
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REPETIR PARA 100%</button>`;
+        } else {
+            summaryHTML += `
+                <div class="result-summary-box error">
+                    <strong>⚠️ ILUSÃO ÓTICA!</strong> Foste avaliado abaixo da meta (80%). Revisa urgente a regra: "A área do gráfico V x t é o Deslocamento" e não te deixes enganar pelas retas.
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REFAZER AVALIAÇÃO</button>`;
+        }
+        
+        if (correctAnswersCount < totalQuestions) {
+            summaryHTML += '<h4 style="margin-bottom:15px; color:var(--text-color); font-size:1.15rem;">Revisão Gráfica e Analítica:</h4>';
+            questionsDatabase.forEach((question, index) => {
+                const userAnswerIndex = quizState.userAnswers[index];
+                if (userAnswerIndex !== question.correctIndex) {
+                    const userAnswerText = userAnswerIndex === null ? "Deixaste em branco" : question.options[userAnswerIndex];
+                    const correctAnswerText = question.options[question.correctIndex];
+                    
+                    // Remover os eventuais SVG do título na revisão para não poluir o layout final
+                    let plainQuestionText = question.text.replace(/<div class="q-svg-container">[\s\S]*?<\/div>/gi, ' [Gráfico Omitido] ');
+
+                    summaryHTML += `
+                        <div class="error-log-item">
+                            <strong style="color:var(--theme-dark); font-size:1.05rem; display:block; margin-bottom:8px;">Q${index + 1}: ${plainQuestionText}</strong>
+                            <span style="color:var(--wrong-border); font-weight: 600; display:block; margin-bottom:5px;">A tua análise: ${userAnswerText}</span>
+                            <span style="color:var(--correct-border); font-weight: 700; display:block;">O Fato Correto: ${correctAnswerText}</span>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        reviewContainer.innerHTML = summaryHTML;
+    }
+
+    function resetQuiz() { 
+        quizState.userAnswers = new Array(questionsDatabase.length).fill(null); 
+        quizState.currentIndex = 0; 
+        changeApplicationView('practice'); 
+    }
+    
+    // START APPLICATION
+    initializeSearch();
+    changeApplicationView('explanation');
+</script>
+</body>
+</html>

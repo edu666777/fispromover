@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Física: Calor e Temperatura - Promover</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* --- VARIÁVEIS DE COR E TEMA: FOGO & GELO (Termologia) --- */
+        :root {
+            --bg-color: #FFF1F2; /* Rose 50 (Fundo quente muito claro) */
+            --text-color: #4C0519; /* Rose 950 (Texto bem escuro) */
+            --border-color: #881337; /* Rose 900 (Contorno escuro) */
+            --white: #FFFFFF;
+            
+            --theme-light: #FFE4E6; /* Rose 200 */
+            --theme-medium: #F43F5E; /* Rose 500 (Vermelho Calor) */
+            --theme-dark: #E11D48; /* Rose 600 */
+            --theme-contrast: #F97316; /* Laranja (Fogo/Atenção) */
+            --theme-accent: #0EA5E9; /* Ciano (Frio/Gelo/Contraste) */
+            --theme-text-active: #FFFFFF;
+            
+            --correct-bg: #D1FAE5;
+            --correct-border: #059669;
+            --wrong-bg: #FFE4E6;
+            --wrong-border: #BE123C;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 15px 120px 15px;
+            background-image: linear-gradient(rgba(225, 29, 72, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(225, 29, 72, 0.1) 1px, transparent 1px);
+            background-size: 25px 25px;
+        }
+
+        /* --- ANIMAÇÕES --- */
+        @keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1) rotate(-5deg); color: var(--theme-contrast); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+        .pulse-effect { animation: pulse 2s infinite; display: inline-block; }
+        .shake-effect { animation: shake 0.4s ease-in-out; }
+
+        /* --- LAYOUT PRINCIPAL --- */
+        .container { width: 100%; max-width: 650px; display: flex; flex-direction: column; gap: 25px; }
+        .logo-header { display: flex; flex-direction: column; align-items: center; padding: 15px 0 25px 0; text-align: center; }
+        .css-logo { font-size: 1.5rem; font-weight: 900; color: var(--theme-text-active); text-transform: uppercase; letter-spacing: -1px; border: 3px solid var(--border-color); padding: 8px 24px; border-radius: 12px; background: var(--theme-dark); box-shadow: 4px 4px 0px var(--theme-contrast); margin-bottom: 15px; transform: rotate(-2deg); }
+        h1 { font-size: 2rem; font-weight: 900; color: var(--text-color); text-transform: uppercase; letter-spacing: -0.5px; line-height: 1.1; }
+        .subtitle { font-size: 1rem; color: var(--white); font-weight: 700; margin-top: 5px; background: var(--theme-contrast); padding: 4px 12px; border-radius: 8px; border: 2px solid var(--border-color); }
+
+        /* --- NAVEGAÇÃO --- */
+        .toggle-container { background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 6px; display: flex; box-shadow: 4px 4px 0px var(--border-color); position: sticky; top: 15px; z-index: 50; }
+        .toggle-btn { flex: 1; border: none; background: none; padding: 12px 0; border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.05rem; color: var(--text-color); cursor: pointer; transition: all 0.2s ease; }
+        .toggle-btn.active { background-color: var(--theme-dark); color: var(--theme-text-active); border: 2px solid var(--border-color); box-shadow: 2px 2px 0px var(--border-color); }
+
+        .view-section { display: none; animation: fadeIn 0.3s ease; flex-direction: column; gap: 35px; }
+        .view-section.active { display: flex; }
+
+        /* --- PESQUISA --- */
+        .search-container { position: relative; width: 100%; }
+        .search-input { width: 100%; padding: 16px 20px 16px 55px; border: 3px solid var(--border-color); border-radius: 12px; background-color: var(--white); font-family: 'Poppins', sans-serif; font-size: 1.05rem; font-weight: 600; color: var(--text-color); box-shadow: 4px 4px 0px var(--border-color); outline: none; transition: all 0.2s ease; }
+        .search-input:focus { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--theme-contrast); border-color: var(--theme-dark); }
+        .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 1.4rem; }
+        #no-results { text-align: center; color: var(--wrong-border); font-weight: 800; display: none; background: var(--wrong-bg); padding: 15px; border: 3px solid var(--wrong-border); border-radius: 8px; }
+
+        /* --- TEORIA --- */
+        .content-group { display: flex; flex-direction: column; position: relative; padding-top: 15px; }
+        .section-badge { display: inline-flex; align-items: center; gap: 10px; background-color: var(--theme-dark); color: var(--white); font-size: 1.1rem; font-weight: 800; padding: 8px 20px; border-radius: 8px; border: 3px solid var(--border-color); box-shadow: 3px 3px 0px var(--theme-contrast); text-transform: uppercase; position: absolute; top: -5px; left: 15px; z-index: 10; transform: rotate(-1.5deg); }
+        .theory-box { display: flex; flex-direction: column; padding: 35px 25px 25px 35px; border-radius: 12px; background-color: var(--white); border: 3px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); font-weight: 500; font-size: 1rem; line-height: 1.7; position: relative; overflow: hidden; gap: 20px; border-left: 14px solid var(--theme-medium); }
+        .theory-box h3 { font-size: 1.35rem; font-weight: 900; color: var(--theme-dark); margin-bottom: 5px; display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px; }
+        .theory-box h4 { font-size: 1.1rem; font-weight: 800; color: var(--text-color); margin-top: 10px; border-bottom: 2px solid var(--theme-light); padding-bottom: 5px; }
+        
+        .inline-example { display: block; width: fit-content; max-width: 100%; margin-top: 6px; margin-bottom: 6px; padding: 12px 20px; background-color: var(--theme-light); border: 2px solid var(--border-color); border-radius: 8px; font-size: 1.4rem; color: var(--theme-dark); font-weight: 900; letter-spacing: 1px; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); text-align: center; }
+        .visual-area { background: var(--bg-color); border: 3px dashed var(--theme-medium); border-radius: 12px; padding: 25px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; width: 100%; }
+        
+        .highlight-box { background-color: #FEF3C7; border: 3px solid var(--border-color); border-left: 8px solid var(--theme-contrast); padding: 18px 20px; border-radius: 8px; font-size: 0.95rem; color: #78350F; font-weight: 600; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); }
+        .highlight-box.blue { background-color: #E0F2FE; border-left-color: var(--theme-accent); color: #0C4A6E; }
+
+        /* --- CARDS DE FÓRMULAS --- */
+        .g-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; width: 100%; margin-top: 10px; }
+        .g-card { flex: 1 1 calc(50% - 15px); min-width: 130px; border-radius: 12px; padding: 15px 10px; text-align: center; border: 3px solid var(--border-color); display: flex; flex-direction: column; align-items: center; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); background-color: var(--white); transition: transform 0.2s; }
+        .g-card:hover { transform: translateY(-3px); }
+        .g-card.full-width { flex: 1 1 100%; max-width: 280px; }
+        .g-icon { font-size: 2.5rem; margin-bottom: 8px; line-height: 1; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.15)); }
+        .g-title { font-size: 1.05rem; font-weight: 900; margin-bottom: 4px; text-transform: uppercase; color: var(--theme-dark); }
+        .g-formula { font-size: 1.15rem; font-weight: 800; color: var(--theme-text-active); margin-bottom: 4px; line-height: 1.2; background: var(--theme-dark); padding: 4px 10px; border-radius: 6px; border: 2px solid var(--border-color); }
+        .g-desc { font-size: 0.85rem; font-weight: 600; color: var(--text-color); margin-top: 6px; line-height: 1.3; }
+
+        /* Elemento para imagens SVG */
+        .q-svg-container { display: flex; justify-content: center; margin: 15px 0; }
+
+        /* --- BOTÕES GERAIS --- */
+        .btn-action { width: 100%; padding: 20px; background-color: var(--theme-dark); color: white; border: 3px solid var(--border-color); border-radius: 12px; font-size: 1.15rem; font-weight: 900; cursor: pointer; box-shadow: 6px 6px 0px var(--theme-contrast); transition: all 0.1s; text-transform: uppercase; margin-top: 10px; }
+        .btn-action:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0px var(--theme-contrast); }
+
+        /* --- QUIZ UI --- */
+        .difficulty-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; border: 2px solid var(--border-color); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
+        .dif-facil { background: #D1FAE5; color: #065F46; }
+        .dif-medio { background: #FEF08A; color: #713F12; }
+        .dif-dificil { background: #FECACA; color: #7F1D1D; }
+
+        .question-map { display: flex; gap: 8px; overflow-x: auto; padding: 10px 5px; margin-bottom: 20px; white-space: nowrap; scroll-behavior: smooth; }
+        .question-map::-webkit-scrollbar { display: none; }
+        .map-dot { min-width: 38px; height: 38px; border: 2px solid var(--border-color); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; color: var(--theme-dark); background: white; cursor: pointer; transition: all 0.2s; }
+        .map-dot.active { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); transform: scale(1.15); }
+        .map-dot.answered-correct { background-color: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .map-dot.answered-wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .quiz-question-card { border: 4px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); padding: 30px; border-radius: 16px; background: var(--white); }
+        .quiz-question-counter { font-size: 0.85rem; font-weight: 900; color: var(--theme-dark); letter-spacing: 1px; }
+        .quiz-question-text { font-size: 1.15rem; margin-top: 8px; color: var(--text-color); font-weight: 800; line-height: 1.5; margin-bottom: 20px;}
+
+        .option-btn { display: flex; align-items: center; width: 100%; padding: 18px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.1s ease; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 600; text-align: left; color: var(--text-color); }
+        .option-btn:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px var(--theme-contrast); }
+        .opt-circle { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--border-color); margin-right: 15px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.05rem; flex-shrink: 0; background: var(--theme-light); color: var(--theme-dark); }
+        .option-btn.correct { background-color: var(--correct-bg); border-color: var(--correct-border); box-shadow: 3px 3px 0px var(--correct-border); }
+        .option-btn.correct .opt-circle { background-color: var(--correct-border); color: white; border-color: var(--correct-border); }
+        .option-btn.wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); opacity: 0.9; box-shadow: none; }
+        .option-btn.wrong .opt-circle { background-color: var(--wrong-border); color: white; border-color: var(--wrong-border); }
+        .option-btn.disabled { pointer-events: none; opacity: 0.7; }
+
+        /* --- FEEDBACK DA QUESTÃO --- */
+        .feedback-box { display: block; margin-top: 25px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 25px; animation: slideUp 0.3s ease-out; box-shadow: 5px 5px 0px rgba(0,0,0,0.1); }
+        .feedback-title { font-weight: 900; text-transform: uppercase; font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .feedback-item { margin-bottom: 10px; font-size: 0.95rem; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); line-height: 1.5; font-weight: 500; }
+        .feedback-item.correct-opt { background: var(--correct-bg); border-color: var(--correct-border); color: #064E3B; font-weight: 700; box-shadow: 3px 3px 0px var(--correct-border); }
+        .feedback-item.wrong-opt { background: #FFE4E6; border-color: #BE123C; color: #7F1D1D; border-style: dashed; margin-top: 8px; }
+
+        /* --- RESULTADOS --- */
+        .result-card { background: white; border: 4px solid var(--border-color); border-radius: 16px; padding: 40px 20px; box-shadow: 8px 8px 0px var(--border-color); margin-bottom: 30px; text-align: center; }
+        .stars-container { font-size: 2.5rem; margin: 15px 0; letter-spacing: 5px; }
+        .percentage-big { font-size: 5rem; font-weight: 900; color: var(--theme-dark); line-height: 1; margin: 15px 0; text-shadow: 4px 4px 0px var(--theme-contrast); }
+        
+        .result-summary-box { padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 3px solid; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); }
+        .result-summary-box.success { background: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .result-summary-box.error { background: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .error-log-item { margin-bottom: 15px; padding: 20px; background: var(--bg-color); border-radius: 12px; border: 3px dashed var(--theme-medium); text-align: left;}
+
+        /* --- RODAPÉ DE NAVEGAÇÃO --- */
+        .quiz-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--white); border-top: 3px solid var(--border-color); padding: 15px 20px; display: none; justify-content: center; gap: 20px; z-index: 100; box-shadow: 0px -4px 10px rgba(0,0,0,0.05); }
+        .nav-btn { padding: 15px 30px; border-radius: 12px; font-weight: 900; border: 3px solid var(--border-color); cursor: pointer; box-shadow: 3px 3px 0px var(--border-color); font-family: 'Poppins', sans-serif; text-transform: uppercase; background: white; color: var(--text-color); font-size: 1rem; transition: transform 0.1s; }
+        .nav-btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 0px 0px 0px transparent; }
+        .btn-next { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); border-color: var(--border-color); }
+        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <header class="logo-header">
+            <div class="css-logo"><span class="pulse-effect">🌡️</span> PROMOVER</div>
+            <h1>Física / 9º Ano</h1>
+            <p class="subtitle">Termologia: Calor e Temperatura</p>
+        </header>
+
+        <div class="toggle-container">
+            <button class="toggle-btn active" id="btnExp" onclick="changeApplicationView('explanation')">📘 Teoria</button>
+            <button class="toggle-btn" id="btnPrac" onclick="changeApplicationView('practice')">🧠 Prática (30)</button>
+        </div>
+
+        <!-- VISTA: TEORIA -->
+        <main id="viewExplanation" class="view-section active">
+            
+            <div class="search-container">
+                <span class="search-icon" aria-hidden="true">🔍</span>
+                <input type="text" id="searchInput" class="search-input" aria-label="Pesquisar conteúdo" placeholder="Pesquisar conceito... (ex: Celsius, Equilíbrio, Convecção)">
+            </div>
+            <div id="no-results"><p>😕 Termo não encontrado na teoria térmica.</p></div>
+
+            <section class="content-group">
+                <div class="section-badge">🔥 1. O Grande Mito do Dia a Dia</div>
+                <article class="theory-box search-target">
+                    <h3>Calor NÃO é Temperatura!</h3>
+                    <p>Em física, dizer "Hoje estou com muito calor!" ou "Fecha a janela para o frio não entrar!" é cientificamente errado. Tu não "tens" calor, e o frio não "entra".</p>
+                    
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li><strong>Temperatura:</strong> É uma grandeza que mede o grau de <strong>agitação das moléculas</strong> de um corpo. Se as moléculas tremem muito, está quente. Se tremem pouco, está frio.</li>
+                        <li><strong>Calor:</strong> É <strong>Energia Térmica EM TRÂNSITO</strong>. O calor é apenas o fluxo de energia que viaja sempre, obrigatoriamente, do corpo MAIS quente para o corpo MAIS frio, até atingirem o <strong>Equilíbrio Térmico</strong> (mesma temperatura).</li>
+                    </ul>
+
+                    <div class="highlight-box blue">
+                        <strong>O Frio é uma ilusão:</strong> O frio não existe na física como energia. "Sentir frio" é apenas a sensação do teu corpo a <strong>perder calor</strong> rapidamente para o ambiente exterior.
+                    </div>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">🌡️ 2. As Escalas Termométricas</div>
+                <article class="theory-box search-target">
+                    <h3>Celsius, Fahrenheit e Kelvin</h3>
+                    <p>O mundo usa o Celsius (ºC), os EUA usam o Fahrenheit (ºF) e a Ciência usa o Kelvin (K).</p>
+                    
+                    <div class="inline-example" style="font-size: 1.4rem; padding: 15px;">
+                        <span style="color: var(--theme-accent); font-weight: 900;">C</span> / 5 = 
+                        (<span style="color: var(--theme-medium); font-weight: 900;">F</span> - 32) / 9 = 
+                        (<span style="color: var(--theme-contrast); font-weight: 900;">K</span> - 273) / 5
+                    </div>
+
+                    <div class="visual-area">
+                        <span style="font-size: 0.85rem; font-weight: 700; color: #64748B; text-transform: uppercase; margin-bottom: 10px;">Teorema de Tales na Termometria</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="320" height="220" viewBox="0 0 320 220">
+                            <!-- Linhas de Referência -->
+                            <line x1="40" y1="40" x2="280" y2="40" stroke="#94A3B8" stroke-dasharray="4"/>
+                            <line x1="40" y1="160" x2="280" y2="160" stroke="#94A3B8" stroke-dasharray="4"/>
+                            
+                            <text x="160" y="30" text-anchor="middle" font-size="11" font-weight="bold" fill="#64748B">Ebulição da Água</text>
+                            <text x="160" y="175" text-anchor="middle" font-size="11" font-weight="bold" fill="#64748B">Fusão do Gelo</text>
+
+                            <!-- Termômetro Celsius -->
+                            <rect x="60" y="30" width="12" height="140" fill="#E0F2FE" stroke="#0EA5E9" stroke-width="2" rx="6"/>
+                            <circle cx="66" cy="165" r="12" fill="#0EA5E9"/>
+                            <rect x="63" y="40" width="6" height="125" fill="#0EA5E9"/>
+                            <text x="66" y="200" text-anchor="middle" font-size="14" font-weight="900" fill="#0EA5E9">ºC</text>
+                            <text x="45" y="45" text-anchor="end" font-size="12" font-weight="bold" fill="#0EA5E9">100</text>
+                            <text x="45" y="165" text-anchor="end" font-size="12" font-weight="bold" fill="#0EA5E9">0</text>
+
+                            <!-- Termômetro Fahrenheit -->
+                            <rect x="154" y="30" width="12" height="140" fill="#FFE4E6" stroke="#F43F5E" stroke-width="2" rx="6"/>
+                            <circle cx="160" cy="165" r="12" fill="#F43F5E"/>
+                            <rect x="157" y="40" width="6" height="125" fill="#F43F5E"/>
+                            <text x="160" y="200" text-anchor="middle" font-size="14" font-weight="900" fill="#F43F5E">ºF</text>
+                            <text x="140" y="45" text-anchor="end" font-size="12" font-weight="bold" fill="#F43F5E">212</text>
+                            <text x="140" y="165" text-anchor="end" font-size="12" font-weight="bold" fill="#F43F5E">32</text>
+
+                            <!-- Termômetro Kelvin -->
+                            <rect x="248" y="30" width="12" height="140" fill="#FEF3C7" stroke="#F59E0B" stroke-width="2" rx="6"/>
+                            <circle cx="254" cy="165" r="12" fill="#F59E0B"/>
+                            <rect x="251" y="40" width="6" height="125" fill="#F59E0B"/>
+                            <text x="254" y="200" text-anchor="middle" font-size="14" font-weight="900" fill="#F59E0B">K</text>
+                            <text x="235" y="45" text-anchor="end" font-size="12" font-weight="bold" fill="#F59E0B">373</text>
+                            <text x="235" y="165" text-anchor="end" font-size="12" font-weight="bold" fill="#F59E0B">273</text>
+                        </svg>
+                    </div>
+
+                    <div class="highlight-box" style="margin-top: 15px;">
+                        <strong>Exemplo Prático:</strong> Vamos converter um dia quente de <strong>30 ºC</strong> para as outras escalas:<br><br>
+                        <strong>Para Kelvin (K):</strong><br>
+                        K = ºC + 273 &rarr; K = 30 + 273 = <strong>303 K</strong><br><br>
+                        <strong>Para Fahrenheit (ºF):</strong><br>
+                        30 / 5 = (F - 32) / 9 &rarr; 6 = (F - 32) / 9 &rarr; 6 &times; 9 = F - 32 &rarr; 54 = F - 32 &rarr; F = 54 + 32 = <strong>86 ºF</strong>
+                    </div>
+                    
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li><strong>Escala Celsius (ºC):</strong> Criada com base na água. Ferve a 100 ºC e congela a 0 ºC.</li>
+                        <li><strong>Zero Absoluto (0 K):</strong> O Kelvin não tem graus (não se diz "graus Kelvin"). O 0 K é o estado em que as moléculas <strong>param completamente</strong>. Não há energia. É o frio extremo do Universo (-273 ºC). Nunca se atinge na vida real!</li>
+                    </ul>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">🌊 3. Propagação do Calor</div>
+                <article class="theory-box search-target">
+                    <h3>Como o Calor viaja?</h3>
+                    <p>A energia térmica foge do corpo quente usando três "transportes" diferentes:</p>
+
+                    <div class="visual-area">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200">
+                            <!-- Fogueira central -->
+                            <path d="M 150 160 Q 130 110 150 70 Q 170 110 150 160" fill="#F59E0B"/>
+                            <path d="M 150 160 Q 140 120 150 90 Q 160 120 150 160" fill="#F43F5E"/>
+                            
+                            <!-- Irradiação (Ondas) -->
+                            <path d="M 110 120 Q 80 120 60 100" fill="none" stroke="#F59E0B" stroke-width="3" stroke-dasharray="4"/>
+                            <path d="M 190 120 Q 220 120 240 100" fill="none" stroke="#F59E0B" stroke-width="3" stroke-dasharray="4"/>
+                            <text x="60" y="90" text-anchor="middle" font-size="12" font-weight="bold" fill="#B45309">IRRADIAÇÃO</text>
+                            
+                            <!-- Convecção (Ar quente sobe) -->
+                            <path d="M 150 60 L 150 20" stroke="#3B82F6" stroke-width="3" marker-end="url(#arrow-conv)"/>
+                            <path d="M 140 20 Q 120 20 120 50 L 120 80" fill="none" stroke="#0EA5E9" stroke-width="2" stroke-dasharray="4" marker-end="url(#arrow-conv-down)"/>
+                            <path d="M 160 20 Q 180 20 180 50 L 180 80" fill="none" stroke="#0EA5E9" stroke-width="2" stroke-dasharray="4" marker-end="url(#arrow-conv-down)"/>
+                            <text x="150" y="15" text-anchor="middle" font-size="12" font-weight="bold" fill="#1D4ED8">CONVECÇÃO</text>
+
+                            <!-- Condução (Barra de metal) -->
+                            <rect x="180" y="140" width="100" height="10" rx="4" fill="#94A3B8"/>
+                            <path d="M 160 145 L 200 145" stroke="#EF4444" stroke-width="4"/>
+                            <text x="240" y="135" text-anchor="middle" font-size="12" font-weight="bold" fill="#B91C1C">CONDUÇÃO</text>
+
+                            <!-- Definições de Setas -->
+                            <defs>
+                                <marker id="arrow-conv" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#3B82F6"/></marker>
+                                <marker id="arrow-conv-down" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#0EA5E9"/></marker>
+                            </defs>
+                        </svg>
+                    </div>
+                    
+                    <div class="g-grid">
+                        <div class="g-card">
+                            <div class="g-icon">🥄🔥</div>
+                            <div class="g-title">1. Condução</div>
+                            <div class="g-desc">Ocorre nos <strong>SÓLIDOS</strong>. A agitação passa de molécula para molécula. Ex: Esquecer a colher de metal na panela quente. (Isolantes evitam isto).</div>
+                        </div>
+                        <div class="g-card">
+                            <div class="g-icon">🍲🌊</div>
+                            <div class="g-title">2. Convecção</div>
+                            <div class="g-desc">Ocorre nos <strong>FLUIDOS (Líquidos e Gases)</strong>. O ar quente (mais leve) sobe, e o ar frio (mais denso) desce. Ex: O ar condicionado.</div>
+                        </div>
+                        <div class="g-card full-width">
+                            <div class="g-icon">☀️🚀</div>
+                            <div class="g-title">3. Irradiação (Radiação)</div>
+                            <div class="g-desc"><strong>A ÚNICA QUE VIAJA NO VÁCUO.</strong> Viaja através de ondas eletromagnéticas. Ex: O calor do Sol que chega à Terra, ou sentires uma lareira.</div>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <button class="btn-action" onclick="changeApplicationView('practice')">
+                Iniciar a Avaliação (30 Questões) ➜
+            </button>
+        </main>
+
+        <!-- VISTA: PRÁTICA (QUIZ) -->
+        <main id="viewPractice" class="view-section">
+            <div style="margin-bottom: 20px; background-color: var(--white); padding: 15px; border-radius: 12px; border: 3px solid var(--border-color); box-shadow: 4px 4px 0px var(--border-color);">
+                <h2 style="color:var(--theme-dark); font-weight:900; margin-bottom: 5px;">A Prova de Fogo - IFCE</h2>
+                <p style="color: var(--theme-contrast); font-size: 0.95rem; font-weight:600;">
+                    30 questões essenciais sobre Calor, Temperatura e Conversões. Cuidado com o vocabulário das escalas! Acerta <strong>80% (24/30)</strong>.
+                </p>
+            </div>
+            
+            <div class="question-map" id="qMap"></div>
+            <div id="quizContainer" style="margin-bottom: 40px;"></div>
+        </main>
+
+        <!-- VISTA: RESULTADOS -->
+        <main id="viewResult" class="view-section">
+            <div class="result-card">
+                <h2 style="font-weight:900; text-transform:uppercase;">Relatório Final</h2>
+                <div class="stars-container" id="finalStars">⭐⭐⭐</div>
+                <div class="percentage-big" id="finalPercent">0%</div>
+                <p style="font-size:1.2rem; font-weight:700; color:#555;" id="finalScoreText">Acertaste 0 de 30</p>
+                <div id="review-container" style="text-align: left; margin-top: 20px;"></div>
+            </div>
+            <div id="action-buttons"></div>
+        </main>
+
+    </div>
+
+    <!-- RODAPÉ DE NAVEGAÇÃO -->
+    <footer class="quiz-footer" id="quizFooter">
+        <button class="nav-btn btn-prev" id="btnPrev" onclick="navigateQuestion(-1)">Anterior</button>
+        <button class="nav-btn btn-next" id="btnNext" onclick="navigateQuestion(1)">Próxima</button>
+    </footer>
+
+<script>
+    /* --- ESTRUTURA DE DADOS (BASE DE QUESTÕES - TERMOLOGIA IFCE) --- */
+    const questionsDatabase = [
+        { 
+            level: "Fácil", 
+            text: "Na linguagem física rigorosa, qual é a definição exata de Temperatura?", 
+            options: ["É a energia que passa de um corpo quente para um frio.", "É a medida macroscópica do grau médio de agitação (energia cinética) das moléculas de um corpo.", "É a quantidade de suor que um corpo produz.", "É o frio que entra no corpo."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Temperatura é apenas um 'termômetro microscópico' que nos diz se os átomos de um corpo estão a vibrar muito (quente) ou pouco (frio).", 
+                otherOptions: ["Energia em trânsito é Calor, não temperatura."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Um aluno no Ceará diz: 'Estou suando porque tenho muito calor no meu corpo'. Porque é que esta frase está CIENTIFICAMENTE ERRADA?", 
+            options: ["Porque ninguém pode ter calor, as pessoas têm frio.", "O corpo humano não transpira por calor, mas sim por humidade.", "O Calor é 'Energia em Trânsito' entre dois corpos com temperaturas diferentes. Um corpo NÃO consegue 'armazenar' calor, ele armazena apenas energia térmica (temperatura).", "O calor só existe nos líquidos."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Corpos têm Temperatura. O Calor só aparece no instante em que a energia decide 'saltar' de um corpo quente para um corpo mais frio.", 
+                otherOptions: ["Incorreto."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Tens um copo de café a 80 ºC e adicionas um cubo de gelo a -5 ºC. Segundo as leis da Termologia, o fluxo natural de calor ocorrerá obrigatoriamente de que forma?", 
+            options: ["O calor viaja do cubo de gelo para o café.", "O frio viaja do cubo de gelo para o café, arrefecendo-o.", "O calor flui do corpo de MAIOR temperatura (café) para o de MENOR temperatura (gelo), até que as temperaturas se igualem.", "Eles trocam calor em direções aleatórias."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Lei Universal: O calor (energia) foge sempre do quente para o frio. Não existe a 'energia do frio' para viajar até ao café; o gelo apenas absorve a energia do café.", 
+                otherOptions: ["O frio não viaja."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Quando o café quente e o gelo da pergunta anterior atingem rigorosamente a mesma temperatura (ex: 20 ºC), as trocas ativas de calor entre eles param. Como se chama este estado na Física?", 
+            options: ["Zero Absoluto.", "Equilíbrio Térmico.", "Isolamento Acústico.", "Calor Específico."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "O Equilíbrio Térmico é o objetivo de toda a troca de calor. Quando T1 = T2, não há mais 'razão' para a energia fluir, e o fluxo macroscópico de calor pára.", 
+                otherOptions: ["Zero absoluto é a falta total de energia (0 K)."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Qual destas grandezas e unidades de medida está INCORRETAMENTE associada no Sistema Internacional (SI) para o estudo da termologia?", 
+            options: ["Temperatura -> Kelvin (K)", "Calor -> Joule (J)", "Temperatura -> Celsius (ºC)", "Trabalho -> Joule (J)"], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Apesar de usarmos os graus Celsius (ºC) todos os dias, a unidade OFICIAL e base no Sistema Internacional (SI) para Temperatura é o Kelvin (K).", 
+                otherOptions: ["Calor é energia, logo mede-se em Joule (ou calorias em alguns contextos)."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "O cientista Lord Kelvin criou a Escala Absoluta (Kelvin) com base num ponto teórico extremo da natureza. O que representa o chamado 'Zero Absoluto' (0 K)?", 
+            options: ["A temperatura em que a água congela no oceano.", "O ponto em que a energia potencial é infinita.", "O estado de repouso molecular absoluto. A energia cinética das partículas atinge o zero; elas deixam completamente de vibrar.", "A temperatura normal do corpo humano."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "O 0 K (que equivale a -273,15 ºC) é o limite mínimo do universo. Se não há movimento/vibração dos átomos, não há temperatura abaixo disso.", 
+                otherOptions: ["A água congela a 273 K (0 ºC)."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Cálculo de Escalas! Sabendo que a fórmula de conversão é T_Kelvin = T_Celsius + 273. Num dia muito quente em Fortaleza, os termómetros marcaram 37 ºC. Qual é este valor registado no Sistema Internacional (em Kelvin)?", 
+            options: ["310 K", "236 K", "37 K", "373 K"], 
+            correctIndex: 0, 
+            explanation: { 
+                correctText: "Basta somar 273 ao valor em Celsius. 37 + 273 = 310 Kelvin. (Lembra-te: nunca digas 'graus' Kelvin).", 
+                otherOptions: ["236K seria se tivesses subtraído (37-273)."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Na temperatura negativa do espaço profundo, um satélite registou a temperatura de 3 K (quase zero absoluto). Quanto seria essa temperatura mortal na escala Celsius? (Usa a relação K = C + 273).", 
+            options: ["-276 ºC", "-270 ºC", "300 ºC", "276 ºC"], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Isolando o C: C = K - 273. Substituindo: C = 3 - 273 = -270 ºC.", 
+                otherOptions: ["Erros algébricos de troca de sinais."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "A escala Fahrenheit (ºF) é muito usada nos Estados Unidos. A fórmula de conversão é C/5 = (F - 32)/9. Se viajares para a Flórida e vires que a piscina está a uns agradáveis 77 ºF, qual é a temperatura em ºC?", 
+            options: ["10 ºC", "20 ºC", "25 ºC", "45 ºC"], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "C/5 = (77 - 32)/9 => C/5 = 45/9 => C/5 = 5 => C = 5 × 5 = 25 ºC.", 
+                otherOptions: ["O erro clássico é esquecer de subtrair o 32 primeiro."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Conversão Clássica do IFCE: O corpo humano saudável mantém a sua temperatura por volta dos 37 ºC. Um médico americano usa um termómetro em Fahrenheit para medir o mesmo doente. Que valor aparecerá no termómetro americano? (Usa C/5 = (F - 32)/9).", 
+            options: ["100 ºF", "98,6 ºF", "80 ºF", "120 ºF"], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "37/5 = (F-32)/9 => 7,4 = (F-32)/9 => 7,4 × 9 = F - 32 => 66,6 = F - 32 => F = 66,6 + 32 = 98,6 ºF.", 
+                otherOptions: ["Muitos alunos acham que 100ºF é a temperatura corporal normal, o que indicaria uma ligeira febre (37,7ºC)."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Se colocares a mão num bloco de madeira a 10 ºC e, logo a seguir, num bloco de ferro também a 10 ºC, o ferro vai parecer-te MUITO MAIS FRIO do que a madeira. Porque é que o nosso cérebro é enganado desta forma?", 
+            options: ["Porque o ferro tem sempre a temperatura mais baixa que o ar.", "O metal é um excelente CONDUTOR de calor. Ele 'rouba' (conduz) a energia térmica da tua pele a 36 ºC de forma brutalmente mais rápida do que a madeira (que é isolante), causando um alarme térmico no teu cérebro.", "Porque o ferro guarda frio no seu interior.", "A madeira produz calor por si só."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "A sensação térmica não mede a temperatura absoluta, mede a RAPIDEZ com que perdes ou ganhas calor. Os metais são ótimos condutores de energia; a madeira é má condutora (isolante).", 
+                otherOptions: ["O ferro e a madeira estavam na mesma temperatura exata."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "A propagação do calor feita OBRIGATORIAMENTE DE MOLÉCULA A MOLÉCULA sem que a matéria saia do lugar (típica dos Sólidos, como quando aqueces a ponta de uma barra de metal) chama-se:", options: ["Convecção", "Radiação", "Condução", "Fusão"], correctIndex: 2, explanation: { correctText: "Na condução, o calor viaja como um dominó a cair: uma molécula a vibrar bate na vizinha, que bate na próxima. A barra não se derrete (não flui), mas a energia passa.", otherOptions: ["Convecção requer fluidos; Radiação não requer contacto."] } },
+        { level: "Médio", text: "As camisolas de lã, os cobertores de penas e as janelas com vidro duplo mantêm-te quente no inverno. Eles funcionam porque são formados por materiais que possuem muito AR preso nas suas fibras. A nível térmico, o Ar estático é:", options: ["Um excelente condutor térmico.", "Um péssimo condutor térmico (um ótimo Isolante Térmico), dificultando a fuga do calor do teu corpo para o ambiente frio.", "Um gerador de energia.", "Um espelho de radiação."], correctIndex: 1, explanation: { correctText: "O ar parado (sem correntes de vento) é um dos melhores isolantes térmicos da natureza. A lã não te 'aquece', ela apenas impede que o calor dos teus 36ºC fuja para a rua.", otherOptions: ["Roupas não geram calor (a não ser que sejam elétricas)."] } },
+        { level: "Fácil", text: "A água a ferver numa panela borbulha: a água quente do fundo sobe, e a água fria da superfície desce, formando um ciclo de correntes. Este processo mecânico de transporte de calor através da movimentação de fluidos (Líquidos e Gases) chama-se:", options: ["Condução", "Convecção", "Irradiação", "Eletromagnetismo"], correctIndex: 1, explanation: { correctText: "A Convecção térmica baseia-se na densidade. Fluido quente expande (fica mais leve) e sobe. Fluido frio contrai (fica mais pesado) e desce.", otherOptions: ["Condução atua em metais sólidos."] } },
+        { level: "Médio", text: "Porque é que o aparelho de Ar Condicionado deve ser SEMPRE instalado na parte mais ALTA da parede de uma sala (e não no rodapé)?", options: ["Por estética e para não estragar a máquina.", "Porque o Ar Frio gerado pela máquina é mais DENSO (pesado) que o ar da sala, tendendo a DESCER sozinho por Convecção, arrefecendo todo o ambiente de forma natural.", "Para facilitar a condução térmica.", "O Ar quente gerado sobe e empurra a máquina."], correctIndex: 1, explanation: { correctText: "Instalado no alto, a gravidade faz o trabalho: o ar frio 'cai', empurrando o ar quente (mais leve) da sala para cima, onde é sugado pela máquina. (O oposto acontece com aquecedores, que devem ficar no chão).", otherOptions: ["Incorreto."] } },
+        { level: "Difícil", text: "O Sol está separado da Terra por 150 milhões de quilómetros de VÁCUO (onde não existe ar, nem matéria, nem moléculas de contacto). Que processo térmico EXCLUSIVO consegue viajar pelo vazio do espaço para aquecer o nosso planeta?", options: ["A Condução magnética.", "As Correntes de Convecção espaciais.", "A Irradiação Térmica (através da luz e ondas eletromagnéticas infravermelhas).", "A transmissão a laser."], correctIndex: 2, explanation: { correctText: "A Condução e a Convecção exigem MATÉRIA (átomos) para transportar o calor. A Radiação (Irradiação) é a única energia capaz de viajar no vácuo perfeito através de fotões (ondas eletromagnéticas).", otherOptions: ["No vácuo, as outras duas são 100% impossíveis."] } },
+        { level: "Médio", text: "Problema clássico do Litoral: Durante um dia quente de sol na praia, a areia queima-te os pés, mas a água do mar continua bastante fria. Apesar de ambas estarem debaixo do mesmo Sol a receber o mesmo calor, porquê a diferença?", options: ["A areia rouba a radiação da água.", "A água possui um CALOR ESPECÍFICO (c) muito ALTO. Ela é muito 'teimosa' e demora imenso tempo e energia para aquecer. A areia tem um calor específico pequeno, aquecendo de imediato.", "A água reflete todo o calor.", "O sal arrefece o mar."], correctIndex: 1, explanation: { correctText: "O calor específico dita a 'preguiça térmica' de um material. A água é o campeão da teimosia térmica. Precisa de toneladas de energia do Sol para subir 1 grau. A areia (e os metais) precisam de quase nada e aquecem rápido.", otherOptions: ["Incorreto."] } },
+        { level: "Difícil", text: "Consequência da praia (Brisa Marítima): De dia, como a areia fica muito quente e a água fria, o ar por cima da areia aquece e SOBE. O que acontece imediatamente a seguir para preencher esse 'buraco' de ar na areia?", options: ["Gera-se uma frente fria vinda do interior do continente.", "Uma 'Brisa Marítima' sopra, onde o ar mais Frio (e denso) que estava sobre o mar viaja na direção da praia para ocupar o espaço livre. É o vento que sentes a vir do mar de dia.", "A convecção do mar puxa a água para a areia.", "Não há vento na praia."], correctIndex: 1, explanation: { correctText: "Esta é a aplicação perfeita da Convecção! O ar quente sobe na praia (baixa pressão). O ar frio do mar é sugado para a praia. (À noite, como a areia arrefece super rápido e o mar mantém-se morninho, o vento inverte a direção, soprando da terra para o mar!).", otherOptions: ["A natureza sempre preenche os vazios de baixa pressão de forma fluida."] } },
+        { level: "Médio", text: "A Garrafa Térmica é uma maravilha da engenharia criada para travar os 3 tipos de propagação do calor. O seu frasco interior tem PAREDES DUPLAS COM VÁCUO no meio. O Vácuo entre os vidros da garrafa serve primariamente para impedir:", options: ["Exclusivamente a Irradiação de calor.", "As trocas de calor por CONDUÇÃO e CONVECÇÃO (pois ambas exigem ar ou matéria para viajar do vidro de dentro para o de fora).", "Para o vidro não quebrar com a pressão.", "Para impedir as reações químicas da água."], correctIndex: 1, explanation: { correctText: "O ar é isolante, mas o VÁCUO perfeito é a barreira suprema contra Condução e Convecção, pois não há átomos para dar o 'salto' térmico entre as paredes duplas.", otherOptions: ["O vácuo não impede a irradiação (a luz viaja no vácuo)."] } },
+        { level: "Médio", text: "Ainda sobre a Garrafa Térmica: As paredes interiores (onde o café fica encostado) são revestidas de um material altamente ESPELHADO (parecem prata brilhante). Qual é o objetivo deste espelho?", options: ["Para deixar o líquido com cor bonita.", "Para refletir de volta para o líquido o calor que tenta fugir através da IRRADIAÇÃO térmica (ondas infravermelhas).", "Para aumentar a convecção interna.", "Para travar a condução magnética."], correctIndex: 1, explanation: { correctText: "Como o vácuo não consegue bloquear a Irradiação (ondas eletromagnéticas), o espelho atua refletindo os fotões de calor (radiação) de volta para o interior do café, prendendo a energia lá dentro.", otherOptions: ["Incorreto."] } },
+        { level: "Difícil", text: "A equação fundamental da Calorimetria é Q = m.c.ΔT (Calor Sensível). Se um bloco de ferro de 2 kg é aquecido, elevando a sua temperatura de 20ºC para 70ºC (logo ΔT = 50), e o seu calor específico é c = 0,11 cal/gºC (ou 450 J/kgºC). Que grandeza a fórmula (Q) pretende descobrir?", options: ["A temperatura máxima do ferro antes de derreter.", "A capacidade de gerar eletricidade do bloco.", "A quantidade exata de ENERGIA TÉRMICA (Calor Q, em Joules ou calorias) que o bloco de ferro precisou de absorver do fogo para conseguir aquecer esses 50 graus.", "O peso molecular do bloco."], correctIndex: 2, explanation: { correctText: "A fórmula 'Que-Macete' (Q = m.c.ΔT) não descobre temperaturas, ela calcula o 'Custo em Energia'. Diz-te: 'Vais precisar gastar Q Joules de energia da tua panela de pressão para aquecer este ferro'.", otherOptions: ["Incorreto."] } },
+        { level: "Fácil", text: "Se caminhares descalço num dia de sol, pisarás numa placa de metal, num tapete e num passeio de cimento, todos sujeitos à mesma temperatura de 40ºC. Qual material te vai infligir a pior queimadura instantânea nos pés e porquê?", options: ["O tapete, por ter muitos pêlos.", "O metal, porque ele tem a capacidade de CONDUZIR o seu calor armazenado de forma incrivelmente rápida e agressiva para a tua pele.", "O cimento, porque é mais pesado.", "Todos vão queimar exatamente com a mesma intensidade."], correctIndex: 1, explanation: { correctText: "Embora todos estejam a 40ºC, a Condutividade Térmica do metal é extrema. Ele 'despeja' imediatamente os Joules na tua carne. O tapete (isolante) liberta a energia aos poucos, protegendo a tua pele.", otherOptions: ["Incorreto."] } },
+        { level: "Médio", text: "Uma consequência bizarra do Calor Específico é o clima nas cidades no meio do deserto vs. litoral. Em cidades desérticas afastadas do mar (sem grandes massas de água perto), os dias chegam aos 45ºC e as noites caem para 5ºC (Amplitude térmica brutal). A culpa é:", options: ["Do vento frio do Norte.", "A areia da rocha tem calor específico baixo. Aquece incrivelmente rápido de manhã, mas sem o sol à noite, perde a energia brutalmente depressa. Não há água do mar (calor específico alto) para reter o calor como um cobertor.", "Da falta de nuvens de poluição.", "Da irradiação nuclear da areia."], correctIndex: 1, explanation: { correctText: "A água atua como um regulador térmico global. Ela absorve o calor de dia lentamente, e devolve de noite lentamente, impedindo oscilações bruscas nas cidades litorais. No deserto, a ausência de água cria extremos diários.", otherOptions: ["Incorreto."] } },
+        { level: "Médio", text: "Dentro do frigorífico tradicional lá de casa, qual o motivo físico principal de o Congelador (Congelador) estar situado na PRATELEIRA MAIS ALTA (no topo do aparelho)?", options: ["Para evitar que as crianças lhe toquem.", "Por razões de poupança elétrica.", "Porque o ar frio gerado é MAIS DENSO. Logo, por correntes de CONVECÇÃO, o ar frio cai naturalmente até ao fundo, empurrando o ar quente das gavetas para cima para ser arrefecido.", "Para não esmagar os ovos no fundo."], correctIndex: 2, explanation: { correctText: "O frio pesa. Ao colocar a fonte de frio no topo, a máquina tira proveito da gravidade e da densidade natural do ar frio, gerando um ciclo de mistura contínua (convecção) sem precisar de ventoínhas forçadas.", otherOptions: ["Incorreto."] } },
+        { level: "Difícil", text: "Se colocares a tua mão de LADO ao lado da chama de uma lareira a uma boa distância (sem por a mão em cima da chama!), o teu rosto ainda assim vai sentir um calor abrasador da fogueira. Qual processo está a aquecer as tuas bochechas?", options: ["Convecção pura.", "Irradiação térmica! A fogueira emite fotões invisíveis de raios infravermelhos (luz de calor) que atravessam o ar horizontalmente até embaterem e aquecerem a tua pele.", "Condução térmica do oxigénio.", "Aumento do volume do ar na lareira."], correctIndex: 1, explanation: { correctText: "A Convecção do fogo faz o ar quente subir para a chaminé (por isso não deves colocar a mão por CIMA). Se o calor te atinge de LADO, são as ondas de radiação eletromagnética a agir à distância.", otherOptions: ["O ar frio entre ti e a fogueira nem precisa de aquecer para a radiação chegar ao teu rosto."] } },
+        { level: "Médio", text: "Variação e Proporção: Num exercício do IFCE, o gráfico da Temperatura de um corpo é cruzado com a quantidade de Calor (Q) adicionada. Se a massa for muito alta (corpo gigantesco), o que acontece à subida da temperatura face à adição de fogo?", options: ["Sobe instantaneamente.", "Fica congelada no zero.", "A temperatura sobe muito LENTAMENTE (a inclinação do gráfico é muito baixa), porque é necessário fornecer imensos Joules de fogo para aquecer toda a massa do corpo enorme.", "A temperatura desce."], correctIndex: 2, explanation: { correctText: "Corpos massivos têm grande Inércia Térmica. Precisas de muito mais tempo de fogão para ferver 10 litros de água do que 1 copinho de água.", otherOptions: ["Incorreto."] } },
+        { level: "Fácil", text: "Duas escalas térmicas partilham a exata mesma DIMENSÃO num grau. Ou seja, se a temperatura subir 10 graus numa, também sobe 10 graus na outra. Quais são as duas escalas que têm esta proporção igual?", options: ["Fahrenheit e Celsius.", "Celsius e Kelvin.", "Kelvin e Fahrenheit.", "Nenhuma delas partilha."], correctIndex: 1, explanation: { correctText: "A conversão entre Celsius e Kelvin envolve apenas uma SOMA (+273). A variação (ΔT) entre elas é idêntica! Se um local aqueceu 15ºC, ele também sofreu uma variação de exatos 15 K. (Fahrenheit tem tamanho diferente, C/5 = F/9).", otherOptions: ["Variações no Fahrenheit não batem 1 para 1 com as outras."] } },
+        { level: "Difícil", text: "Misturas Calorimétricas: Colocas 100 gramas de água a 80ºC misturadas num copo com 100 gramas de água fria a 20ºC. Estão na mesma quantidade mássica e no mesmo material. No fim (Equilíbrio Térmico), qual será a temperatura da mistura se o copo não roubar calor nenhum?", options: ["100 ºC", "60 ºC", "50 ºC, que é a média aritmética simples (80+20)/2, pois a massa e a substância são iguais.", "40 ºC"], correctIndex: 2, explanation: { correctText: "A Matemática da conservação dita: Q_cedido + Q_absorvido = 0. Como as massas e os calores específicos são iguas, o Ponto de Equilíbrio cai no meio exato: (80+20)/2 = 50ºC. Misturar litros iguais de águas diferentes dá a média perfeita.", otherOptions: ["Se as massas fossem diferentes (ex: muita água fria e pouca quente), a conta desviava-se para a temperatura de quem tem mais massa."] } },
+        { level: "Fácil", text: "Para terminar o módulo: Em dias de neve com -5ºC, vês pessoas a vestirem casacos de penas (muito espessos). O que dita as leis da Termodinâmica sobre a função REAL desses casacos em ti?", options: ["Os casacos geram calor no seu interior por fricção química.", "O casaco atrai a luz do Sol nas penas.", "O casaco apenas ISOLA e BLOQUEIA o inevitável fluxo do calor do teu corpo (36ºC) em fuga para a atmosfera gelada (-5ºC). Tu és o aquecedor de ti mesmo.", "A neve repele as penas."], correctIndex: 2, explanation: { correctText: "O calor foge sempre do Quente para o Frio (Lei Zero). Ao vestires penas (ar encurralado), tu barraste a porta. Ficas quente porque as tuas calorias da digestão já não fogem pelo ar.", otherOptions: ["Roupas sem baterias ou aquecedores elétricos geram zero calor."] } }
+    ];
+
+    /* --- GESTÃO DE ESTADO (STATE) --- */
+    const quizState = {
+        currentIndex: 0,
+        userAnswers: new Array(questionsDatabase.length).fill(null),
+        confettiAnimationId: null
+    };
+
+    /* --- FUNCIONALIDADES DE PESQUISA (TEORIA) --- */
+    function initializeSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const contentGroups = document.querySelectorAll('.content-group');
+        const noResultsMsg = document.getElementById('no-results');
+
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', function(event) {
+            const searchTerm = normalizeText(event.target.value);
+            let totalVisibleElements = 0;
+            
+            contentGroups.forEach(group => {
+                const groupContent = normalizeText(group.textContent);
+                const isMatch = groupContent.includes(searchTerm);
+                
+                group.style.display = isMatch ? 'flex' : 'none';
+                if (isMatch) totalVisibleElements++;
+            });
+            
+            noResultsMsg.style.display = totalVisibleElements === 0 ? 'block' : 'none';
+        });
+    }
+
+    function normalizeText(text) {
+        return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    /* --- CONTROLO DE VISTAS (VIEWS) --- */
+    function changeApplicationView(viewName) {
+        const views = ['viewExplanation', 'viewPractice', 'viewResult'];
+        
+        views.forEach(viewId => document.getElementById(viewId).classList.remove('active'));
+        
+        const quizFooter = document.getElementById('quizFooter');
+        if (quizFooter) quizFooter.style.display = 'none';
+
+        if (viewName === 'explanation') {
+            document.getElementById('viewExplanation').classList.add('active');
+            document.getElementById('btnExp').classList.add('active');
+            document.getElementById('btnPrac').classList.remove('active');
+        } else if (viewName === 'practice') {
+            document.getElementById('viewPractice').classList.add('active');
+            if (quizFooter) quizFooter.style.display = 'flex';
+            document.getElementById('btnExp').classList.remove('active');
+            document.getElementById('btnPrac').classList.add('active');
+            
+            renderCurrentQuestion();
+            renderNavigationMap();
+        } else if (viewName === 'result') {
+            document.getElementById('viewResult').classList.add('active');
+        }
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* --- GERAÇÃO INTERFACE DO QUIZ --- */
+    function getDifficultyBadgeClass(level) {
+        const mapping = { 'Fácil': 'dif-facil', 'Médio': 'dif-medio', 'Difícil': 'dif-dificil' };
+        return mapping[level] || 'dif-facil';
+    }
+
+    function buildOptionsHTML(question, selectedAnswerIndex) {
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        return question.options.map((optionText, optionIndex) => {
+            let cssClass = '';
+            
+            if (selectedAnswerIndex !== null) {
+                if (optionIndex === question.correctIndex) cssClass = 'correct';
+                else if (optionIndex === selectedAnswerIndex) cssClass = 'wrong';
+                else cssClass = 'disabled';
+            }
+
+            const isDisabled = selectedAnswerIndex !== null ? 'disabled' : '';
+
+            return `
+                <button class="option-btn ${cssClass}" onclick="handleOptionSelection(${optionIndex})" ${isDisabled}>
+                    <div class="opt-circle">${alphabet[optionIndex]}</div>
+                    <div>${optionText}</div>
+                </button>
+            `;
+        }).join('');
+    }
+
+    function buildFeedbackHTML(question, selectedAnswerIndex) {
+        const isCorrect = selectedAnswerIndex === question.correctIndex;
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        const titleClass = isCorrect ? 'success' : 'error';
+        const titleText = isCorrect ? '✅ Raciocínio Termológico Certo!' : '❌ Falha de Equilíbrio Térmico!';
+        
+        const distortionsHTML = question.explanation.otherOptions.map((explanationText, idx) => {
+            if (idx === question.correctIndex) return '';
+            return `<div class="feedback-item wrong-opt"><strong>${alphabet[idx]})</strong> ${explanationText}</div>`;
+        }).join('');
+
+        return `
+            <div class="feedback-box show">
+                <div class="feedback-title ${titleClass}" style="color: ${isCorrect ? 'var(--correct-border)' : 'var(--wrong-border)'}">${titleText}</div>
+                <div class="feedback-item correct-opt"><strong>O Fato Exato:</strong> ${question.options[question.correctIndex]}</div>
+                <div style="margin-top:15px;font-size:1rem;color:var(--text-color);margin-bottom:15px;font-weight:600;">${question.explanation.correctText}</div>
+                <div style="margin-top:15px;border-top:2px dashed var(--border-color);padding-top:15px;">
+                    <small style="color:var(--text-color);"><strong>Análise dos Erros:</strong></small>
+                    ${distortionsHTML}
+                </div>
+            </div>
+        `;
+    }
+
+    function renderCurrentQuestion() {
+        const container = document.getElementById('quizContainer');
+        if (!container) return;
+
+        const question = questionsDatabase[quizState.currentIndex];
+        const selectedAnswerIndex = quizState.userAnswers[quizState.currentIndex];
+        const badgeClass = getDifficultyBadgeClass(question.level);
+        
+        let feedbackHTML = selectedAnswerIndex !== null ? buildFeedbackHTML(question, selectedAnswerIndex) : '';
+
+        container.innerHTML = `
+            <div class="quiz-question-card">
+                <span class="difficulty-badge ${badgeClass}">${question.level}</span>
+                <div style="margin-bottom:25px;">
+                    <span class="quiz-question-counter">QUESTÃO ${quizState.currentIndex + 1} DE ${questionsDatabase.length}</span>
+                    <h2 class="quiz-question-text">${question.text}</h2>
+                </div>
+                <div class="options-list">
+                    ${buildOptionsHTML(question, selectedAnswerIndex)}
+                </div>
+                ${feedbackHTML}
+            </div>
+        `;
+        
+        updateNavigationButtons();
+    }
+
+    /* --- LÓGICA DO QUIZ --- */
+    function handleOptionSelection(selectedIndex) {
+        if (quizState.userAnswers[quizState.currentIndex] !== null) return;
+        
+        quizState.userAnswers[quizState.currentIndex] = selectedIndex;
+        const isCorrect = selectedIndex === questionsDatabase[quizState.currentIndex].correctIndex;
+        
+        if (isCorrect) startSuccessAnimation();
+        else triggerErrorShakeEffect();
+        
+        renderCurrentQuestion();
+        renderNavigationMap();
+    }
+
+    function triggerErrorShakeEffect() {
+        const container = document.getElementById('quizContainer');
+        if (container) { 
+            container.classList.remove('shake-effect'); 
+            void container.offsetWidth; 
+            container.classList.add('shake-effect'); 
+            setTimeout(() => container.classList.remove('shake-effect'), 500); 
+        }
+    }
+
+    /* --- ANIMAÇÕES (CONFETTI) --- */
+    function startSuccessAnimation() {
+        const duration = 1500;
+        const end = Date.now() + duration;
+        
+        stopSuccessAnimation();
+        
+        function animateFrame() {
+            if(window.confetti && typeof confetti === 'function') {
+                const config = { particleCount: 5, spread: 55, colors: ['#EF4444', '#F97316', '#0EA5E9', '#E11D48'] };
+                confetti({ ...config, angle: 60, origin: { x: 0, y: 0.6 } });
+                confetti({ ...config, angle: 120, origin: { x: 1, y: 0.6 } });
+            }
+            if (Date.now() < end) quizState.confettiAnimationId = requestAnimationFrame(animateFrame);
+        }
+        animateFrame();
+    }
+
+    function stopSuccessAnimation() {
+        if (window.confetti && typeof confetti.reset === 'function') confetti.reset(); 
+        if (quizState.confettiAnimationId) {
+            cancelAnimationFrame(quizState.confettiAnimationId);
+            quizState.confettiAnimationId = null;
+        }
+    }
+
+    /* --- NAVEGAÇÃO MAPA --- */
+    function renderNavigationMap() {
+        const mapContainer = document.getElementById('qMap');
+        if (!mapContainer) return;
+        
+        mapContainer.innerHTML = questionsDatabase.map((question, index) => {
+            const isCurrent = index === quizState.currentIndex;
+            const userAnswer = quizState.userAnswers[index];
+            const hasAnswered = userAnswer !== null;
+            const isCorrect = userAnswer === question.correctIndex;
+            
+            let cssClass = 'map-dot';
+            if (isCurrent) cssClass += ' active';
+            if (hasAnswered) cssClass += isCorrect ? ' answered-correct' : ' answered-wrong';
+            
+            return `<div class="${cssClass}" onclick="goToQuestion(${index})">${index + 1}</div>`;
+        }).join('');
+        
+        setTimeout(() => { 
+            const activeDot = mapContainer.querySelector('.map-dot.active'); 
+            if (activeDot) activeDot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); 
+        }, 50);
+    }
+
+    function goToQuestion(targetIndex) { 
+        stopSuccessAnimation();
+        quizState.currentIndex = targetIndex; 
+        renderCurrentQuestion(); 
+        renderNavigationMap(); 
+    }
+    
+    function navigateQuestion(directionOffset) { 
+        const nextIndex = quizState.currentIndex + directionOffset; 
+        if (nextIndex >= 0 && nextIndex < questionsDatabase.length) goToQuestion(nextIndex); 
+    }
+
+    function updateNavigationButtons() {
+        const btnPrev = document.getElementById('btnPrev');
+        const btnNext = document.getElementById('btnNext');
+        
+        if (btnPrev) btnPrev.disabled = (quizState.currentIndex === 0);
+        
+        if (btnNext) {
+            const isLastQuestion = quizState.currentIndex === questionsDatabase.length - 1;
+            if (isLastQuestion) { 
+                btnNext.textContent = "Finalizar Avaliação"; 
+                btnNext.onclick = finishQuiz; 
+            } else { 
+                btnNext.textContent = "Próxima ➡️"; 
+                btnNext.onclick = () => navigateQuestion(1); 
+            }
+        }
+    }
+
+    /* --- CÁLCULO DE RESULTADOS --- */
+    function calculateStars(percent) {
+        if (percent === 100) return "⭐⭐⭐⭐⭐";
+        if (percent >= 80) return "⭐⭐⭐⭐";
+        if (percent >= 60) return "⭐⭐⭐";
+        if (percent >= 40) return "⭐⭐";
+        if (percent > 0) return "⭐";
+        return "🌑"; // zero stars
+    }
+
+    function finishQuiz() {
+        const unansweredCount = quizState.userAnswers.filter(answer => answer === null).length;
+        
+        if (unansweredCount > 0) {
+            const confirmMessage = `Existem ${unansweredCount} questões por responder. Quer terminar mesmo assim (as em branco serão dadas como erradas)?`;
+            if (!confirm(confirmMessage)) return;
+        }
+
+        stopSuccessAnimation();
+
+        const correctAnswersCount = quizState.userAnswers.filter((answer, index) => answer === questionsDatabase[index].correctIndex).length;
+        const totalQuestions = questionsDatabase.length;
+        const percentageScore = Math.round((correctAnswersCount / totalQuestions) * 100);
+        const isApproved = percentageScore >= 80;
+        
+        renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved);
+        changeApplicationView('result');
+    }
+
+    function renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved) {
+        document.getElementById('finalPercent').textContent = `${percentageScore}%`;
+        document.getElementById('finalScoreText').textContent = `Acertaste ${correctAnswersCount} de ${totalQuestions}`;
+        document.getElementById('finalStars').textContent = calculateStars(percentageScore);
+        
+        const reviewContainer = document.getElementById('review-container');
+        const actionButtonsContainer = document.getElementById('action-buttons');
+        
+        let summaryHTML = '';
+
+        if (isApproved) {
+            summaryHTML += `
+                <div class="result-summary-box success">
+                    <strong>🎉 DOMÍNIO TÉRMICO!</strong> A tua base teórica em troca de calor, equilíbrio e conversão de escalas (C, F e Kelvin) está fantástica. Parabéns!
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REPETIR PARA 100%</button>`;
+        } else {
+            summaryHTML += `
+                <div class="result-summary-box error">
+                    <strong>⚠️ FUGA DE ENERGIA!</strong> Foste avaliado abaixo da meta (80%). Revisa urgente a diferença brutal entre "Calor" (fluxo) e "Temperatura" (agitação), e a rasteira da conversão do Zero Absoluto.
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REFAZER AVALIAÇÃO</button>`;
+        }
+        
+        if (correctAnswersCount < totalQuestions) {
+            summaryHTML += '<h4 style="margin-bottom:15px; color:var(--text-color); font-size:1.15rem;">Revisão das Falhas Físicas:</h4>';
+            questionsDatabase.forEach((question, index) => {
+                const userAnswerIndex = quizState.userAnswers[index];
+                if (userAnswerIndex !== question.correctIndex) {
+                    const userAnswerText = userAnswerIndex === null ? "Deixaste em branco" : question.options[userAnswerIndex];
+                    const correctAnswerText = question.options[question.correctIndex];
+                    
+                    let plainQuestionText = question.text.replace(/<div class="q-svg-container">[\s\S]*?<\/div>/gi, ' [Desenho Omitido] ');
+
+                    summaryHTML += `
+                        <div class="error-log-item">
+                            <strong style="color:var(--theme-dark); font-size:1.05rem; display:block; margin-bottom:8px;">Q${index + 1}: ${plainQuestionText}</strong>
+                            <span style="color:var(--wrong-border); font-weight: 600; display:block; margin-bottom:5px;">A tua análise: ${userAnswerText}</span>
+                            <span style="color:var(--correct-border); font-weight: 700; display:block;">A Resposta Correta: ${correctAnswerText}</span>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        reviewContainer.innerHTML = summaryHTML;
+    }
+
+    function resetQuiz() { 
+        quizState.userAnswers = new Array(questionsDatabase.length).fill(null); 
+        quizState.currentIndex = 0; 
+        changeApplicationView('practice'); 
+    }
+    
+    // START APPLICATION
+    initializeSearch();
+    changeApplicationView('explanation');
+</script>
+</body>
+</html>

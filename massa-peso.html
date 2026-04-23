@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Física: Massa, Peso e Gravitação - Promover</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* --- VARIÁVEIS DE COR E TEMA: COSMOS & GRAVIDADE --- */
+        :root {
+            --bg-color: #F8FAFC; /* Slate 50 */
+            --text-color: #0F172A; /* Slate 900 */
+            --border-color: #1E3A8A; /* Azul Escuro Marinho */
+            --white: #FFFFFF;
+            
+            --theme-light: #E0E7FF; /* Indigo muito claro */
+            --theme-medium: #6366F1; /* Indigo vibrante */
+            --theme-dark: #312E81; /* Indigo profundo (Espaço) */
+            --theme-contrast: #10B981; /* Verde Esmeralda (Terra/Atenção) */
+            --theme-accent: #F59E0B; /* Âmbar (Estrelas/Vetores) */
+            --theme-text-active: #FFFFFF;
+            
+            --correct-bg: #D1FAE5;
+            --correct-border: #059669;
+            --wrong-bg: #FFE4E6;
+            --wrong-border: #BE123C;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 15px 120px 15px;
+            background-image: linear-gradient(rgba(99, 102, 241, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(99, 102, 241, 0.1) 1px, transparent 1px);
+            background-size: 25px 25px;
+        }
+
+        /* --- ANIMAÇÕES --- */
+        @keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1) rotate(-5deg); color: var(--theme-contrast); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+        .pulse-effect { animation: pulse 2s infinite; display: inline-block; }
+        .shake-effect { animation: shake 0.4s ease-in-out; }
+
+        /* --- LAYOUT PRINCIPAL --- */
+        .container { width: 100%; max-width: 650px; display: flex; flex-direction: column; gap: 25px; }
+        .logo-header { display: flex; flex-direction: column; align-items: center; padding: 15px 0 25px 0; text-align: center; }
+        .css-logo { font-size: 1.5rem; font-weight: 900; color: var(--theme-text-active); text-transform: uppercase; letter-spacing: -1px; border: 3px solid var(--border-color); padding: 8px 24px; border-radius: 12px; background: var(--theme-dark); box-shadow: 4px 4px 0px var(--theme-contrast); margin-bottom: 15px; transform: rotate(-2deg); }
+        h1 { font-size: 2rem; font-weight: 900; color: var(--text-color); text-transform: uppercase; letter-spacing: -0.5px; line-height: 1.1; }
+        .subtitle { font-size: 1rem; color: var(--white); font-weight: 700; margin-top: 5px; background: var(--theme-medium); padding: 4px 12px; border-radius: 8px; border: 2px solid var(--border-color); }
+
+        /* --- NAVEGAÇÃO --- */
+        .toggle-container { background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 6px; display: flex; box-shadow: 4px 4px 0px var(--border-color); position: sticky; top: 15px; z-index: 50; }
+        .toggle-btn { flex: 1; border: none; background: none; padding: 12px 0; border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.05rem; color: var(--text-color); cursor: pointer; transition: all 0.2s ease; }
+        .toggle-btn.active { background-color: var(--theme-dark); color: var(--theme-text-active); border: 2px solid var(--border-color); box-shadow: 2px 2px 0px var(--border-color); }
+
+        .view-section { display: none; animation: fadeIn 0.3s ease; flex-direction: column; gap: 35px; }
+        .view-section.active { display: flex; }
+
+        /* --- PESQUISA --- */
+        .search-container { position: relative; width: 100%; }
+        .search-input { width: 100%; padding: 16px 20px 16px 55px; border: 3px solid var(--border-color); border-radius: 12px; background-color: var(--white); font-family: 'Poppins', sans-serif; font-size: 1.05rem; font-weight: 600; color: var(--text-color); box-shadow: 4px 4px 0px var(--border-color); outline: none; transition: all 0.2s ease; }
+        .search-input:focus { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--theme-contrast); border-color: var(--theme-dark); }
+        .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 1.4rem; }
+        #no-results { text-align: center; color: var(--wrong-border); font-weight: 800; display: none; background: var(--wrong-bg); padding: 15px; border: 3px solid var(--wrong-border); border-radius: 8px; }
+
+        /* --- TEORIA --- */
+        .content-group { display: flex; flex-direction: column; position: relative; padding-top: 15px; }
+        .section-badge { display: inline-flex; align-items: center; gap: 10px; background-color: var(--theme-dark); color: var(--white); font-size: 1.1rem; font-weight: 800; padding: 8px 20px; border-radius: 8px; border: 3px solid var(--border-color); box-shadow: 3px 3px 0px var(--theme-contrast); text-transform: uppercase; position: absolute; top: -5px; left: 15px; z-index: 10; transform: rotate(-1.5deg); }
+        .theory-box { display: flex; flex-direction: column; padding: 35px 25px 25px 35px; border-radius: 12px; background-color: var(--white); border: 3px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); font-weight: 500; font-size: 1rem; line-height: 1.7; position: relative; overflow: hidden; gap: 20px; border-left: 14px solid var(--theme-medium); }
+        .theory-box h3 { font-size: 1.35rem; font-weight: 900; color: var(--theme-dark); margin-bottom: 5px; display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px; }
+        .theory-box h4 { font-size: 1.1rem; font-weight: 800; color: var(--text-color); margin-top: 10px; border-bottom: 2px solid var(--theme-light); padding-bottom: 5px; }
+        
+        .inline-example { display: block; width: fit-content; max-width: 100%; margin-top: 6px; margin-bottom: 6px; padding: 12px 20px; background-color: var(--theme-light); border: 2px solid var(--border-color); border-radius: 8px; font-size: 1.25rem; color: var(--theme-dark); font-weight: 900; letter-spacing: 1px; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); text-align: center; }
+        .visual-area { background: var(--bg-color); border: 3px dashed var(--theme-medium); border-radius: 12px; padding: 25px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; width: 100%; }
+        
+        .highlight-box { background-color: #FEF3C7; border: 3px solid var(--border-color); border-left: 8px solid var(--theme-accent); padding: 18px 20px; border-radius: 8px; font-size: 0.95rem; color: #78350F; font-weight: 600; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); }
+        .highlight-box.blue { background-color: #EFF6FF; border-left-color: #3B82F6; color: #1E3A8A; }
+        .highlight-box.green { background-color: #ECFDF5; border-left-color: #10B981; color: #064E3B; }
+
+        /* --- CARDS DE GRAVIDADE --- */
+        .g-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; width: 100%; margin-top: 10px; }
+        .g-card { flex: 1 1 calc(50% - 15px); min-width: 130px; border-radius: 12px; padding: 15px 10px; text-align: center; border: 3px solid var(--border-color); display: flex; flex-direction: column; align-items: center; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); background-color: var(--white); transition: transform 0.2s; }
+        .g-card:hover { transform: translateY(-3px); }
+        .g-card.full-width { flex: 1 1 100%; max-width: 280px; }
+        .g-icon { font-size: 2.5rem; margin-bottom: 8px; line-height: 1; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.15)); }
+        .g-title { font-size: 1.05rem; font-weight: 900; margin-bottom: 4px; text-transform: uppercase; color: var(--theme-dark); }
+        .g-formula { font-size: 1.15rem; font-weight: 800; color: var(--theme-dark); margin-bottom: 4px; line-height: 1.2; background: var(--bg-color); padding: 4px 10px; border-radius: 6px; border: 2px solid var(--border-color); }
+        .g-desc { font-size: 0.85rem; font-weight: 600; color: var(--text-color); margin-top: 6px; line-height: 1.3; }
+
+        /* --- BOTÕES GERAIS --- */
+        .btn-action { width: 100%; padding: 20px; background-color: var(--theme-dark); color: white; border: 3px solid var(--border-color); border-radius: 12px; font-size: 1.15rem; font-weight: 900; cursor: pointer; box-shadow: 6px 6px 0px var(--theme-contrast); transition: all 0.1s; text-transform: uppercase; margin-top: 10px; }
+        .btn-action:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0px var(--theme-contrast); }
+
+        /* --- QUIZ UI --- */
+        .difficulty-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; border: 2px solid var(--border-color); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
+        .dif-facil { background: #D1FAE5; color: #065F46; }
+        .dif-medio { background: #FEF08A; color: #713F12; }
+        .dif-dificil { background: #FECACA; color: #7F1D1D; }
+
+        .question-map { display: flex; gap: 8px; overflow-x: auto; padding: 10px 5px; margin-bottom: 20px; white-space: nowrap; scroll-behavior: smooth; }
+        .question-map::-webkit-scrollbar { display: none; }
+        .map-dot { min-width: 38px; height: 38px; border: 2px solid var(--border-color); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; color: var(--theme-dark); background: white; cursor: pointer; transition: all 0.2s; }
+        .map-dot.active { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); transform: scale(1.15); }
+        .map-dot.answered-correct { background-color: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .map-dot.answered-wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .quiz-question-card { border: 4px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); padding: 30px; border-radius: 16px; background: var(--white); }
+        .quiz-question-counter { font-size: 0.85rem; font-weight: 900; color: var(--theme-dark); letter-spacing: 1px; }
+        .quiz-question-text { font-size: 1.15rem; margin-top: 8px; color: var(--text-color); font-weight: 800; line-height: 1.5; margin-bottom: 20px;}
+
+        .option-btn { display: flex; align-items: center; width: 100%; padding: 18px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.1s ease; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 600; text-align: left; color: var(--text-color); }
+        .option-btn:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px var(--theme-contrast); }
+        .opt-circle { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--border-color); margin-right: 15px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.05rem; flex-shrink: 0; background: var(--theme-light); color: var(--theme-dark); }
+        .option-btn.correct { background-color: var(--correct-bg); border-color: var(--correct-border); box-shadow: 3px 3px 0px var(--correct-border); }
+        .option-btn.correct .opt-circle { background-color: var(--correct-border); color: white; border-color: var(--correct-border); }
+        .option-btn.wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); opacity: 0.9; box-shadow: none; }
+        .option-btn.wrong .opt-circle { background-color: var(--wrong-border); color: white; border-color: var(--wrong-border); }
+        .option-btn.disabled { pointer-events: none; opacity: 0.7; }
+
+        /* --- FEEDBACK DA QUESTÃO --- */
+        .feedback-box { display: block; margin-top: 25px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 25px; animation: slideUp 0.3s ease-out; box-shadow: 5px 5px 0px rgba(0,0,0,0.1); }
+        .feedback-title { font-weight: 900; text-transform: uppercase; font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .feedback-item { margin-bottom: 10px; font-size: 0.95rem; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); line-height: 1.5; font-weight: 500; }
+        .feedback-item.correct-opt { background: var(--correct-bg); border-color: var(--correct-border); color: #064E3B; font-weight: 700; box-shadow: 3px 3px 0px var(--correct-border); }
+        .feedback-item.wrong-opt { background: #FEE2E2; border-color: #EF4444; color: #7F1D1D; border-style: dashed; margin-top: 8px; }
+
+        /* --- RESULTADOS --- */
+        .result-card { background: white; border: 4px solid var(--border-color); border-radius: 16px; padding: 40px 20px; box-shadow: 8px 8px 0px var(--border-color); margin-bottom: 30px; text-align: center; }
+        .stars-container { font-size: 2.5rem; margin: 15px 0; letter-spacing: 5px; }
+        .percentage-big { font-size: 5rem; font-weight: 900; color: var(--theme-dark); line-height: 1; margin: 15px 0; text-shadow: 4px 4px 0px var(--theme-contrast); }
+        
+        .result-summary-box { padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 3px solid; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); }
+        .result-summary-box.success { background: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .result-summary-box.error { background: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .error-log-item { margin-bottom: 15px; padding: 20px; background: var(--bg-color); border-radius: 12px; border: 3px dashed var(--theme-medium); text-align: left;}
+
+        /* --- RODAPÉ DE NAVEGAÇÃO --- */
+        .quiz-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--white); border-top: 3px solid var(--border-color); padding: 15px 20px; display: none; justify-content: center; gap: 20px; z-index: 100; box-shadow: 0px -4px 10px rgba(0,0,0,0.05); }
+        .nav-btn { padding: 15px 30px; border-radius: 12px; font-weight: 900; border: 3px solid var(--border-color); cursor: pointer; box-shadow: 3px 3px 0px var(--border-color); font-family: 'Poppins', sans-serif; text-transform: uppercase; background: white; color: var(--text-color); font-size: 1rem; transition: transform 0.1s; }
+        .nav-btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 0px 0px 0px transparent; }
+        .btn-next { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); border-color: var(--border-color); }
+        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <header class="logo-header">
+            <div class="css-logo"><span class="pulse-effect">🌍</span> PROMOVER</div>
+            <h1>Física / 9º Ano</h1>
+            <p class="subtitle">Dinâmica: Massa, Peso e Gravidade</p>
+        </header>
+
+        <div class="toggle-container">
+            <button class="toggle-btn active" id="btnExp" onclick="changeApplicationView('explanation')">📘 Teoria</button>
+            <button class="toggle-btn" id="btnPrac" onclick="changeApplicationView('practice')">🧠 Prática (30)</button>
+        </div>
+
+        <!-- VISTA: TEORIA -->
+        <main id="viewExplanation" class="view-section active">
+            
+            <div class="search-container">
+                <span class="search-icon" aria-hidden="true">🔍</span>
+                <input type="text" id="searchInput" class="search-input" aria-label="Pesquisar conteúdo" placeholder="Pesquisar conceito... (ex: Gravidade, Massa, Lua)">
+            </div>
+            <div id="no-results"><p>😕 Termo não encontrado na teoria da Gravitação.</p></div>
+
+            <section class="content-group">
+                <div class="section-badge">⚖️ 1. O Grande Mal-Entendido</div>
+                <article class="theory-box search-target">
+                    <h3>Massa NÃO é Peso!</h3>
+                    <p>No dia a dia dizemos "Vou pesar-me na balança e vi que tenho 60 kg". Na Física, esta frase é um crime de lesa-pátria! Massa e Peso são grandezas completamente distintas.</p>
+                    
+                    <div class="visual-area" style="background: transparent; border: none; padding: 0;">
+                        <div class="g-grid">
+                            <!-- Massa -->
+                            <div class="g-card">
+                                <div class="g-icon">🧊</div>
+                                <div class="g-title">A Massa (m)</div>
+                                <div class="g-desc">É a quantidade de matéria que forma o teu corpo. É uma <strong>Grandeza Escalar</strong> constante. Mede-se em <strong>Quilogramas (kg)</strong>.</div>
+                            </div>
+                            
+                            <!-- Peso -->
+                            <div class="g-card">
+                                <div class="g-icon">⬇️</div>
+                                <div class="g-title">O Peso (P)</div>
+                                <div class="g-desc">É a Força com que a gravidade do planeta te puxa para baixo. É uma <strong>Grandeza Vetorial</strong>. Mede-se em <strong>Newtons (N)</strong>.</div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">🧮 2. Como Calcular o Peso?</div>
+                <article class="theory-box search-target">
+                    <h3>A Força Invisível</h3>
+                    <p>O Peso é apenas a aplicação da 2ª Lei de Newton (Força = massa × aceleração) focada na gravidade.</p>
+                    
+                    <div class="inline-example">P = m &middot; g</div>
+                    
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li><strong>P:</strong> Força Peso (em Newtons).</li>
+                        <li><strong>m:</strong> Massa do corpo (em kg). NUNCA MUDA, estejas na Terra ou na Lua.</li>
+                        <li><strong>g:</strong> Aceleração da gravidade local. Na Terra é aproximadamente <strong>10 m/s²</strong>. Na Lua é cerca de <strong>1,6 m/s²</strong>.</li>
+                    </ul>
+
+                    <div class="highlight-box green">
+                        <strong>Exemplo Espacial:</strong> Um astronauta tem 80 kg. A sua massa na Lua será de 80 kg. O seu Peso na Terra é de 800 N (80 × 10). O seu Peso na Lua será de apenas 128 N (80 × 1,6). O astronauta fica mais "leve", mas não perde massa!
+                    </div>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">🔭 3. Lei da Gravitação Universal</div>
+                <article class="theory-box search-target">
+                    <h3>A Maçã e a Lua</h3>
+                    <p>Isaac Newton percebeu que a mesma força misteriosa que faz a maçã cair da árvore é a força que mantém a Lua presa a girar em redor da Terra.</p>
+                    
+                    <div class="inline-example">F = G &middot; (M &middot; m) / d<sup>2</sup></div>
+                    
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li><strong>O que diz a lei?</strong> Matéria atrai matéria! Qualquer objeto no universo atrai outro objeto.</li>
+                        <li><strong>As Massas:</strong> Quanto maiores forem as massas (M e m) dos corpos, <strong>MAIOR</strong> é a força de atração entre eles.</li>
+                        <li><strong>A Distância (d):</strong> Quanto mais longe os corpos estiverem, mais fraca fica a atração. Como a distância está ao quadrado (d²), se a distância DUPLICAR (2x), a força cai para a QUARTA PARTE (÷ 4).</li>
+                    </ul>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">🌍 4. A Gravidade Varia!</div>
+                <article class="theory-box search-target">
+                    <h3>Onde pesamos menos na Terra?</h3>
+                    <p>O valor de <strong>g = 9,8 m/s²</strong> não é rigorosamente igual em todo o planeta.</p>
+                    
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li><strong>Altitude:</strong> Se subires ao topo do Monte Evereste, ficas mais longe do centro da Terra. Logo, a gravidade lá em cima é <strong>MENOR</strong> e o teu peso também diminui.</li>
+                        <li><strong>Equador vs Pólos:</strong> A Terra não é uma bola perfeita; ela é achatada nos pólos e gordinha no equador. Nos Pólos, estás mais perto do centro da Terra, logo a gravidade lá é <strong>MAIOR</strong> (pesaria ligeiramente mais na Antártida do que no Brasil/Portugal).</li>
+                    </ul>
+                </article>
+            </section>
+
+            <button class="btn-action" onclick="changeApplicationView('practice')">
+                Iniciar a Avaliação (30 Questões) ➜
+            </button>
+        </main>
+
+        <!-- VISTA: PRÁTICA (QUIZ) -->
+        <main id="viewPractice" class="view-section">
+            <div style="margin-bottom: 20px; background-color: var(--white); padding: 15px; border-radius: 12px; border: 3px solid var(--border-color); box-shadow: 4px 4px 0px var(--border-color);">
+                <h2 style="color:var(--theme-dark); font-weight:900; margin-bottom: 5px;">A Prova de Fogo - IFCE</h2>
+                <p style="color: var(--theme-contrast); font-size: 0.95rem; font-weight:600;">
+                    30 questões sobre Massa, Peso e a Lei da Gravitação. Cuidado com as rasteiras interplanetárias. Acerta <strong>80% (24/30)</strong>.
+                </p>
+            </div>
+            
+            <div class="question-map" id="qMap"></div>
+            <div id="quizContainer" style="margin-bottom: 40px;"></div>
+        </main>
+
+        <!-- VISTA: RESULTADOS -->
+        <main id="viewResult" class="view-section">
+            <div class="result-card">
+                <h2 style="font-weight:900; text-transform:uppercase;">Relatório Final</h2>
+                <div class="stars-container" id="finalStars">⭐⭐⭐</div>
+                <div class="percentage-big" id="finalPercent">0%</div>
+                <p style="font-size:1.2rem; font-weight:700; color:#555;" id="finalScoreText">Acertaste 0 de 30</p>
+                <div id="review-container" style="text-align: left; margin-top: 20px;"></div>
+            </div>
+            <div id="action-buttons"></div>
+        </main>
+
+    </div>
+
+    <!-- RODAPÉ DE NAVEGAÇÃO -->
+    <footer class="quiz-footer" id="quizFooter">
+        <button class="nav-btn btn-prev" id="btnPrev" onclick="navigateQuestion(-1)">Anterior</button>
+        <button class="nav-btn btn-next" id="btnNext" onclick="navigateQuestion(1)">Próxima</button>
+    </footer>
+
+<script>
+    /* --- ESTRUTURA DE DADOS (BASE DE QUESTÕES - MASSA E PESO IFCE) --- */
+    const questionsDatabase = [
+        { 
+            level: "Fácil", 
+            text: "No senso comum, as pessoas dizem 'Fui à farmácia pesar-me e vi que tenho 70 quilos'. Do ponto de vista rigoroso da Física, qual é o erro fundamental desta frase?", 
+            options: ["O erro está em dizer 'quilos', a unidade certa é o grama.", "A pessoa mediu a sua MASSA (70 kg), que é uma quantidade de matéria escalar. O PESO é uma força vetorial medida em Newtons.", "O peso nunca é medido na farmácia, apenas nos hospitais.", "Não há erro, Massa e Peso são grandezas idênticas com nomes diferentes."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Em Física, 70 kg é a tua MASSA. O teu Peso é a força com que a Terra te puxa, e teria um valor de aproximadamente 700 Newtons.", 
+                otherOptions: ["Assumir que Massa e Peso são sinónimos é o erro fatal da Dinâmica."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Qual das seguintes alternativas apresenta as grandezas e as suas respetivas Unidades no Sistema Internacional (SI) de forma totalmente correta?", 
+            options: ["Massa em Newtons (N) ; Peso em Quilogramas (kg).", "Massa em Quilogramas (kg) ; Peso em Newtons (N).", "Massa em Gramas (g) ; Peso em Joule (J).", "Massa e Peso medem-se ambos em Quilogramas (kg)."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "A Massa é uma grandeza base do SI (kg). O Peso é uma Força, logo mede-se obrigatoriamente em Newtons (N).", 
+                otherOptions: ["A primeira opção inverte os conceitos de forma errada."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Na Mecânica Clássica de Newton, a Massa de um corpo é uma propriedade que mede a sua quantidade de matéria e também a sua:", 
+            options: ["Capacidade térmica.", "Temperatura absoluta.", "Inércia (a resistência à mudança do seu estado de repouso ou movimento).", "Carga elétrica neutra."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Massa é a medida quantitativa da Inércia. Um objeto com muita massa (como um camião) é muito difícil de empurrar (tirar do repouso) ou de travar (parar o movimento).", 
+                otherOptions: ["Temperatura e Eletricidade são de outras áreas da física."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Um aluno do IFCE tem uma massa de 50 kg. Sabendo que a aceleração da gravidade na Terra (g) é aproximadamente 10 m/s², qual é o valor da Força Peso deste aluno?", 
+            options: ["5 N", "50 N", "500 N", "5000 N"], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Basta aplicar a fórmula do Peso (que é a 2ª Lei de Newton): P = m × g. P = 50 kg × 10 m/s² = 500 Newtons.", 
+                otherOptions: ["Se dividisses, dariam 5N. Se não multiplicasses, seriam 50N."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Um módulo de aterragem espacial da NASA pesa 4.000 N na superfície da Terra (g = 10 m/s²). Ele é enviado para o planeta Marte, onde a gravidade é aproximadamente g = 3,7 m/s². Qual é a MASSA deste módulo em Marte?", 
+            options: ["400 kg", "4.000 kg", "A massa varia consoante a gravidade.", "Aproximadamente 1.081 kg"], 
+            correctIndex: 0, 
+            explanation: { 
+                correctText: "Atenção à rasteira! A MASSA nunca muda. Primeiro, descobre a massa na Terra: P = m.g => 4000 = m × 10 => m = 400 kg. A massa será de 400 kg em qualquer canto do Universo, inclusive em Marte.", 
+                otherOptions: ["Se tentasses usar o 3,7 para dividir o peso terrestre errarias a essência da pergunta: a massa é constante."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Uma sonda robótica foi enviada para o planeta Júpiter. Sabe-se que a aceleração da gravidade em Júpiter é cerca de 2,5 vezes maior do que na Terra. O que acontece às grandezas (Massa e Peso) da sonda quando aterra nesse planeta gigante?", 
+            options: ["A massa da sonda multiplica-se por 2,5 e o peso mantém-se constante.", "A massa diminui devido à pressão, mas o peso aumenta.", "A massa e o peso multiplicam-se por 2,5.", "A massa da sonda mantém-se RIGOROSAMENTE IGUAL, mas o seu Peso aumenta 2,5 vezes (a sonda fica mais 'pesada' e difícil de levantar)."], 
+            correctIndex: 3, 
+            explanation: { 
+                correctText: "Como Júpiter 'puxa' os objetos com mais força (gravidade maior), o Peso da sonda dispara (P = m.g). No entanto, o número de parafusos e placas de metal que formam a sonda não mudou, logo a sua Massa é a mesma.", 
+                otherOptions: ["Incorreto: Massa não é afetada pela gravidade."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Na Terra, existem dois instrumentos clássicos: A Balança de Pratos (com contrapesos) e o Dinamômetro (uma mola com escala). O que mede especificamente um Dinamômetro na física escolar?", 
+            options: ["Mede apenas o tempo de queda.", "Mede a Força (neste caso, o Peso, através do esticamento elástico da mola).", "Mede unicamente a Massa constante.", "Mede a densidade do ar."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "O Dinamômetro é um instrumento que mede FORÇAS (em Newtons). Como o Peso é uma força, se pendurares algo no dinamômetro, ele estica a mola indicando o valor do Peso daquele corpo.", 
+                otherOptions: ["A balança de pratos compara massas de forma independente da gravidade."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Se tu levares uma Balança de Pratos (aquelas de braços antigos onde colocas um pacote de farinha de um lado e blocos de chumbo do outro) para a Lua, o que acontecerá à medição?", 
+            options: ["A balança não funcionará porque na Lua não há gravidade nenhuma.", "O pacote de farinha parecerá mais pesado.", "A medição será exata, a balança ficará equilibrada com a mesma quantidade de chumbo, pois ela COMPARA massas e a gravidade cai proporcionalmente dos dois lados.", "A balança marcará um sexto do valor."], correctIndex: 2, explanation: { correctText: "Uma balança de pratos mede a massa por comparação. Como a gravidade da Lua é fraca para a farinha e também fraca para o chumbo, a proporção mantém-se. Os pratos vão equilibrar-se perfeitamente indicando a mesma massa.", otherOptions: ["Balanças de molas (digitais) dariam um resultado menor, mas as de pratos não."] } },
+        { level: "Difícil", text: "A Lei da Gravitação Universal de Isaac Newton é expressa pela fórmula: F = G.(M.m) / d². Baseado nesta lei, o que acontece à Força de Atração entre a Terra e um satélite se a DISTÂNCIA (d) entre eles for DUPLICADA?", options: ["A força de atração duplica (fica 2x maior).", "A força de atração divide-se por dois (fica metade).", "A força de atração divide-se por quatro (fica 4x menor).", "A força mantém-se, pois o espaço é vácuo."], correctIndex: 2, explanation: { correctText: "Atenção ao 'd²' na fórmula! Se a distância duplica (d passa a ser 2d), o denominador da fórmula fica (2d)² = 4d². Ou seja, a força não cai para metade, ela cai brutalmente para a QUARTA PARTE. A atração gravitacional enfraquece muito rapidamente com o afastamento.", otherOptions: ["A relação é inversamente proporcional ao quadrado, não linear."] } },
+        { level: "Médio", text: "De acordo com a Lei da Gravitação de Newton, é a massa que gera a atração. Se isto é verdade, porquê que um lápis pousado na tua mesa não se move em direção a uma borracha por atração gravitacional?", options: ["Porque os plásticos e a madeira não possuem gravidade.", "Porque a força de atração entre massas tão pequenas (lápis e borracha) é ridiculamente microscópica, sendo incapaz de vencer o Atrito da mesa.", "Porque apenas planetas exercem força gravitacional.", "Porque eles possuem cargas elétricas opostas que se repelem."], correctIndex: 1, explanation: { correctText: "Eles atraem-se sim! Mas a Constante 'G' na fórmula de Newton tem um valor absurdamente pequeno (6,67 x 10⁻¹¹). Logo, objetos comuns atraem-se com frações minúsculas de Newton, que são invisíveis perante a força de atrito que os cola à mesa.", otherOptions: ["Só reparamos na gravidade quando uma das massas é colossal (como o planeta Terra)."] } },
+        { level: "Fácil", text: "A Terra é uma esfera ligeiramente achatada. O seu raio nos Pólos é menor (estás mais perto do centro) e o raio no Equador é maior (estás mais longe do centro). Baseado nisto, onde é que a Aceleração da Gravidade (g) é mais forte?", options: ["No Equador, porque faz mais calor.", "É exatamente igual em todos os milímetros do planeta.", "Nos Pólos (Norte e Sul), pois como estás mais perto do centro de massa do planeta, a atração gravitacional é maior.", "No Equador, pois o movimento de rotação puxa mais."], correctIndex: 2, explanation: { correctText: "A gravidade varia com o inverso do quadrado da distância. Como o raio polar é mais curto (a Terra é espalmada em cima e em baixo), nos pólos tu ficas mais perto do 'coração' da Terra, o que faz a gravidade g subir para cerca de 9,83 m/s² (contra 9,78 no equador).", otherOptions: ["Calor ou rotação não são as causas diretas e primárias desta diferença de atração pura."] } },
+        { level: "Médio", text: "Se um alpinista levar um aparelho de alta precisão ao topo do Monte Evereste (quase 9 km de altitude), o que acontecerá ao peso (Força P) dos seus equipamentos lá no alto?", options: ["Fica exatamente igual ao peso no nível do mar.", "O Peso aumenta absurdamente devido ao frio.", "O Peso fica zero, ele flutua na montanha.", "O Peso DIMINUI ligeiramente, porque a altitude afasta o corpo do centro de gravidade da Terra, reduzindo o valor local do 'g'."], correctIndex: 3, explanation: { correctText: "Quanto maior a altitude (distância para o centro do planeta), menor é a força com que a Terra te atrai. Por isso, pesas ligeiramente menos no cimo do Evereste do que ao nível do mar na praia.", otherOptions: ["Massa continua igual, o que desce é a Força Peso."] } },
+        { level: "Fácil", text: "Para efeitos de prova escolar (a não ser que seja dito o contrário), a força que aponta sempre rigorosamente na direção VERTICAL e no sentido PARA BAIXO (em direção ao centro da Terra) denomina-se:", options: ["Força Normal", "Força de Atrito", "Força Centrífuga", "Força Peso (Gravitacional)"], correctIndex: 3, explanation: { correctText: "O Peso é a tração que a gravidade exerce sobre todos os corpos com massa, alinhando-os na direção do centro de massa do nosso planeta.", otherOptions: ["Normal aponta para fora da superfície, perpendicular."] } },
+        { level: "Difícil", text: "Um problema clássico do Elevador e da Balança: Tu estás em pé numa balança digital dentro de um elevador. O elevador acelera violentamente PARA CIMA. A balança mostrará um 'peso aparente':", options: ["Maior que o teu peso real, porque a Força Normal (que a balança mede) teve de ser maior que o teu Peso para conseguir te empurrar para cima (N > P).", "Menor que o teu peso real.", "Rigorosamente igual ao teu peso.", "Zero absoluto."], correctIndex: 0, explanation: { correctText: "A balança no chão não lê o teu Peso (P), ela lê a Força Normal (N) de contato. Para tu acelerares a subir, a Força Normal (empurrão do chão) tem de ganhar ao teu Peso (que te puxa para baixo). Como N é muito grande, o visor da balança sobe!", otherOptions: ["Incorreto."] } },
+        { level: "Médio", text: "No mesmo elevador, o cabo de aço rebenta e o elevador entra em QUEDA LIVRE. Desces com uma aceleração exatamente igual à da gravidade (g). Se olhares para a balança debaixo dos teus pés, ela marcará:", options: ["O dobro do teu peso.", "O teu peso normal.", "Apenas a tua massa.", "ZERO. Entras num estado de 'Imponderabilidade aparente', pois perdes a compressão contra o chão que caía junto contigo."], correctIndex: 3, explanation: { correctText: "Como o chão foge debaixo de ti com a mesma aceleração (g) que tu próprio estás a cair, tu não consegues fazer força de contacto na superfície da balança. A Força Normal vira zero, e tu flutuas na cabine, como um astronauta.", otherOptions: ["Incorreto."] } },
+        { level: "Fácil", text: "Qual das grandezas cinemáticas e dinâmicas abaixo NUNCA tem o seu valor alterado, não importando o planeta, a galáxia ou a velocidade em que o objeto se encontre na mecânica clássica?", options: ["Velocidade", "Peso", "Massa (Inercial)", "Temperatura"], correctIndex: 2, explanation: { correctText: "A Massa é uma constante intrínseca do objeto (a quantidade de partículas que ele tem e a sua preguiça inercial). Um tijolo de 2kg tem 2kg aqui e no sol.", otherOptions: ["O peso e a velocidade dependem totalmente do referencial e campo gravitacional local."] } },
+        { level: "Difícil", text: "Uma esfera de chumbo de 10 kg e uma pena de 10 gramas são atiradas de uma torre num ambiente onde foi sugado todo o ar (Vácuo total perfeito). A 2ª Lei de Newton diz que F = m.a. Sabendo que o chumbo pesa muito mais que a pena, o que acontece?", options: ["O chumbo chega primeiro, pois tem mais massa.", "A pena flutua no vácuo.", "As duas chegam ao solo EXATAMENTE ao mesmo tempo. A gravidade aplica a mesma aceleração 'g' a todos os corpos, independentemente da massa, se não houver resistência do ar.", "O chumbo rasga o vácuo."], correctIndex: 2, explanation: { correctText: "Este é o princípio da equivalência de Galileu, comprovado na Lua em 1971. Aceleração = Força / Massa. O chumbo tem um Peso gigantesco, mas também tem uma Inércia gigantesca (é difícil movê-lo). A pena tem Peso minúsculo e inércia minúscula. A matemática cancela-se perfeitamente e ambos caem a 9,8 m/s².", otherOptions: ["Sem ar não há abrandamento da pena."] } },
+        { level: "Médio", text: "O que diz rigorosamente a 3ª Lei de Newton sobre a força gravitacional que a Terra aplica na Maçã, em comparação com a força gravitacional que a Maçã aplica na Terra?", options: ["A Terra puxa a maçã com muito mais força, porque a Terra tem bilhões de toneladas.", "A maçã não exerce qualquer atração na Terra.", "Ambos atraem-se com forças de MÓDULOS (valores) ESTRITAMENTE IGUAIS. Apenas os efeitos visíveis são diferentes devido à enorme inércia (massa) da Terra.", "A força da Terra empurra a maçã."], correctIndex: 2, explanation: { correctText: "A Lei de Ação e Reação é imperativa. Se a Terra puxa a maçã com 1 Newton, a maçã puxa a Terra com exato 1 Newton. A maçã move-se rápido porque F=m.a (a sua massa é pequena, logo a sua aceleração é enorme). A Terra é tão pesada que a sua aceleração é impercetível, mas sente a mesma força.", otherOptions: ["A força é mútua e idêntica."] } },
+        { level: "Médio", text: "Segundo a Lei da Gravitação Universal de Newton, a atração entre os corpos é de longo alcance. Se um satélite estivesse 'preso' à Terra por uma corda elástica, o que a gravidade representaria nesse modelo mental?", options: ["O elástico a esticar infinitamente.", "A Força Centrípeta que 'puxa' o satélite para o centro da curva, impedindo-o de voar em linha reta para fora da órbita pelo espaço adentro (inércia).", "A força de repulsão.", "A força de atrito orbital."], correctIndex: 1, explanation: { correctText: "Em órbitas circulares, a Força da Gravidade atua como a Força Centrípeta. O satélite 'tenta' fugir numa reta pela inércia, e a gravidade dá 'puxões' constantes de volta para o planeta, criando uma queda circular eterna (a órbita).", otherOptions: ["Incorreto."] } },
+        { level: "Fácil", text: "O Sol tem uma massa gigantesca. É essa massa brutal que gera uma Força Gravitacional capaz de manter 8 planetas a girar no seu entorno (Sistema Solar). Se o Sol desaparecesse de repente por magia, o que aconteceria ao movimento da Terra?", options: ["A Terra pararia e ficaria congelada no espaço.", "A Terra sairia disparada em Movimento Retilíneo Uniforme (linha reta infinita) pelo universo afora, pela 1ª Lei de Newton (Inércia).", "A Terra cairia noutro planeta.", "A Terra formaria um novo sol imediatamente."], correctIndex: 1, explanation: { correctText: "Sem a corda invisível da atração gravitacional do Sol a desviar a rota, a Inércia faria a Terra assumir o seu estado inalterado: voar em linha reta a mais de 100.000 km/h pelo vácuo escuro.", otherOptions: ["Inércia não para corpos em andamento vazio."] } },
+        { level: "Difícil", text: "Problema Algébrico: Um menino tem uma massa de 40 kg. Na Terra, o seu Peso é cerca de 400 N. Qual seria a diferença entre a Força Peso que ele sentiria na Terra e a Força Peso que ele sentiria na Lua (g_lua = 1,6 m/s²)?", options: ["Ele pesaria 64 N a menos.", "A diferença seria de 336 Newtons (400 N na Terra menos 64 N na Lua).", "Ele não teria peso.", "Ele teria o mesmo peso."], correctIndex: 1, explanation: { correctText: "Passo 1: Acha o Peso na Lua (P = m × g => P = 40 × 1,6 = 64 N). Passo 2: O peso na Terra é 400 N. A diferença (subtração) é 400 - 64 = 336 Newtons de diferença de atração.", otherOptions: ["Cálculo de variação (delta)."] } },
+        { level: "Médio", text: "Nas famosas imagens dos astronautas americanos na Lua em 1969, nós vemo-los a dar enormes 'saltos' a cada passo. Isto acontece exclusivamente porque:", options: ["Eles perderam quase 80% da sua massa e dos seus músculos na viagem.", "Os fatos espaciais tinham molas debaixo das botas.", "A aceleração da gravidade (g) lunar é cerca de seis vezes mais fraca que a da Terra, puxando os seus corpos de volta ao solo de forma muito mais lenta e fraca.", "A Lua não tem atmosfera para fazer peso sobre os ombros."], correctIndex: 2, explanation: { correctText: "Com a gravidade lunar tão baixa, o esforço muscular que na Terra te faria pular 20 cm (porque o planeta trava-te brutalmente), na Lua é suficiente para te projetar um metro no ar de forma muito mais suave e flutuante.", otherOptions: ["O fato deles pesa quase 100kg na terra, masa não foi alterada."] } },
+        { level: "Difícil", text: "A Lei da Gravitação de Newton foi aclamada como 'Universal'. O que significa a palavra 'Universal' neste contexto específico da Física?", options: ["Significa que as equações dão sempre o número 1 no final.", "Significa que Newton foi um físico e um poeta muito famoso e aceito na Europa.", "Significa que a MESMA fórmula e a mesma constante (G) que explicam a queda da maçã explicam o movimento das galáxias e as marés em qualquer ponto do Universo conhecido.", "Significa que foi aceite por todas as universidades da época."], correctIndex: 2, explanation: { correctText: "A genialidade de Newton foi unificar a 'Física Terrestre' com a 'Física Celeste'. Ele provou que as estrelas e pedras obedecem exatamente às mesmas regras matemáticas, não havendo magia celestial.", otherOptions: ["As outras não explicam a universalidade científica das leis."] } },
+        { level: "Médio", text: "Uma garrafa de água mineral de 2 litros tem uma massa aproximada de 2 kg. Qual é o Módulo, Direção e Sentido da força gravitacional normal que atua sobre esta garrafa na sala de aula?", options: ["Módulo: 2 kg. Direção: Horizontal. Sentido: Para a direita.", "Módulo: 20 N. Direção: Vertical. Sentido: Para baixo (em direção ao centro da Terra).", "Módulo: 20 N. Direção: Cima. Sentido: Infinito.", "Módulo: 2 N. Direção: Inclinada."], correctIndex: 1, explanation: { correctText: "Força Gravitacional é o Peso (P = 2kg × 10m/s² = 20 N). A Direção da gravidade é sempre a linha Vertical que te une ao solo. O Sentido da gravidade é de atração, ou seja, para o chão (para baixo).", otherOptions: ["Cuidado com as trocas entre massa e peso, e direção/sentido."] } },
+        { level: "Fácil", text: "O que é o 'Centro de Gravidade' (ou Centro de Massa) de um objeto?", options: ["É o núcleo do átomo principal daquele material.", "É um ponto imaginário no corpo onde se considera que toda a sua massa está concentrada. Num objeto simétrico, como uma régua, fica exatamente no meio dela.", "É a zona mais quente do corpo.", "É o local onde ele toca o chão."], correctIndex: 1, explanation: { correctText: "Na física, para não desenharmos bilhões de vetores da gravidade a puxar cada célula do teu corpo, calculamos um ponto central (como a zona do umbigo num humano) onde assumimos que atua o Vetor Força Peso total (P) para equilibrar o sistema.", otherOptions: ["Incorreto."] } },
+        { level: "Médio", text: "Numa brincadeira de baloiço (gangorra), uma criança pesada de 50 kg senta-se de um lado. Para que a prancha fique PERFEITAMENTE HORIZONTAL (equilibrada) com uma criança mais leve de 25 kg do outro lado, o que deve acontecer?", options: ["A criança mais leve tem de sentar-se na mesma distância.", "A criança mais pesada tem de ir mais para trás.", "A criança leve (25 kg) tem de se sentar duas vezes mais LONGE do ponto de apoio (centro) do que a criança pesada.", "É impossível empatar pesos diferentes numa prancha."], correctIndex: 2, explanation: { correctText: "O Equilíbrio estático de Torques (Momentos) dita que Força × Distância = Força × Distância. Se a criança leve tem metade do peso, ela tem de estar ao dobro da distância do eixo para compensar o desnível.", otherOptions: ["A criança pesada é quem se tem de encostar mais ao centro (diminuindo o braço da alavanca)."] } },
+        { level: "Difícil", text: "Na fórmula F = G.(M.m) / d², o 'G' é uma constante famosa. Quando cientistas a mediram em laboratório, descobriram que ela é um número '10 elevado a menos onze' (0,0000000000667). O que é que isto revela sobre a Força da Gravidade na natureza?", options: ["Que a gravidade é a força mais poderosa e forte de todas as forças do universo em curta distância.", "Que ela é uma força incrivelmente FRACA. Para notares os efeitos da gravidade, precisas de amontoar trilhões de toneladas de matéria (como um planeta) no mesmo lugar.", "Que ela só funciona com átomos de chumbo.", "Que a gravidade repele em vez de atrair."], correctIndex: 1, explanation: { correctText: "A gravidade é a força mais fraca da física. É por isso que tu consegues levantar um telemóvel da mesa com a tua mão, vencendo a atração que TODO O PLANETA TERRA inteiro faz contra o telemóvel para o colar no chão!", otherOptions: ["O eletromagnetismo e a força nuclear forte são infinitamente mais fortes localmente."] } },
+        { level: "Médio", text: "Na Física do Ensino Técnico, quando se fala no 'Campo Gravitacional' da Terra (g), ele está a atuar num meteorito que viaja pelo espaço, longe da atmosfera?", options: ["Não, a gravidade só funciona dentro das nuvens de ar (atmosfera).", "Não, a gravidade acaba onde acaba a atração dos mares.", "Sim, a gravidade é um campo invisível que se estende pelo vácuo infinito, mas vai ficando cada vez mais fraco com a distância.", "O meteorito não tem massa, logo não sofre ação de 'g'."], correctIndex: 2, explanation: { correctText: "O campo gravitacional terrestre não precisa de ar ou fios para puxar. É uma distorção do próprio espaço-tempo que chega até à Lua e muito além, atraindo astros e satélites mesmo no vazio absoluto.", otherOptions: ["Atmosfera não tem nada a ver com a atração de massa para massa."] } },
+        { level: "Fácil", text: "Qualitativo Rápido: Numa prova pede-se para calculares o 'PESO' de uma carga que vai viajar de elevador. Qual a fórmula fundamental que tu escreves no rascunho da tua folha de prova?", options: ["V = V₀ + a.t", "F = k.x", "P = m.g", "E = m.c²"], correctIndex: 2, explanation: { correctText: "Peso = Massa × Gravidade. É a aplicação estrita da 2ª Lei de Newton (Força = Massa × Aceleração) para objetos num campo planetário vertical.", otherOptions: ["K.x é a Força Elástica da Mola (Lei de Hooke)."] } },
+        { level: "Difícil", text: "Último desafio conceptual: Duas massas idênticas M estão separadas por uma distância D, sofrendo uma atração F. Se, como por magia do examinador do IFCE, dobrarmos a massa do planeta 1 (2M) E dobrarmos a massa do planeta 2 (2M), deixando-os no mesmo sítio. O que acontece à nova Força de atração?", options: ["Fica igual.", "Fica o dobro (2x maior).", "A Força fica QUATRO VEZES (4x) maior.", "O planeta explode."], correctIndex: 2, explanation: { correctText: "A fórmula é F = G.(M.m)/d². Se as duas massas sobem para o dobro, multiplicamos o topo da fórmula por (2 × 2 = 4). Como a distância (d) em baixo não mexeu, a Força geral sobe por um fator de Quatro. A atração é muito brutal agora!", otherOptions: ["Incorreto pela matemática da proporcionalidade."] } }
+    ];
+
+    /* --- GESTÃO DE ESTADO (STATE) --- */
+    const quizState = {
+        currentIndex: 0,
+        userAnswers: new Array(questionsDatabase.length).fill(null),
+        confettiAnimationId: null
+    };
+
+    /* --- FUNCIONALIDADES DE PESQUISA (TEORIA) --- */
+    function initializeSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const contentGroups = document.querySelectorAll('.content-group');
+        const noResultsMsg = document.getElementById('no-results');
+
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', function(event) {
+            const searchTerm = normalizeText(event.target.value);
+            let totalVisibleElements = 0;
+            
+            contentGroups.forEach(group => {
+                const groupContent = normalizeText(group.textContent);
+                const isMatch = groupContent.includes(searchTerm);
+                
+                group.style.display = isMatch ? 'flex' : 'none';
+                if (isMatch) totalVisibleElements++;
+            });
+            
+            noResultsMsg.style.display = totalVisibleElements === 0 ? 'block' : 'none';
+        });
+    }
+
+    function normalizeText(text) {
+        return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    /* --- CONTROLO DE VISTAS (VIEWS) --- */
+    function changeApplicationView(viewName) {
+        const views = ['viewExplanation', 'viewPractice', 'viewResult'];
+        
+        views.forEach(viewId => document.getElementById(viewId).classList.remove('active'));
+        
+        const quizFooter = document.getElementById('quizFooter');
+        if (quizFooter) quizFooter.style.display = 'none';
+
+        if (viewName === 'explanation') {
+            document.getElementById('viewExplanation').classList.add('active');
+            document.getElementById('btnExp').classList.add('active');
+            document.getElementById('btnPrac').classList.remove('active');
+        } else if (viewName === 'practice') {
+            document.getElementById('viewPractice').classList.add('active');
+            if (quizFooter) quizFooter.style.display = 'flex';
+            document.getElementById('btnExp').classList.remove('active');
+            document.getElementById('btnPrac').classList.add('active');
+            
+            renderCurrentQuestion();
+            renderNavigationMap();
+        } else if (viewName === 'result') {
+            document.getElementById('viewResult').classList.add('active');
+        }
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* --- GERAÇÃO INTERFACE DO QUIZ --- */
+    function getDifficultyBadgeClass(level) {
+        const mapping = { 'Fácil': 'dif-facil', 'Médio': 'dif-medio', 'Difícil': 'dif-dificil' };
+        return mapping[level] || 'dif-facil';
+    }
+
+    function buildOptionsHTML(question, selectedAnswerIndex) {
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        return question.options.map((optionText, optionIndex) => {
+            let cssClass = '';
+            
+            if (selectedAnswerIndex !== null) {
+                if (optionIndex === question.correctIndex) cssClass = 'correct';
+                else if (optionIndex === selectedAnswerIndex) cssClass = 'wrong';
+                else cssClass = 'disabled';
+            }
+
+            const isDisabled = selectedAnswerIndex !== null ? 'disabled' : '';
+
+            return `
+                <button class="option-btn ${cssClass}" onclick="handleOptionSelection(${optionIndex})" ${isDisabled}>
+                    <div class="opt-circle">${alphabet[optionIndex]}</div>
+                    <div>${optionText}</div>
+                </button>
+            `;
+        }).join('');
+    }
+
+    function buildFeedbackHTML(question, selectedAnswerIndex) {
+        const isCorrect = selectedAnswerIndex === question.correctIndex;
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        const titleClass = isCorrect ? 'success' : 'error';
+        const titleText = isCorrect ? '✅ Raciocínio Correto!' : '❌ Falha de Gravidade!';
+        
+        const distortionsHTML = question.explanation.otherOptions.map((explanationText, idx) => {
+            if (idx === question.correctIndex) return '';
+            return `<div class="feedback-item wrong-opt"><strong>${alphabet[idx]})</strong> ${explanationText}</div>`;
+        }).join('');
+
+        return `
+            <div class="feedback-box show">
+                <div class="feedback-title ${titleClass}" style="color: ${isCorrect ? 'var(--correct-border)' : 'var(--wrong-border)'}">${titleText}</div>
+                <div class="feedback-item correct-opt"><strong>O Fato Exato:</strong> ${question.options[question.correctIndex]}</div>
+                <div style="margin-top:15px;font-size:1rem;color:var(--text-color);margin-bottom:15px;font-weight:600;">${question.explanation.correctText}</div>
+                <div style="margin-top:15px;border-top:2px dashed var(--border-color);padding-top:15px;">
+                    <small style="color:var(--text-color);"><strong>Análise dos Desvios:</strong></small>
+                    ${distortionsHTML}
+                </div>
+            </div>
+        `;
+    }
+
+    function renderCurrentQuestion() {
+        const container = document.getElementById('quizContainer');
+        if (!container) return;
+
+        const question = questionsDatabase[quizState.currentIndex];
+        const selectedAnswerIndex = quizState.userAnswers[quizState.currentIndex];
+        const badgeClass = getDifficultyBadgeClass(question.level);
+        
+        let feedbackHTML = selectedAnswerIndex !== null ? buildFeedbackHTML(question, selectedAnswerIndex) : '';
+
+        container.innerHTML = `
+            <div class="quiz-question-card">
+                <span class="difficulty-badge ${badgeClass}">${question.level}</span>
+                <div style="margin-bottom:25px;">
+                    <span class="quiz-question-counter">QUESTÃO ${quizState.currentIndex + 1} DE ${questionsDatabase.length}</span>
+                    <h2 class="quiz-question-text">${question.text}</h2>
+                </div>
+                <div class="options-list">
+                    ${buildOptionsHTML(question, selectedAnswerIndex)}
+                </div>
+                ${feedbackHTML}
+            </div>
+        `;
+        
+        updateNavigationButtons();
+    }
+
+    /* --- LÓGICA DO QUIZ --- */
+    function handleOptionSelection(selectedIndex) {
+        if (quizState.userAnswers[quizState.currentIndex] !== null) return;
+        
+        quizState.userAnswers[quizState.currentIndex] = selectedIndex;
+        const isCorrect = selectedIndex === questionsDatabase[quizState.currentIndex].correctIndex;
+        
+        if (isCorrect) startSuccessAnimation();
+        else triggerErrorShakeEffect();
+        
+        renderCurrentQuestion();
+        renderNavigationMap();
+    }
+
+    function triggerErrorShakeEffect() {
+        const container = document.getElementById('quizContainer');
+        if (container) { 
+            container.classList.remove('shake-effect'); 
+            void container.offsetWidth; 
+            container.classList.add('shake-effect'); 
+            setTimeout(() => container.classList.remove('shake-effect'), 500); 
+        }
+    }
+
+    /* --- ANIMAÇÕES (CONFETTI) --- */
+    function startSuccessAnimation() {
+        const duration = 1500;
+        const end = Date.now() + duration;
+        
+        stopSuccessAnimation();
+        
+        function animateFrame() {
+            if(window.confetti && typeof confetti === 'function') {
+                const config = { particleCount: 5, spread: 55, colors: ['#6366F1', '#312E81', '#10B981', '#F59E0B'] };
+                confetti({ ...config, angle: 60, origin: { x: 0, y: 0.6 } });
+                confetti({ ...config, angle: 120, origin: { x: 1, y: 0.6 } });
+            }
+            if (Date.now() < end) quizState.confettiAnimationId = requestAnimationFrame(animateFrame);
+        }
+        animateFrame();
+    }
+
+    function stopSuccessAnimation() {
+        if (window.confetti && typeof confetti.reset === 'function') confetti.reset(); 
+        if (quizState.confettiAnimationId) {
+            cancelAnimationFrame(quizState.confettiAnimationId);
+            quizState.confettiAnimationId = null;
+        }
+    }
+
+    /* --- NAVEGAÇÃO MAPA --- */
+    function renderNavigationMap() {
+        const mapContainer = document.getElementById('qMap');
+        if (!mapContainer) return;
+        
+        mapContainer.innerHTML = questionsDatabase.map((question, index) => {
+            const isCurrent = index === quizState.currentIndex;
+            const userAnswer = quizState.userAnswers[index];
+            const hasAnswered = userAnswer !== null;
+            const isCorrect = userAnswer === question.correctIndex;
+            
+            let cssClass = 'map-dot';
+            if (isCurrent) cssClass += ' active';
+            if (hasAnswered) cssClass += isCorrect ? ' answered-correct' : ' answered-wrong';
+            
+            return `<div class="${cssClass}" onclick="goToQuestion(${index})">${index + 1}</div>`;
+        }).join('');
+        
+        setTimeout(() => { 
+            const activeDot = mapContainer.querySelector('.map-dot.active'); 
+            if (activeDot) activeDot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); 
+        }, 50);
+    }
+
+    function goToQuestion(targetIndex) { 
+        stopSuccessAnimation();
+        quizState.currentIndex = targetIndex; 
+        renderCurrentQuestion(); 
+        renderNavigationMap(); 
+    }
+    
+    function navigateQuestion(directionOffset) { 
+        const nextIndex = quizState.currentIndex + directionOffset; 
+        if (nextIndex >= 0 && nextIndex < questionsDatabase.length) goToQuestion(nextIndex); 
+    }
+
+    function updateNavigationButtons() {
+        const btnPrev = document.getElementById('btnPrev');
+        const btnNext = document.getElementById('btnNext');
+        
+        if (btnPrev) btnPrev.disabled = (quizState.currentIndex === 0);
+        
+        if (btnNext) {
+            const isLastQuestion = quizState.currentIndex === questionsDatabase.length - 1;
+            if (isLastQuestion) { 
+                btnNext.textContent = "Finalizar Avaliação"; 
+                btnNext.onclick = finishQuiz; 
+            } else { 
+                btnNext.textContent = "Próxima ➡️"; 
+                btnNext.onclick = () => navigateQuestion(1); 
+            }
+        }
+    }
+
+    /* --- CÁLCULO DE RESULTADOS --- */
+    function calculateStars(percent) {
+        if (percent === 100) return "⭐⭐⭐⭐⭐";
+        if (percent >= 80) return "⭐⭐⭐⭐";
+        if (percent >= 60) return "⭐⭐⭐";
+        if (percent >= 40) return "⭐⭐";
+        if (percent > 0) return "⭐";
+        return "🌑"; // zero stars
+    }
+
+    function finishQuiz() {
+        const unansweredCount = quizState.userAnswers.filter(answer => answer === null).length;
+        
+        if (unansweredCount > 0) {
+            const confirmMessage = `Existem ${unansweredCount} questões por responder. Quer terminar mesmo assim (as em branco serão dadas como erradas)?`;
+            if (!confirm(confirmMessage)) return;
+        }
+
+        stopSuccessAnimation();
+
+        const correctAnswersCount = quizState.userAnswers.filter((answer, index) => answer === questionsDatabase[index].correctIndex).length;
+        const totalQuestions = questionsDatabase.length;
+        const percentageScore = Math.round((correctAnswersCount / totalQuestions) * 100);
+        const isApproved = percentageScore >= 80;
+        
+        renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved);
+        changeApplicationView('result');
+    }
+
+    function renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved) {
+        document.getElementById('finalPercent').textContent = `${percentageScore}%`;
+        document.getElementById('finalScoreText').textContent = `Acertaste ${correctAnswersCount} de ${totalQuestions}`;
+        document.getElementById('finalStars').textContent = calculateStars(percentageScore);
+        
+        const reviewContainer = document.getElementById('review-container');
+        const actionButtonsContainer = document.getElementById('action-buttons');
+        
+        let summaryHTML = '';
+
+        if (isApproved) {
+            summaryHTML += `
+                <div class="result-summary-box success">
+                    <strong>🎉 DOMÍNIO GRAVITACIONAL!</strong> A tua compreensão da diferença entre a massa de um corpo e a força da gravidade está impecável para os exames!
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REPETIR PARA 100%</button>`;
+        } else {
+            summaryHTML += `
+                <div class="result-summary-box error">
+                    <strong>⚠️ ATENÇÃO NA QUEDA LIVRE!</strong> Foste avaliado abaixo da meta (80%). Revisa a Lei da Gravitação de Newton e não voltes a confundir Quilogramas com Newtons!
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REFAZER AVALIAÇÃO</button>`;
+        }
+        
+        if (correctAnswersCount < totalQuestions) {
+            summaryHTML += '<h4 style="margin-bottom:15px; color:var(--text-color); font-size:1.15rem;">Revisão Teórica e Algébrica:</h4>';
+            questionsDatabase.forEach((question, index) => {
+                const userAnswerIndex = quizState.userAnswers[index];
+                if (userAnswerIndex !== question.correctIndex) {
+                    const userAnswerText = userAnswerIndex === null ? "Deixaste em branco" : question.options[userAnswerIndex];
+                    const correctAnswerText = question.options[question.correctIndex];
+                    
+                    summaryHTML += `
+                        <div class="error-log-item">
+                            <strong style="color:var(--theme-dark); font-size:1.05rem; display:block; margin-bottom:8px;">Q${index + 1}: ${question.text}</strong>
+                            <span style="color:var(--wrong-border); font-weight: 600; display:block; margin-bottom:5px;">A tua análise: ${userAnswerText}</span>
+                            <span style="color:var(--correct-border); font-weight: 700; display:block;">A Resposta Correta: ${correctAnswerText}</span>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        reviewContainer.innerHTML = summaryHTML;
+    }
+
+    function resetQuiz() { 
+        quizState.userAnswers = new Array(questionsDatabase.length).fill(null); 
+        quizState.currentIndex = 0; 
+        changeApplicationView('practice'); 
+    }
+    
+    // START APPLICATION
+    initializeSearch();
+    changeApplicationView('explanation');
+</script>
+</body>
+</html>

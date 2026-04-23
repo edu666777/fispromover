@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Física: Energia Potencial - Promover</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* --- VARIÁVEIS DE COR E TEMA: GRAVIDADE & MOLAS (Potencial) --- */
+        :root {
+            --bg-color: #F5F3FF; /* Violeta 50 */
+            --text-color: #3B0764; /* Violeta 900 */
+            --border-color: #581C87; /* Violeta 800 */
+            --white: #FFFFFF;
+            
+            --theme-light: #E9D5FF; /* Violeta 200 */
+            --theme-medium: #9333EA; /* Violeta 600 */
+            --theme-dark: #6B21A8; /* Violeta 700 */
+            --theme-contrast: #F59E0B; /* Âmbar 500 (Energia) */
+            --theme-accent: #10B981; /* Esmeralda (Mola/Movimento) */
+            --theme-text-active: #FFFFFF;
+            
+            --correct-bg: #D1FAE5;
+            --correct-border: #059669;
+            --wrong-bg: #FFE4E6;
+            --wrong-border: #BE123C;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 15px 120px 15px;
+            background-image: linear-gradient(rgba(147, 51, 234, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(147, 51, 234, 0.1) 1px, transparent 1px);
+            background-size: 25px 25px;
+        }
+
+        /* --- ANIMAÇÕES --- */
+        @keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1) rotate(-5deg); color: var(--theme-contrast); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+        .pulse-effect { animation: pulse 2s infinite; display: inline-block; }
+        .shake-effect { animation: shake 0.4s ease-in-out; }
+
+        /* --- LAYOUT PRINCIPAL --- */
+        .container { width: 100%; max-width: 650px; display: flex; flex-direction: column; gap: 25px; }
+        .logo-header { display: flex; flex-direction: column; align-items: center; padding: 15px 0 25px 0; text-align: center; }
+        .css-logo { font-size: 1.5rem; font-weight: 900; color: var(--theme-text-active); text-transform: uppercase; letter-spacing: -1px; border: 3px solid var(--border-color); padding: 8px 24px; border-radius: 12px; background: var(--theme-dark); box-shadow: 4px 4px 0px var(--theme-contrast); margin-bottom: 15px; transform: rotate(-2deg); }
+        h1 { font-size: 2rem; font-weight: 900; color: var(--text-color); text-transform: uppercase; letter-spacing: -0.5px; line-height: 1.1; }
+        .subtitle { font-size: 1rem; color: var(--white); font-weight: 700; margin-top: 5px; background: var(--theme-contrast); padding: 4px 12px; border-radius: 8px; border: 2px solid var(--border-color); }
+
+        /* --- NAVEGAÇÃO --- */
+        .toggle-container { background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 6px; display: flex; box-shadow: 4px 4px 0px var(--border-color); position: sticky; top: 15px; z-index: 50; }
+        .toggle-btn { flex: 1; border: none; background: none; padding: 12px 0; border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.05rem; color: var(--text-color); cursor: pointer; transition: all 0.2s ease; }
+        .toggle-btn.active { background-color: var(--theme-dark); color: var(--theme-text-active); border: 2px solid var(--border-color); box-shadow: 2px 2px 0px var(--border-color); }
+
+        .view-section { display: none; animation: fadeIn 0.3s ease; flex-direction: column; gap: 35px; }
+        .view-section.active { display: flex; }
+
+        /* --- PESQUISA --- */
+        .search-container { position: relative; width: 100%; }
+        .search-input { width: 100%; padding: 16px 20px 16px 55px; border: 3px solid var(--border-color); border-radius: 12px; background-color: var(--white); font-family: 'Poppins', sans-serif; font-size: 1.05rem; font-weight: 600; color: var(--text-color); box-shadow: 4px 4px 0px var(--border-color); outline: none; transition: all 0.2s ease; }
+        .search-input:focus { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--theme-contrast); border-color: var(--theme-dark); }
+        .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 1.4rem; }
+        #no-results { text-align: center; color: var(--wrong-border); font-weight: 800; display: none; background: var(--wrong-bg); padding: 15px; border: 3px solid var(--wrong-border); border-radius: 8px; }
+
+        /* --- TEORIA --- */
+        .content-group { display: flex; flex-direction: column; position: relative; padding-top: 15px; }
+        .section-badge { display: inline-flex; align-items: center; gap: 10px; background-color: var(--theme-dark); color: var(--white); font-size: 1.1rem; font-weight: 800; padding: 8px 20px; border-radius: 8px; border: 3px solid var(--border-color); box-shadow: 3px 3px 0px var(--theme-contrast); text-transform: uppercase; position: absolute; top: -5px; left: 15px; z-index: 10; transform: rotate(-1.5deg); }
+        .theory-box { display: flex; flex-direction: column; padding: 35px 25px 25px 35px; border-radius: 12px; background-color: var(--white); border: 3px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); font-weight: 500; font-size: 1rem; line-height: 1.7; position: relative; overflow: hidden; gap: 20px; border-left: 14px solid var(--theme-medium); }
+        .theory-box h3 { font-size: 1.35rem; font-weight: 900; color: var(--theme-dark); margin-bottom: 5px; display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px; }
+        .theory-box h4 { font-size: 1.1rem; font-weight: 800; color: var(--text-color); margin-top: 10px; border-bottom: 2px solid var(--theme-light); padding-bottom: 5px; }
+        
+        .inline-example { display: block; width: fit-content; max-width: 100%; margin-top: 6px; margin-bottom: 6px; padding: 12px 20px; background-color: var(--theme-light); border: 2px solid var(--border-color); border-radius: 8px; font-size: 1.15rem; color: var(--theme-dark); font-weight: 900; letter-spacing: 1px; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); text-align: center; }
+        .visual-area { background: var(--bg-color); border: 3px dashed var(--theme-medium); border-radius: 12px; padding: 25px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; width: 100%; }
+        
+        .highlight-box { background-color: #FEF3C7; border: 3px solid var(--border-color); border-left: 8px solid var(--theme-contrast); padding: 18px 20px; border-radius: 8px; font-size: 0.95rem; color: #78350F; font-weight: 600; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); }
+        .highlight-box.purple { background-color: #F3E8FF; border-left-color: var(--theme-medium); color: #4C1D95; }
+
+        /* --- CARDS DE FÓRMULAS --- */
+        .g-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; width: 100%; margin-top: 10px; }
+        .g-card { flex: 1 1 calc(50% - 15px); min-width: 130px; border-radius: 12px; padding: 15px 10px; text-align: center; border: 3px solid var(--border-color); display: flex; flex-direction: column; align-items: center; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); background-color: var(--white); transition: transform 0.2s; }
+        .g-card:hover { transform: translateY(-3px); }
+        .g-card.full-width { flex: 1 1 100%; max-width: 280px; }
+        .g-icon { font-size: 2.5rem; margin-bottom: 8px; line-height: 1; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.15)); }
+        .g-title { font-size: 1.05rem; font-weight: 900; margin-bottom: 4px; text-transform: uppercase; color: var(--theme-dark); }
+        .g-formula { font-size: 1.15rem; font-weight: 800; color: var(--theme-text-active); margin-bottom: 4px; line-height: 1.2; background: var(--theme-medium); padding: 4px 10px; border-radius: 6px; border: 2px solid var(--border-color); }
+        .g-desc { font-size: 0.85rem; font-weight: 600; color: var(--text-color); margin-top: 6px; line-height: 1.3; }
+
+        /* --- BOTÕES GERAIS --- */
+        .btn-action { width: 100%; padding: 20px; background-color: var(--theme-dark); color: white; border: 3px solid var(--border-color); border-radius: 12px; font-size: 1.15rem; font-weight: 900; cursor: pointer; box-shadow: 6px 6px 0px var(--theme-contrast); transition: all 0.1s; text-transform: uppercase; margin-top: 10px; }
+        .btn-action:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0px var(--theme-contrast); }
+
+        /* --- QUIZ UI --- */
+        .difficulty-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; border: 2px solid var(--border-color); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
+        .dif-facil { background: #D1FAE5; color: #065F46; }
+        .dif-medio { background: #FEF08A; color: #713F12; }
+        .dif-dificil { background: #FECACA; color: #7F1D1D; }
+
+        .question-map { display: flex; gap: 8px; overflow-x: auto; padding: 10px 5px; margin-bottom: 20px; white-space: nowrap; scroll-behavior: smooth; }
+        .question-map::-webkit-scrollbar { display: none; }
+        .map-dot { min-width: 38px; height: 38px; border: 2px solid var(--border-color); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; color: var(--theme-dark); background: white; cursor: pointer; transition: all 0.2s; }
+        .map-dot.active { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); transform: scale(1.15); }
+        .map-dot.answered-correct { background-color: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .map-dot.answered-wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .quiz-question-card { border: 4px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); padding: 30px; border-radius: 16px; background: var(--white); }
+        .quiz-question-counter { font-size: 0.85rem; font-weight: 900; color: var(--theme-dark); letter-spacing: 1px; }
+        .quiz-question-text { font-size: 1.15rem; margin-top: 8px; color: var(--text-color); font-weight: 800; line-height: 1.5; margin-bottom: 20px;}
+
+        .option-btn { display: flex; align-items: center; width: 100%; padding: 18px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.1s ease; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 600; text-align: left; color: var(--text-color); }
+        .option-btn:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px var(--theme-contrast); }
+        .opt-circle { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--border-color); margin-right: 15px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.05rem; flex-shrink: 0; background: var(--theme-light); color: var(--theme-dark); }
+        .option-btn.correct { background-color: var(--correct-bg); border-color: var(--correct-border); box-shadow: 3px 3px 0px var(--correct-border); }
+        .option-btn.correct .opt-circle { background-color: var(--correct-border); color: white; border-color: var(--correct-border); }
+        .option-btn.wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); opacity: 0.9; box-shadow: none; }
+        .option-btn.wrong .opt-circle { background-color: var(--wrong-border); color: white; border-color: var(--wrong-border); }
+        .option-btn.disabled { pointer-events: none; opacity: 0.7; }
+
+        /* --- FEEDBACK DA QUESTÃO --- */
+        .feedback-box { display: block; margin-top: 25px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 25px; animation: slideUp 0.3s ease-out; box-shadow: 5px 5px 0px rgba(0,0,0,0.1); }
+        .feedback-title { font-weight: 900; text-transform: uppercase; font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .feedback-item { margin-bottom: 10px; font-size: 0.95rem; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); line-height: 1.5; font-weight: 500; }
+        .feedback-item.correct-opt { background: var(--correct-bg); border-color: var(--correct-border); color: #064E3B; font-weight: 700; box-shadow: 3px 3px 0px var(--correct-border); }
+        .feedback-item.wrong-opt { background: #FFE4E6; border-color: #BE123C; color: #7F1D1D; border-style: dashed; margin-top: 8px; }
+
+        /* --- RESULTADOS --- */
+        .result-card { background: white; border: 4px solid var(--border-color); border-radius: 16px; padding: 40px 20px; box-shadow: 8px 8px 0px var(--border-color); margin-bottom: 30px; text-align: center; }
+        .stars-container { font-size: 2.5rem; margin: 15px 0; letter-spacing: 5px; }
+        .percentage-big { font-size: 5rem; font-weight: 900; color: var(--theme-dark); line-height: 1; margin: 15px 0; text-shadow: 4px 4px 0px var(--theme-contrast); }
+        
+        .result-summary-box { padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 3px solid; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); }
+        .result-summary-box.success { background: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .result-summary-box.error { background: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .error-log-item { margin-bottom: 15px; padding: 20px; background: var(--bg-color); border-radius: 12px; border: 3px dashed var(--theme-medium); text-align: left;}
+
+        /* --- RODAPÉ DE NAVEGAÇÃO --- */
+        .quiz-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--white); border-top: 3px solid var(--border-color); padding: 15px 20px; display: none; justify-content: center; gap: 20px; z-index: 100; box-shadow: 0px -4px 10px rgba(0,0,0,0.05); }
+        .nav-btn { padding: 15px 30px; border-radius: 12px; font-weight: 900; border: 3px solid var(--border-color); cursor: pointer; box-shadow: 3px 3px 0px var(--border-color); font-family: 'Poppins', sans-serif; text-transform: uppercase; background: white; color: var(--text-color); font-size: 1rem; transition: transform 0.1s; }
+        .nav-btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 0px 0px 0px transparent; }
+        .btn-next { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); border-color: var(--border-color); }
+        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <header class="logo-header">
+            <div class="css-logo"><span class="pulse-effect">🔋</span> PROMOVER</div>
+            <h1>Física / 9º Ano</h1>
+            <p class="subtitle">Energia Potencial: A Energia Guardada</p>
+        </header>
+
+        <div class="toggle-container">
+            <button class="toggle-btn active" id="btnExp" onclick="changeApplicationView('explanation')">📘 Teoria</button>
+            <button class="toggle-btn" id="btnPrac" onclick="changeApplicationView('practice')">🧠 Prática (30)</button>
+        </div>
+
+        <!-- VISTA: TEORIA -->
+        <main id="viewExplanation" class="view-section active">
+            
+            <div class="search-container">
+                <span class="search-icon" aria-hidden="true">🔍</span>
+                <input type="text" id="searchInput" class="search-input" aria-label="Pesquisar conteúdo" placeholder="Pesquisar conceito... (ex: Altura, Mola, Joules)">
+            </div>
+            <div id="no-results"><p>😕 Termo não encontrado na teoria de Energia Potencial.</p></div>
+
+            <section class="content-group">
+                <div class="section-badge">🔋 1. O Banco de Energia</div>
+                <article class="theory-box search-target">
+                    <h3>O que é a Energia Potencial?</h3>
+                    <p>Enquanto a Energia Cinética é a energia do movimento, a <strong>Energia Potencial</strong> é a energia <strong>ARMAZENADA</strong> num sistema. Ela está "escondida", com o potencial de se transformar em movimento a qualquer momento.</p>
+                    <p>Na mecânica clássica, estudamos duas formas principais de armazenar essa energia: através da gravidade ou através da deformação de materiais elásticos.</p>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">🍎 2. Energia Potencial Gravitacional (E<sub>pg</sub>)</div>
+                <article class="theory-box search-target">
+                    <h3>A Energia da Altura</h3>
+                    <p>Sempre que levantas um objeto do chão, estás a lutar contra a gravidade. O esforço que fazes fica guardado no objeto em forma de Energia Potencial Gravitacional.</p>
+                    
+                    <div class="visual-area" style="background: transparent; border: none; padding: 0;">
+                        <div class="g-grid">
+                            <div class="g-card full-width">
+                                <div class="g-icon">⛰️</div>
+                                <div class="g-title">A Fórmula da Gravidade</div>
+                                <div class="g-formula">E<sub>pg</sub> = m &middot; g &middot; h</div>
+                                <div class="g-desc"><strong>m:</strong> Massa (kg) | <strong>g:</strong> Gravidade (10 m/s&sup2;) | <strong>h:</strong> Altura (m). A energia depende DIRETAMENTE da altura!</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="highlight-box purple">
+                        <strong>O Referencial Importa:</strong> A altura "h" é sempre relativa! Uma jarra a 2 metros do chão do quarto tem uma energia. Mas se considerarmos o chão da rua (10 metros abaixo), a energia calculada será muito maior. Temos sempre de adotar um nível de referência onde <strong>h = 0</strong>.
+                    </div>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">🏹 3. Energia Potencial Elástica (E<sub>pe</sub>)</div>
+                <article class="theory-box search-target">
+                    <h3>A Energia das Molas</h3>
+                    <p>Quando esticas um elástico ou comprimes a mola de uma caneta, sentes a força de resistência do material. Essa tensão guarda Energia Potencial Elástica.</p>
+
+                    <div class="visual-area" style="background: transparent; border: none; padding: 0;">
+                        <div class="g-grid">
+                            <div class="g-card full-width">
+                                <div class="g-icon">🪀</div>
+                                <div class="g-title">A Fórmula da Mola</div>
+                                <div class="g-formula">E<sub>pe</sub> = (k &middot; x<sup>2</sup>) / 2</div>
+                                <div class="g-desc"><strong>k:</strong> Constante Elástica (Dureza da mola em N/m)<br><strong>x:</strong> Deformação (em metros).</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="highlight-box">
+                        <strong>A Armadilha do Quadrado:</strong> Assim como na energia cinética, aqui a deformação (<strong>x</strong>) está <strong>AO QUADRADO</strong>. Se tu esticares uma mola O DOBRO da distância, ela guardará QUATRO VEZES mais energia!
+                    </div>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">🔄 4. O Salto para a Cinética</div>
+                <article class="theory-box search-target">
+                    <h3>A Libertação da Energia</h3>
+                    <p>A Energia Potencial não quer ficar guardada para sempre. Assim que largas a mola (ou deixas cair a pedra da montanha), a Energia Potencial transforma-se instantaneamente em <strong>Energia Cinética</strong> (movimento). É o princípio da conservação da energia mecânica!</p>
+                </article>
+            </section>
+
+            <button class="btn-action" onclick="changeApplicationView('practice')">
+                Iniciar a Avaliação (30 Questões) ➜
+            </button>
+        </main>
+
+        <!-- VISTA: PRÁTICA (QUIZ) -->
+        <main id="viewPractice" class="view-section">
+            <div style="margin-bottom: 20px; background-color: var(--white); padding: 15px; border-radius: 12px; border: 3px solid var(--border-color); box-shadow: 4px 4px 0px var(--border-color);">
+                <h2 style="color:var(--theme-dark); font-weight:900; margin-bottom: 5px;">A Prova de Fogo - IFCE</h2>
+                <p style="color: var(--theme-contrast); font-size: 0.95rem; font-weight:600;">
+                    30 questões sobre Energia Potencial (Gravitacional e Elástica). Atenção às unidades de metro e aos cálculos quadráticos. Acerta <strong>80% (24/30)</strong>.
+                </p>
+            </div>
+            
+            <div class="question-map" id="qMap"></div>
+            <div id="quizContainer" style="margin-bottom: 40px;"></div>
+        </main>
+
+        <!-- VISTA: RESULTADOS -->
+        <main id="viewResult" class="view-section">
+            <div class="result-card">
+                <h2 style="font-weight:900; text-transform:uppercase;">Relatório Final</h2>
+                <div class="stars-container" id="finalStars">⭐⭐⭐</div>
+                <div class="percentage-big" id="finalPercent">0%</div>
+                <p style="font-size:1.2rem; font-weight:700; color:#555;" id="finalScoreText">Acertaste 0 de 30</p>
+                <div id="review-container" style="text-align: left; margin-top: 20px;"></div>
+            </div>
+            <div id="action-buttons"></div>
+        </main>
+
+    </div>
+
+    <!-- RODAPÉ DE NAVEGAÇÃO -->
+    <footer class="quiz-footer" id="quizFooter">
+        <button class="nav-btn btn-prev" id="btnPrev" onclick="navigateQuestion(-1)">Anterior</button>
+        <button class="nav-btn btn-next" id="btnNext" onclick="navigateQuestion(1)">Próxima</button>
+    </footer>
+
+<script>
+    /* --- ESTRUTURA DE DADOS (BASE DE QUESTÕES - ENERGIA POTENCIAL IFCE) --- */
+    const questionsDatabase = [
+        { level: "Fácil", text: "Na Física, como é genericamente definida a 'Energia Potencial' num sistema?", options: ["É a energia que um corpo tem devido à sua velocidade constante.", "É a energia que se dissipa sob a forma de calor no atrito.", "É a energia armazenada num corpo ou num sistema, pronta a ser transformada noutras formas de energia (como a cinética).", "É a energia térmica emitida pelo sol."], correctIndex: 2, explanation: { correctText: "A Energia Potencial é a 'energia em repouso'. Ela está armazenada no sistema (numa mola, num elástico ou num corpo em altura) e pode ser ativada a qualquer momento.", otherOptions: ["A energia da velocidade é a Cinética."] } },
+        { level: "Fácil", text: "Qual é a unidade de medida do Sistema Internacional (SI) utilizada para quantificar a Energia Potencial (seja ela Gravitacional ou Elástica)?", options: ["Watt (W)", "Newton (N)", "Metro por segundo (m/s)", "Joule (J)"], correctIndex: 3, explanation: { correctText: "Assim como qualquer outra forma de energia ou trabalho na física clássica, a Energia Potencial é medida em Joules (J).", otherOptions: ["Newton mede Força. Watt mede Potência."] } },
+        { level: "Fácil", text: "A Energia Potencial Gravitacional de um corpo que está perto da superfície da Terra depende obrigatoriamente de três grandezas físicas. Quais são?", options: ["Velocidade, Tempo e Massa.", "Massa do corpo, Aceleração da Gravidade e Altura.", "Pressão atmosférica, Altura e Volume.", "Força de atrito, Massa e Aceleração."], correctIndex: 1, explanation: { correctText: "Basta recordar a fórmula: Epg = m · g · h. Ela depende da Massa (m), da Gravidade do planeta (g) e da Altura (h) em relação ao referencial.", otherOptions: ["Incorreto."] } },
+        { level: "Médio", text: "Cálculo Direto: Um vaso de 3 kg está numa prateleira a 2 metros de altura do chão. Considerando a gravidade local como g = 10 m/s², qual é a Energia Potencial Gravitacional do vaso em relação ao chão?", options: ["30 J", "60 J", "15 J", "600 J"], correctIndex: 1, explanation: { correctText: "Multiplicação direta dos fatores: Epg = m · g · h => Epg = 3 × 10 × 2 = 60 Joules.", otherOptions: ["Cálculo simples de tabuada."] } },
+        { level: "Médio", text: "Um elevador de 500 kg está no 10º andar de um edifício, a 30 metros de altura em relação à rua. Qual a energia potencial gravitacional que ele armazena em relação à rua? (Usa g = 10 m/s²).", options: ["1.500 J", "15.000 J", "150.000 J", "1.500.000 J"], correctIndex: 2, explanation: { correctText: "Epg = m · g · h => 500 × 10 × 30 = 150.000 Joules.", otherOptions: ["Atenção à quantidade de zeros nas multiplicações."] } },
+        { level: "Fácil", text: "O que acontece à Energia Potencial Gravitacional de um objeto se o levarmos para O DOBRO da altura em que ele estava inicialmente?", options: ["Ela quadruplica.", "Ela divide-se por dois.", "Ela duplica (fica 2x maior), pois a energia é diretamente proporcional à altura.", "Ela não se altera enquanto o objeto não cair."], correctIndex: 2, explanation: { correctText: "Na fórmula Epg = m·g·h, o 'h' não tem expoente. Se a altura duplica, a energia duplica. É uma relação puramente linear.", otherOptions: ["Quadruplicar só aconteceria se a variável estivesse ao quadrado (como na energia elástica ou cinética)."] } },
+        { level: "Difícil", text: "Atenção ao referencial: Um livro de 1 kg está em cima de uma mesa que tem 1 metro de altura. A sala onde a mesa está fica no 2º andar de um prédio, a 10 metros da rua. Qual é a Energia Potencial do livro EM RELAÇÃO AO TAMPO DA MESA?", options: ["10 Joules", "110 Joules", "0 Joules", "100 Joules"], correctIndex: 2, explanation: { correctText: "A energia potencial é sempre RELATIVA a um referencial. Se o nível de referência (h=0) for a própria mesa onde o livro já está apoiado, a altura dele é zero. Logo, Epg = 1 × 10 × 0 = 0 Joules.", otherOptions: ["Em relação ao chão da sala seria 10J. Em relação à rua seria 110J."] } },
+        { level: "Médio", text: "Um alpinista de 80 kg escala uma montanha de 500 metros de altura no planeta Terra (g = 10 m/s²). Outro alpinista de 80 kg faz o mesmo numa montanha de 500 m no planeta Marte (onde a gravidade é bem menor, cerca de 3,7 m/s²). Quem guardou mais energia potencial gravitacional?", options: ["O alpinista em Marte.", "O alpinista na Terra, porque o valor do 'g' é maior, logo a multiplicação final (m·g·h) dá um valor muito mais alto.", "Eles acumularam a mesma energia, pois têm a mesma massa e subiram a mesma altura.", "Depende da velocidade da escalada."], correctIndex: 1, explanation: { correctText: "A gravidade (g) puxa com mais força na Terra. Subir 500m contra 10 m/s² exige mais trabalho e acumula mais energia (400.000 J) do que em Marte (148.000 J).", otherOptions: ["A força gravitacional altera a energia acumulada."] } },
+        { level: "Fácil", text: "Ao comprimires a mola de uma suspensão de bicicleta, sentes uma grande força de resistência. A energia que fica armazenada nas espirais dessa mola comprimida chama-se:", options: ["Energia Térmica.", "Energia Potencial Gravitacional.", "Energia Potencial Elástica.", "Energia Cinética."], correctIndex: 2, explanation: { correctText: "Corpos que sofrem deformação (esticar ou encolher) e tendem a voltar à sua forma original armazenam Energia Potencial Elástica.", otherOptions: ["Incorreto."] } },
+        { level: "Médio", text: "A fórmula matemática para calcular a Energia Potencial Elástica é Epe = (k · x²) / 2. Na física, o que significa a variável 'x' nesta fórmula?", options: ["A constante elástica da mola.", "O comprimento total da mola desenrolada.", "A massa do corpo preso à mola.", "A deformação sofrida pela mola (o quanto ela foi esticada ou comprimida em relação ao seu estado natural de repouso)."], correctIndex: 3, explanation: { correctText: "O 'x' é a medida da deformação. Se uma mola tem 30 cm de tamanho natural, e tu a encolhes até ficar com 20 cm, a deformação (x) que usas na fórmula é de 10 cm (0,1 metros).", otherOptions: ["O comprimento total não é usado na fórmula de energia."] } },
+        { level: "Médio", text: "Ainda na fórmula Epe = (k · x²) / 2. O que representa a letra 'k' e qual é a sua unidade no Sistema Internacional?", options: ["Representa a aceleração da mola, em m/s².", "Representa o peso da mola, em Newtons.", "Representa a Constante Elástica (a 'dureza' ou rigidez da mola). Mede-se em Newtons por metro (N/m).", "Representa a constante cinética em Joules."], correctIndex: 2, explanation: { correctText: "A constante 'k' indica a força necessária para deformar a mola. Uma mola de caneta tem um k muito baixo (fácil de dobrar). A mola de um carro tem um k na casa dos milhares de N/m (muito dura).", otherOptions: ["Incorreto."] } },
+        { level: "Difícil", text: "A rasteira geométrica! Se tu puxares a corda elástica de um arco em 10 centímetros, armazenas uma certa Energia Potencial Elástica. Se puxares O DOBRO da distância (20 centímetros), o que acontece à energia guardada para o disparo da flecha?", options: ["Duplica (fica 2x maior).", "Quadruplica (fica 4x maior), porque a deformação 'x' está elevada ao quadrado na fórmula matemática.", "Fica a mesma, pois a constante do arco não muda.", "Aumenta 10 vezes."], correctIndex: 1, explanation: { correctText: "Na fórmula Epe = (k·x²)/2, o x está ao quadrado. Se x passa a ser 2x, o quadrado torna a energia (2)² = 4 vezes maior! Um puxão ligeiramente maior aumenta brutalmente a letalidade da flecha.", otherOptions: ["É o mesmo princípio da velocidade na energia cinética."] } },
+        { level: "Difícil", text: "Cálculo de Energia Elástica: Uma mola de constante elástica k = 2.000 N/m está comprimida em 0,1 metros (10 cm). Quantos Joules de Energia Potencial Elástica ela tem acumulados?", options: ["10 J", "20 J", "100 J", "200 J"], correctIndex: 0, explanation: { correctText: "Epe = (k · x²) / 2. Epe = (2000 × 0,1²) / 2. O quadrado de 0,1 é 0,01. Multiplicando: 2000 × 0,01 = 20. Por fim, divide por 2: Epe = 10 Joules.", otherOptions: ["O erro mais comum é não elevar o x ao quadrado e dar 100J. O segundo erro é não dividir por 2 e dar 20J."] } },
+        { level: "Médio", text: "No laboratório de física, um aluno encontra duas molas. A Mola A tem constante k = 100 N/m e a Mola B tem k = 500 N/m. Se ele esticar as DUAS molas exatamente na mesma distância (ex: 2 metros), qual delas guardará mais energia elástica?", options: ["A Mola A, por ser mais macia.", "A Mola B, pois tem uma constante elástica MAIOR, o que significa que exigiu muito mais força para sofrer a mesma deformação.", "Elas guardarão a mesma energia.", "É impossível esticar molas diferentes na mesma distância."], correctIndex: 1, explanation: { correctText: "O valor de 'k' multiplica o resultado. A Mola B é 5x mais 'dura' que a Mola A. Logo, para a obrigares a esticar 2 metros tiveste de suar e fazer 5x mais trabalho muscular do que na Mola A.", otherOptions: ["Molas moles guardam menos energia para o mesmo puxão."] } },
+        { level: "Fácil", text: "Uma ave agarra numa ostra e voa verticalmente para a deixar cair e partir a casca. Durante a SUBIDA (ganhando altitude), o que acontece à Energia Potencial Gravitacional da ostra?", options: ["Permanece constante.", "Diminui, pois a gravidade puxa para baixo.", "Aumenta proporcionalmente, pois a altura (h) em relação ao solo está a ficar maior a cada segundo.", "Fica negativa."], correctIndex: 2, explanation: { correctText: "Como Epg = m·g·h, a massa e a gravidade são fixas, mas o 'h' está a subir no eixo do referencial. A conta final dá um valor de energia acumulada cada vez maior.", otherOptions: ["Incorreto."] } },
+        { level: "Médio", text: "Quando uma maçã se solta do galho de uma macieira e entra em Queda Livre, o que está a acontecer FISICAMENTE com as suas energias durante os metros em que cai?", options: ["A sua Energia Cinética e a sua Energia Potencial aumentam juntas.", "A sua Energia Potencial Gravitacional (Epg) DIMINUI, mas essa energia não se perde: transforma-se em Velocidade, fazendo a Energia Cinética (Ec) AUMENTAR proporcionalmente.", "Ambas as energias diminuem e somem.", "A Energia Potencial transforma-se em massa."], correctIndex: 1, explanation: { correctText: "É o princípio de Conservação! A 'conta bancária' da Altura vai esvaziando, transferindo o dinheiro para a 'conta bancária' da Velocidade. Ela cai cada vez mais rápido.", otherOptions: ["A energia total conserva-se, logo uma sobe e a outra desce."] } },
+        { level: "Médio", text: "Para sistemas mecânicos ideais, sem atrito nem resistência do ar, a Lei da Conservação da Energia Mecânica diz que a SOMA da (Energia Cinética + Energia Potencial) tem de ser:", options: ["Sempre zero.", "Sempre crescente.", "Constante em QUALQUER ponto da trajetória.", "Positiva no topo e negativa no chão."], correctIndex: 2, explanation: { correctText: "Se o corpo tem 100 J de Epg no topo (e zero Ec), a meio do caminho terá 50 J de Epg e 50 J de Ec (Soma = 100). Ao bater no chão, terá 0 de Epg e 100 J de Ec (Soma = 100). O valor total conserva-se inalterável.", otherOptions: ["Incorreto."] } },
+        { level: "Difícil", text: "Desafio Teórico do IFCE: Lanças uma pedra perfeitamente na VERTICAL, para o céu. No PONTO MAIS ALTO da trajetória (altura máxima), o que podemos afirmar sobre as energias da pedra?", options: ["Epg = 0 e Ec é máxima.", "Epg é Máxima e a Ec é ZERO (pois a pedra para momentaneamente de subir antes de cair).", "Epg é Máxima e a Ec também é Máxima.", "Ambas são iguais a zero."], correctIndex: 1, explanation: { correctText: "No topo do voo balístico, o objeto não tem mais velocidade para subir (Velocidade = 0, logo Ec = 0). Mas como é o ponto mais alto, o seu 'cofre' de energia gravitacional atingiu o valor máximo de capacidade.", otherOptions: ["A alternativa 1 descreve o exato momento em que ela vai bater no chão."] } },
+        { level: "Médio", text: "Na vida real, se tu atirares uma bola de borracha contra o chão, ela volta a subir, mas nunca alcança de volta a altura exata da qual foi largada. Porque é que a Energia Potencial Gravitacional final é menor que a inicial?", options: ["Porque a gravidade puxa mais na descida do que na subida.", "A lei de Newton falhou.", "Porque a Energia Mecânica dissipou-se (transformando-se em calor, som e deformação elástica) no momento em que a bola bateu no chão.", "A bola ganhou massa."], correctIndex: 2, explanation: { correctText: "Os sistemas da vida real têm atrito e forças não-conservativas. Parte da energia pura de movimento 'perdeu-se' a amassar as moléculas da borracha e a gerar a onda sonora do 'pimba' no chão.", otherOptions: ["Incorreto."] } },
+        { level: "Fácil", text: "Um acrobata pula de uma prancha numa piscina (trampolim). No exato instante ANTES de tocar na superfície da água, qual energia atingiu o seu pico MÁXIMO?", options: ["Energia Potencial Gravitacional.", "Energia Potencial Elástica.", "Energia Cinética (Velocidade).", "Energia Nuclear."], correctIndex: 2, explanation: { correctText: "No ponto mais baixo (mesmo antes da travagem na água), toda a energia que ele tinha ganho por estar na prancha virou velocidade pura de queda.", otherOptions: ["A Potencial atingiu o mínimo (referencial zero)."] } },
+        { level: "Difícil", text: "Cálculo de Inversão de Fórmulas: Uma ave tem uma massa de 2 kg e voa a uma altura onde a sua Energia Potencial Gravitacional é de 400 J. Considerando g = 10 m/s², a que ALTURA (h) se encontra a ave?", options: ["20 metros", "10 metros", "50 metros", "200 metros"], correctIndex: 0, explanation: { correctText: "Sabemos que Epg = m · g · h. Substituindo os valores: 400 = 2 × 10 × h. Fica: 400 = 20 × h. Isolando o h: h = 400 / 20 = 20 metros.", otherOptions: ["Problemas de isolar a variável (matemática básica) reprovam muitos alunos."] } },
+        { level: "Difícil", text: "Outro cálculo inverso: Um arco armazena 100 Joules de Energia Potencial Elástica (Epe). A mola desse arco foi deformada em 2 metros (x = 2). Qual é o valor da constante elástica (k) deste arco?", options: ["100 N/m", "50 N/m", "25 N/m", "10 N/m"], correctIndex: 1, explanation: { correctText: "Fórmula: Epe = (k · x²) / 2. Substituindo: 100 = (k × 2²) / 2. Fica: 100 = (k × 4) / 2. Fica: 100 = k × 2. Passa o 2 a dividir: k = 100 / 2 = 50 N/m.", otherOptions: ["O erro mais comum é esquecer de elevar a deformação (2m) ao quadrado."] } },
+        { level: "Médio", text: "Imagina uma pista de Skate com duas colinas (uma rampa em W). A Colina A tem 5 metros. O skatista desce de lá SEM darmos nenhum empurrão (velocidade inicial zero). Se a pista não tiver atrito, ele conseguirá chegar ao topo da Colina B que tem 6 metros de altura?", options: ["Sim, ele embala no fundo.", "Não! Pela conservação da energia, a energia total não pode aumentar. A energia de 5m só lhe permite voltar a subir até ao limite exato de 5m na Colina B.", "Sim, a gravidade empurra para cima.", "Depende da prancha de skate."], correctIndex: 1, explanation: { correctText: "Milagres energéticos não existem. Se tu depositas 500 Joules no sistema (devido aos 5m de altura inicial), ele não pode chegar ao outro lado precisando de 600 Joules para subir os 6m. Faltará energia potencial e ele vai parar a meio e cair para trás.", otherOptions: ["A menos que ele empurre com a perna (injetando energia mecânica extra), é fisicamente impossível ele subir mais alto do que o ponto de onde foi largado."] } },
+        { level: "Fácil", text: "Uma mola está presa ao teto. Ela encontra-se no seu estado de relaxamento natural (ninguém lhe toca). Qual é o valor da sua Energia Potencial Elástica neste momento?", options: ["Depende da gravidade.", "Máxima.", "Zero Joules (0 J), pois não há qualquer deformação (x = 0).", "Igual à constante k."], correctIndex: 2, explanation: { correctText: "Para uma mola guardar energia, ela TEM de estar fora da sua zona de conforto (esticada ou amassada). Se não está deformada (x=0), a fórmula do kx²/2 dá zero. Ela está vazia.", otherOptions: ["Incorreto."] } },
+        { level: "Médio", text: "Num jogo de dardos tipo Nerf, quando tu comprimes a mola da arma com o dardo, a mola guarda Energia Potencial Elástica. Quando apertas o gatilho, a mola atira o dardo para o ar. Que transformações de energia ocorreram?", options: ["Elástica → Cinética → Potencial Gravitacional.", "Gravitacional → Térmica.", "Cinética → Elástica.", "Elétrica → Cinética."], correctIndex: 0, explanation: { correctText: "O dardo é expulso pelo 'x' da mola a destrancar-se (Potencial Elástica vira Cinética de velocidade). Como ele é disparado para o ar, vai subindo, perdendo a velocidade e ganhando altura (Cinética vira Potencial Gravitacional).", otherOptions: ["O domínio das sequências de energia é vital para as respostas abertas."] } },
+        { level: "Difícil", text: "O Salto com Vara nas Olimpíadas: O atleta corre muito rápido, espeta a vara elástica no chão, ela verga-se totalmente, e atira o atleta a 6 metros de altura por cima da fasquia. Onde estava a principal energia guardada que o levantou do chão?", options: ["Nos braços dele apenas.", "Na Energia Potencial Gravitacional da corrida.", "Na Energia Potencial Elástica da vara! Ele transformou a sua Velocidade (Ec) na curvatura extrema da vara (Epe), que depois o catapultou para Cima (Epg).", "No ar à volta."], correctIndex: 2, explanation: { correctText: "Este é o exemplo clássico de prova sobre transformações triplas. Ec da corrida -> Epe da fibra da vara deformada -> Ec de lançamento vertical -> Epg no pico do salto.", otherOptions: ["Incorreto."] } },
+        { level: "Médio", text: "Um drone desce verticalmente a uma velocidade rigorosamente CONSTANTE usando as suas hélices para travar a gravidade. Se a velocidade é constante, a sua Energia Cinética não muda. E a sua Energia Potencial Gravitacional?", options: ["Também é constante.", "Está a DIMINUIR, porque a sua altura em relação ao chão fica cada vez menor.", "Está a aumentar.", "Não existe Epg para máquinas."], correctIndex: 1, explanation: { correctText: "A Energia Cinética depende da Velocidade (que está trancada e fixa), logo o valor de Ec é fixo. Mas o drone continua a perder Altitude (h). Como o 'h' encolhe na fórmula mgh, a Energia Potencial está a esvaziar a cada segundo.", otherOptions: ["A energia 'perdida' da potencial está a ser gasta pelo motor das hélices que combatem o ar."] } },
+        { level: "Fácil", text: "Uma fruta está no topo da árvore. Ela guarda Energia Potencial Gravitacional. Qual das duas laranjas, A (pesa 100 gramas) ou B (pesa 500 gramas), ambas no MESMO galho exato a 4 metros de altura, acumula MAIOR Energia Potencial?", options: ["A laranja A.", "A laranja B, pois tem MAIOR MASSA (m).", "Ambas têm a mesma energia, pois estão na mesma altura.", "Depende se o vento sopra."], correctIndex: 1, explanation: { correctText: "Embora ambas caiam à mesma velocidade no vácuo, a Laranja B tem muito mais átomos no seu interior (Massa = 0,5 kg). Na fórmula Epg = m·g·h, quem tem a maior massa multiplica e guarda muito mais energia potencial para a queda (vai dar uma pancada mais forte no chão).", otherOptions: ["A altura não é a única variável, a massa do corpo importa."] } },
+        { level: "Difícil", text: "Desafio IFCE (Teórico): Atiras uma bola com a mão de forma inclinada para a frente. Ela sobe, faz um grande arco de curva no ar (lançamento oblíquo parabólico), e bate no chão do outro lado do pátio. No ponto MAIS ALTO dessa parábola curva, a Energia Cinética (Ec) da bola é igual a ZERO?", options: ["Sim, porque ela parou de subir.", "Não! Ela parou de subir na vertical (Velocidade do eixo Y é nula), mas ela continua a andar para a FRENTE (Velocidade no eixo X ainda existe). Logo, ela ainda tem velocidade horizontal e a Ec NÃO É ZERO no topo do arco.", "Sim, as energias cancelam-se no topo.", "Não, porque a gravidade desligou."], correctIndex: 1, explanation: { correctText: "A rasteira mais genial da cinemática. Num lançamento oblíquo, o objeto não para no ar. Ele continua a ir para a frente a rasgar o céu. Como ele tem velocidade no eixo X, a fórmula E=(m.v²)/2 não é zero. Ele tem energia cinética e potencial ao mesmo tempo no topo da parábola!", otherOptions: ["Só seria zero num arremesso estritamente vertical a 90 graus."] } },
+        { level: "Fácil", text: "Resumo Geral da Ficha de Energia: A letra 'g' que aparece repetidamente na fórmula Epg = m·g·h é a Aceleração da Gravidade. No Sistema Internacional, que unidade utilizamos para o 'h' (altura) a fim de obtermos o resultado da energia nos sagrados Joules (J)?", options: ["Centímetros (cm)", "Quilómetros (km)", "Polegadas", "Metros (m)"], correctIndex: 3, explanation: { correctText: "Para que o caldo não entorne nas provas da física! A massa DEVE estar em kg. A gravidade em m/s². A altura (h) DEVE, rigorosa e indiscutivelmente, estar convertida em METROS (m). Só assim o resultado sai em Joules (J).", otherOptions: ["Errar centímetros para metros destrói a nota da questão inteira."] } }
+    ];
+
+    /* --- GESTÃO DE ESTADO (STATE) --- */
+    const quizState = {
+        currentIndex: 0,
+        userAnswers: new Array(questionsDatabase.length).fill(null),
+        confettiAnimationId: null
+    };
+
+    /* --- FUNCIONALIDADES DE PESQUISA (TEORIA) --- */
+    function initializeSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const contentGroups = document.querySelectorAll('.content-group');
+        const noResultsMsg = document.getElementById('no-results');
+
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', function(event) {
+            const searchTerm = normalizeText(event.target.value);
+            let totalVisibleElements = 0;
+            
+            contentGroups.forEach(group => {
+                const groupContent = normalizeText(group.textContent);
+                const isMatch = groupContent.includes(searchTerm);
+                
+                group.style.display = isMatch ? 'flex' : 'none';
+                if (isMatch) totalVisibleElements++;
+            });
+            
+            noResultsMsg.style.display = totalVisibleElements === 0 ? 'block' : 'none';
+        });
+    }
+
+    function normalizeText(text) {
+        return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    /* --- CONTROLO DE VISTAS (VIEWS) --- */
+    function changeApplicationView(viewName) {
+        const views = ['viewExplanation', 'viewPractice', 'viewResult'];
+        
+        views.forEach(viewId => document.getElementById(viewId).classList.remove('active'));
+        
+        const quizFooter = document.getElementById('quizFooter');
+        if (quizFooter) quizFooter.style.display = 'none';
+
+        if (viewName === 'explanation') {
+            document.getElementById('viewExplanation').classList.add('active');
+            document.getElementById('btnExp').classList.add('active');
+            document.getElementById('btnPrac').classList.remove('active');
+        } else if (viewName === 'practice') {
+            document.getElementById('viewPractice').classList.add('active');
+            if (quizFooter) quizFooter.style.display = 'flex';
+            document.getElementById('btnExp').classList.remove('active');
+            document.getElementById('btnPrac').classList.add('active');
+            
+            renderCurrentQuestion();
+            renderNavigationMap();
+        } else if (viewName === 'result') {
+            document.getElementById('viewResult').classList.add('active');
+        }
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* --- GERAÇÃO INTERFACE DO QUIZ --- */
+    function getDifficultyBadgeClass(level) {
+        const mapping = { 'Fácil': 'dif-facil', 'Médio': 'dif-medio', 'Difícil': 'dif-dificil' };
+        return mapping[level] || 'dif-facil';
+    }
+
+    function buildOptionsHTML(question, selectedAnswerIndex) {
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        return question.options.map((optionText, optionIndex) => {
+            let cssClass = '';
+            
+            if (selectedAnswerIndex !== null) {
+                if (optionIndex === question.correctIndex) cssClass = 'correct';
+                else if (optionIndex === selectedAnswerIndex) cssClass = 'wrong';
+                else cssClass = 'disabled';
+            }
+
+            const isDisabled = selectedAnswerIndex !== null ? 'disabled' : '';
+
+            return `
+                <button class="option-btn ${cssClass}" onclick="handleOptionSelection(${optionIndex})" ${isDisabled}>
+                    <div class="opt-circle">${alphabet[optionIndex]}</div>
+                    <div>${optionText}</div>
+                </button>
+            `;
+        }).join('');
+    }
+
+    function buildFeedbackHTML(question, selectedAnswerIndex) {
+        const isCorrect = selectedAnswerIndex === question.correctIndex;
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        const titleClass = isCorrect ? 'success' : 'error';
+        const titleText = isCorrect ? '✅ Raciocínio Correto!' : '❌ Diagnóstico Energético Falhou!';
+        
+        const distortionsHTML = question.explanation.otherOptions.map((explanationText, idx) => {
+            if (idx === question.correctIndex) return '';
+            return `<div class="feedback-item wrong-opt"><strong>${alphabet[idx]})</strong> ${explanationText}</div>`;
+        }).join('');
+
+        return `
+            <div class="feedback-box show">
+                <div class="feedback-title ${titleClass}" style="color: ${isCorrect ? 'var(--correct-border)' : 'var(--wrong-border)'}">${titleText}</div>
+                <div class="feedback-item correct-opt"><strong>O Princípio Físico:</strong> ${question.options[question.correctIndex]}</div>
+                <div style="margin-top:15px;font-size:1rem;color:var(--text-color);margin-bottom:15px;font-weight:600;">${question.explanation.correctText}</div>
+                <div style="margin-top:15px;border-top:2px dashed var(--border-color);padding-top:15px;">
+                    <small style="color:var(--text-color);"><strong>Análise dos Desvios:</strong></small>
+                    ${distortionsHTML}
+                </div>
+            </div>
+        `;
+    }
+
+    function renderCurrentQuestion() {
+        const container = document.getElementById('quizContainer');
+        if (!container) return;
+
+        const question = questionsDatabase[quizState.currentIndex];
+        const selectedAnswerIndex = quizState.userAnswers[quizState.currentIndex];
+        const badgeClass = getDifficultyBadgeClass(question.level);
+        
+        let feedbackHTML = selectedAnswerIndex !== null ? buildFeedbackHTML(question, selectedAnswerIndex) : '';
+
+        container.innerHTML = `
+            <div class="quiz-question-card">
+                <span class="difficulty-badge ${badgeClass}">${question.level}</span>
+                <div style="margin-bottom:25px;">
+                    <span class="quiz-question-counter">QUESTÃO ${quizState.currentIndex + 1} DE ${questionsDatabase.length}</span>
+                    <h2 class="quiz-question-text">${question.text}</h2>
+                </div>
+                <div class="options-list">
+                    ${buildOptionsHTML(question, selectedAnswerIndex)}
+                </div>
+                ${feedbackHTML}
+            </div>
+        `;
+        
+        updateNavigationButtons();
+    }
+
+    /* --- LÓGICA DO QUIZ --- */
+    function handleOptionSelection(selectedIndex) {
+        if (quizState.userAnswers[quizState.currentIndex] !== null) return;
+        
+        quizState.userAnswers[quizState.currentIndex] = selectedIndex;
+        const isCorrect = selectedIndex === questionsDatabase[quizState.currentIndex].correctIndex;
+        
+        if (isCorrect) startSuccessAnimation();
+        else triggerErrorShakeEffect();
+        
+        renderCurrentQuestion();
+        renderNavigationMap();
+    }
+
+    function triggerErrorShakeEffect() {
+        const container = document.getElementById('quizContainer');
+        if (container) { 
+            container.classList.remove('shake-effect'); 
+            void container.offsetWidth; 
+            container.classList.add('shake-effect'); 
+            setTimeout(() => container.classList.remove('shake-effect'), 500); 
+        }
+    }
+
+    /* --- ANIMAÇÕES (CONFETTI) --- */
+    function startSuccessAnimation() {
+        const duration = 1500;
+        const end = Date.now() + duration;
+        
+        stopSuccessAnimation();
+        
+        function animateFrame() {
+            if(window.confetti && typeof confetti === 'function') {
+                const config = { particleCount: 5, spread: 55, colors: ['#9333EA', '#6B21A8', '#F59E0B', '#10B981'] };
+                confetti({ ...config, angle: 60, origin: { x: 0, y: 0.6 } });
+                confetti({ ...config, angle: 120, origin: { x: 1, y: 0.6 } });
+            }
+            if (Date.now() < end) quizState.confettiAnimationId = requestAnimationFrame(animateFrame);
+        }
+        animateFrame();
+    }
+
+    function stopSuccessAnimation() {
+        if (window.confetti && typeof confetti.reset === 'function') confetti.reset(); 
+        if (quizState.confettiAnimationId) {
+            cancelAnimationFrame(quizState.confettiAnimationId);
+            quizState.confettiAnimationId = null;
+        }
+    }
+
+    /* --- NAVEGAÇÃO MAPA --- */
+    function renderNavigationMap() {
+        const mapContainer = document.getElementById('qMap');
+        if (!mapContainer) return;
+        
+        mapContainer.innerHTML = questionsDatabase.map((question, index) => {
+            const isCurrent = index === quizState.currentIndex;
+            const userAnswer = quizState.userAnswers[index];
+            const hasAnswered = userAnswer !== null;
+            const isCorrect = userAnswer === question.correctIndex;
+            
+            let cssClass = 'map-dot';
+            if (isCurrent) cssClass += ' active';
+            if (hasAnswered) cssClass += isCorrect ? ' answered-correct' : ' answered-wrong';
+            
+            return `<div class="${cssClass}" onclick="goToQuestion(${index})">${index + 1}</div>`;
+        }).join('');
+        
+        setTimeout(() => { 
+            const activeDot = mapContainer.querySelector('.map-dot.active'); 
+            if (activeDot) activeDot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); 
+        }, 50);
+    }
+
+    function goToQuestion(targetIndex) { 
+        stopSuccessAnimation();
+        quizState.currentIndex = targetIndex; 
+        renderCurrentQuestion(); 
+        renderNavigationMap(); 
+    }
+    
+    function navigateQuestion(directionOffset) { 
+        const nextIndex = quizState.currentIndex + directionOffset; 
+        if (nextIndex >= 0 && nextIndex < questionsDatabase.length) goToQuestion(nextIndex); 
+    }
+
+    function updateNavigationButtons() {
+        const btnPrev = document.getElementById('btnPrev');
+        const btnNext = document.getElementById('btnNext');
+        
+        if (btnPrev) btnPrev.disabled = (quizState.currentIndex === 0);
+        
+        if (btnNext) {
+            const isLastQuestion = quizState.currentIndex === questionsDatabase.length - 1;
+            if (isLastQuestion) { 
+                btnNext.textContent = "Finalizar Avaliação"; 
+                btnNext.onclick = finishQuiz; 
+            } else { 
+                btnNext.textContent = "Próxima ➡️"; 
+                btnNext.onclick = () => navigateQuestion(1); 
+            }
+        }
+    }
+
+    /* --- CÁLCULO DE RESULTADOS --- */
+    function calculateStars(percent) {
+        if (percent === 100) return "⭐⭐⭐⭐⭐";
+        if (percent >= 80) return "⭐⭐⭐⭐";
+        if (percent >= 60) return "⭐⭐⭐";
+        if (percent >= 40) return "⭐⭐";
+        if (percent > 0) return "⭐";
+        return "🌑"; // zero stars
+    }
+
+    function finishQuiz() {
+        const unansweredCount = quizState.userAnswers.filter(answer => answer === null).length;
+        
+        if (unansweredCount > 0) {
+            const confirmMessage = `Existem ${unansweredCount} questões por responder. Quer terminar mesmo assim (as em branco serão dadas como erradas)?`;
+            if (!confirm(confirmMessage)) return;
+        }
+
+        stopSuccessAnimation();
+
+        const correctAnswersCount = quizState.userAnswers.filter((answer, index) => answer === questionsDatabase[index].correctIndex).length;
+        const totalQuestions = questionsDatabase.length;
+        const percentageScore = Math.round((correctAnswersCount / totalQuestions) * 100);
+        const isApproved = percentageScore >= 80;
+        
+        renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved);
+        changeApplicationView('result');
+    }
+
+    function renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved) {
+        document.getElementById('finalPercent').textContent = `${percentageScore}%`;
+        document.getElementById('finalScoreText').textContent = `Acertaste ${correctAnswersCount} de ${totalQuestions}`;
+        document.getElementById('finalStars').textContent = calculateStars(percentageScore);
+        
+        const reviewContainer = document.getElementById('review-container');
+        const actionButtonsContainer = document.getElementById('action-buttons');
+        
+        let summaryHTML = '';
+
+        if (isApproved) {
+            summaryHTML += `
+                <div class="result-summary-box success">
+                    <strong>🎉 CONSERVAÇÃO PERFEITA!</strong> O teu domínio das Fórmulas da Energia Potencial (Gravitacional e Elástica) e a noção de Referencial de Altura garantem-te um lugar seguro no nível exigido pelo IFCE.
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REPETIR PARA 100%</button>`;
+        } else {
+            summaryHTML += `
+                <div class="result-summary-box error">
+                    <strong>⚠️ BATERIA FRACA!</strong> Foste avaliado abaixo da meta (80%). Lembra-te de não ignorar o Quadrado (x²) na fórmula da mola, nem a importância de converter cm para metros nas contas!
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REFAZER AVALIAÇÃO</button>`;
+        }
+        
+        if (correctAnswersCount < totalQuestions) {
+            summaryHTML += '<h4 style="margin-bottom:15px; color:var(--text-color); font-size:1.15rem;">Revisão Teórica e Algébrica:</h4>';
+            questionsDatabase.forEach((question, index) => {
+                const userAnswerIndex = quizState.userAnswers[index];
+                if (userAnswerIndex !== question.correctIndex) {
+                    const userAnswerText = userAnswerIndex === null ? "Deixaste em branco" : question.options[userAnswerIndex];
+                    const correctAnswerText = question.options[question.correctIndex];
+                    
+                    let plainQuestionText = question.text;
+
+                    summaryHTML += `
+                        <div class="error-log-item">
+                            <strong style="color:var(--theme-dark); font-size:1.05rem; display:block; margin-bottom:8px;">Q${index + 1}: ${plainQuestionText}</strong>
+                            <span style="color:var(--wrong-border); font-weight: 600; display:block; margin-bottom:5px;">A tua análise: ${userAnswerText}</span>
+                            <span style="color:var(--correct-border); font-weight: 700; display:block;">A Resposta Correta: ${correctAnswerText}</span>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        reviewContainer.innerHTML = summaryHTML;
+    }
+
+    function resetQuiz() { 
+        quizState.userAnswers = new Array(questionsDatabase.length).fill(null); 
+        quizState.currentIndex = 0; 
+        changeApplicationView('practice'); 
+    }
+    
+    // START APPLICATION
+    initializeSearch();
+    changeApplicationView('explanation');
+</script>
+</body>
+</html>

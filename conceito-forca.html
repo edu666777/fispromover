@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Física: Dinâmica e Conceito de Força - Promover</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* --- VARIÁVEIS DE COR E TEMA: IMPACTO & DINÂMICA (Forças) --- */
+        :root {
+            --bg-color: #FEF2F2; /* Fundo vermelho muito claro */
+            --text-color: #450A0A; /* Vermelho muito escuro quase preto */
+            --border-color: #7F1D1D; /* Contorno vermelho tijolo */
+            --white: #FFFFFF;
+            
+            --theme-light: #FEE2E2; /* Vermelho pastel */
+            --theme-medium: #EF4444; /* Vermelho vivo */
+            --theme-dark: #B91C1C; /* Vermelho profundo */
+            --theme-contrast: #F59E0B; /* Âmbar (Atenção/Impacto) */
+            --theme-accent: #3B82F6; /* Azul (Vetores/Forças opostas) */
+            --theme-text-active: #FFFFFF;
+            
+            --correct-bg: #D1FAE5;
+            --correct-border: #059669;
+            --wrong-bg: #FFE4E6;
+            --wrong-border: #BE123C;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 15px 120px 15px;
+            background-image: linear-gradient(rgba(185, 28, 28, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(185, 28, 28, 0.1) 1px, transparent 1px);
+            background-size: 25px 25px;
+        }
+
+        /* --- ANIMAÇÕES --- */
+        @keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1) rotate(-5deg); color: var(--theme-contrast); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+        .pulse-effect { animation: pulse 2s infinite; display: inline-block; }
+        .shake-effect { animation: shake 0.4s ease-in-out; }
+
+        /* --- LAYOUT PRINCIPAL --- */
+        .container { width: 100%; max-width: 650px; display: flex; flex-direction: column; gap: 25px; }
+        .logo-header { display: flex; flex-direction: column; align-items: center; padding: 15px 0 25px 0; text-align: center; }
+        .css-logo { font-size: 1.5rem; font-weight: 900; color: var(--theme-text-active); text-transform: uppercase; letter-spacing: -1px; border: 3px solid var(--border-color); padding: 8px 24px; border-radius: 12px; background: var(--theme-dark); box-shadow: 4px 4px 0px var(--theme-contrast); margin-bottom: 15px; transform: rotate(-2deg); }
+        h1 { font-size: 2rem; font-weight: 900; color: var(--text-color); text-transform: uppercase; letter-spacing: -0.5px; line-height: 1.1; }
+        .subtitle { font-size: 1rem; color: var(--white); font-weight: 700; margin-top: 5px; background: var(--theme-contrast); padding: 4px 12px; border-radius: 8px; border: 2px solid var(--border-color); }
+
+        /* --- NAVEGAÇÃO --- */
+        .toggle-container { background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 6px; display: flex; box-shadow: 4px 4px 0px var(--border-color); position: sticky; top: 15px; z-index: 50; }
+        .toggle-btn { flex: 1; border: none; background: none; padding: 12px 0; border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.05rem; color: var(--text-color); cursor: pointer; transition: all 0.2s ease; }
+        .toggle-btn.active { background-color: var(--theme-dark); color: var(--theme-text-active); border: 2px solid var(--border-color); box-shadow: 2px 2px 0px var(--border-color); }
+
+        .view-section { display: none; animation: fadeIn 0.3s ease; flex-direction: column; gap: 35px; }
+        .view-section.active { display: flex; }
+
+        /* --- PESQUISA --- */
+        .search-container { position: relative; width: 100%; }
+        .search-input { width: 100%; padding: 16px 20px 16px 55px; border: 3px solid var(--border-color); border-radius: 12px; background-color: var(--white); font-family: 'Poppins', sans-serif; font-size: 1.05rem; font-weight: 600; color: var(--text-color); box-shadow: 4px 4px 0px var(--border-color); outline: none; transition: all 0.2s ease; }
+        .search-input:focus { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--theme-contrast); border-color: var(--theme-dark); }
+        .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 1.4rem; }
+        #no-results { text-align: center; color: var(--wrong-border); font-weight: 800; display: none; background: var(--wrong-bg); padding: 15px; border: 3px solid var(--wrong-border); border-radius: 8px; }
+
+        /* --- TEORIA --- */
+        .content-group { display: flex; flex-direction: column; position: relative; padding-top: 15px; }
+        .section-badge { display: inline-flex; align-items: center; gap: 10px; background-color: var(--theme-dark); color: var(--white); font-size: 1.1rem; font-weight: 800; padding: 8px 20px; border-radius: 8px; border: 3px solid var(--border-color); box-shadow: 3px 3px 0px var(--theme-contrast); text-transform: uppercase; position: absolute; top: -5px; left: 15px; z-index: 10; transform: rotate(-1.5deg); }
+        .theory-box { display: flex; flex-direction: column; padding: 35px 25px 25px 35px; border-radius: 12px; background-color: var(--white); border: 3px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); font-weight: 500; font-size: 1rem; line-height: 1.7; position: relative; overflow: hidden; gap: 20px; border-left: 14px solid var(--theme-medium); }
+        .theory-box h3 { font-size: 1.35rem; font-weight: 900; color: var(--theme-dark); margin-bottom: 5px; display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px; }
+        .theory-box h4 { font-size: 1.1rem; font-weight: 800; color: var(--text-color); margin-top: 10px; border-bottom: 2px solid var(--theme-light); padding-bottom: 5px; }
+        
+        .inline-example { display: block; width: fit-content; max-width: 100%; margin-top: 6px; margin-bottom: 6px; padding: 12px 20px; background-color: var(--theme-light); border: 2px solid var(--border-color); border-radius: 8px; font-size: 1.25rem; color: var(--theme-dark); font-weight: 900; letter-spacing: 1px; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); text-align: center; }
+        .visual-area { background: var(--bg-color); border: 3px dashed var(--theme-medium); border-radius: 12px; padding: 25px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; width: 100%; }
+        
+        .highlight-box { background-color: #FEF3C7; border: 3px solid var(--border-color); border-left: 8px solid var(--theme-contrast); padding: 18px 20px; border-radius: 8px; font-size: 0.95rem; color: #78350F; font-weight: 600; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); }
+        .highlight-box.blue { background-color: #EFF6FF; border-left-color: #3B82F6; color: #1E3A8A; }
+
+        /* --- CARDS DE LEIS DE NEWTON --- */
+        .l-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; width: 100%; margin-top: 10px; }
+        .l-card { flex: 1 1 calc(50% - 15px); min-width: 130px; border-radius: 12px; padding: 15px 10px; text-align: center; border: 3px solid var(--border-color); display: flex; flex-direction: column; align-items: center; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); background-color: var(--white); transition: transform 0.2s; }
+        .l-card:hover { transform: translateY(-3px); }
+        .l-card.full-width { flex: 1 1 100%; max-width: 280px; }
+        .l-icon { font-size: 2.5rem; margin-bottom: 8px; line-height: 1; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.15)); }
+        .l-title { font-size: 1.05rem; font-weight: 900; margin-bottom: 4px; text-transform: uppercase; color: var(--theme-dark); }
+        .l-formula { font-size: 1.15rem; font-weight: 800; color: var(--theme-contrast); margin-bottom: 4px; line-height: 1.2; background: var(--bg-color); padding: 4px 10px; border-radius: 6px; border: 2px solid var(--border-color); }
+        .l-desc { font-size: 0.85rem; font-weight: 600; color: var(--text-color); margin-top: 6px; line-height: 1.3; }
+
+        /* --- BOTÕES GERAIS --- */
+        .btn-action { width: 100%; padding: 20px; background-color: var(--theme-dark); color: white; border: 3px solid var(--border-color); border-radius: 12px; font-size: 1.15rem; font-weight: 900; cursor: pointer; box-shadow: 6px 6px 0px var(--theme-contrast); transition: all 0.1s; text-transform: uppercase; margin-top: 10px; }
+        .btn-action:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0px var(--theme-contrast); }
+
+        /* --- QUIZ UI --- */
+        .difficulty-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; border: 2px solid var(--border-color); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
+        .dif-facil { background: #D1FAE5; color: #065F46; }
+        .dif-medio { background: #FEF08A; color: #713F12; }
+        .dif-dificil { background: #FECACA; color: #7F1D1D; }
+
+        .question-map { display: flex; gap: 8px; overflow-x: auto; padding: 10px 5px; margin-bottom: 20px; white-space: nowrap; scroll-behavior: smooth; }
+        .question-map::-webkit-scrollbar { display: none; }
+        .map-dot { min-width: 38px; height: 38px; border: 2px solid var(--border-color); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; color: var(--theme-dark); background: white; cursor: pointer; transition: all 0.2s; }
+        .map-dot.active { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); transform: scale(1.15); }
+        .map-dot.answered-correct { background-color: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .map-dot.answered-wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .quiz-question-card { border: 4px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); padding: 30px; border-radius: 16px; background: var(--white); }
+        .quiz-question-counter { font-size: 0.85rem; font-weight: 900; color: var(--theme-dark); letter-spacing: 1px; }
+        .quiz-question-text { font-size: 1.15rem; margin-top: 8px; color: var(--text-color); font-weight: 800; line-height: 1.5; margin-bottom: 20px;}
+
+        /* Elemento para imagens SVG dentro das perguntas */
+        .q-svg-container { display: flex; justify-content: center; margin: 15px 0; }
+
+        .option-btn { display: flex; align-items: center; width: 100%; padding: 18px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.1s ease; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 600; text-align: left; color: var(--text-color); }
+        .option-btn:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px var(--theme-contrast); }
+        .opt-circle { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--border-color); margin-right: 15px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.05rem; flex-shrink: 0; background: var(--theme-light); color: var(--theme-dark); }
+        .option-btn.correct { background-color: var(--correct-bg); border-color: var(--correct-border); box-shadow: 3px 3px 0px var(--correct-border); }
+        .option-btn.correct .opt-circle { background-color: var(--correct-border); color: white; border-color: var(--correct-border); }
+        .option-btn.wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); opacity: 0.9; box-shadow: none; }
+        .option-btn.wrong .opt-circle { background-color: var(--wrong-border); color: white; border-color: var(--wrong-border); }
+        .option-btn.disabled { pointer-events: none; opacity: 0.7; }
+
+        /* --- FEEDBACK DA QUESTÃO --- */
+        .feedback-box { display: block; margin-top: 25px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 25px; animation: slideUp 0.3s ease-out; box-shadow: 5px 5px 0px rgba(0,0,0,0.1); }
+        .feedback-title { font-weight: 900; text-transform: uppercase; font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .feedback-item { margin-bottom: 10px; font-size: 0.95rem; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); line-height: 1.5; font-weight: 500; }
+        .feedback-item.correct-opt { background: var(--correct-bg); border-color: var(--correct-border); color: #064E3B; font-weight: 700; box-shadow: 3px 3px 0px var(--correct-border); }
+        .feedback-item.wrong-opt { background: #F1F5F9; border-color: #94A3B8; color: #475569; border-style: dashed; margin-top: 8px; }
+
+        /* --- RESULTADOS --- */
+        .result-card { background: white; border: 4px solid var(--border-color); border-radius: 16px; padding: 40px 20px; box-shadow: 8px 8px 0px var(--border-color); margin-bottom: 30px; text-align: center; }
+        .stars-container { font-size: 2.5rem; margin: 15px 0; letter-spacing: 5px; }
+        .percentage-big { font-size: 5rem; font-weight: 900; color: var(--theme-dark); line-height: 1; margin: 15px 0; text-shadow: 4px 4px 0px var(--theme-contrast); }
+        
+        .result-summary-box { padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 3px solid; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); }
+        .result-summary-box.success { background: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .result-summary-box.error { background: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .error-log-item { margin-bottom: 15px; padding: 20px; background: var(--bg-color); border-radius: 12px; border: 3px dashed var(--theme-medium); text-align: left;}
+
+        /* --- RODAPÉ DE NAVEGAÇÃO --- */
+        .quiz-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--white); border-top: 3px solid var(--border-color); padding: 15px 20px; display: none; justify-content: center; gap: 20px; z-index: 100; box-shadow: 0px -4px 10px rgba(0,0,0,0.05); }
+        .nav-btn { padding: 15px 30px; border-radius: 12px; font-weight: 900; border: 3px solid var(--border-color); cursor: pointer; box-shadow: 3px 3px 0px var(--border-color); font-family: 'Poppins', sans-serif; text-transform: uppercase; background: white; color: var(--text-color); font-size: 1rem; transition: transform 0.1s; }
+        .nav-btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 0px 0px 0px transparent; }
+        .btn-next { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); border-color: var(--border-color); }
+        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <header class="logo-header">
+            <div class="css-logo"><span class="pulse-effect">🧱</span> PROMOVER</div>
+            <h1>Física / 9º Ano</h1>
+            <p class="subtitle">Dinâmica: O Conceito de Força</p>
+        </header>
+
+        <div class="toggle-container">
+            <button class="toggle-btn active" id="btnExp" onclick="changeApplicationView('explanation')">📘 Teoria</button>
+            <button class="toggle-btn" id="btnPrac" onclick="changeApplicationView('practice')">🧠 Prática (30)</button>
+        </div>
+
+        <!-- VISTA: TEORIA -->
+        <main id="viewExplanation" class="view-section active">
+            
+            <div class="search-container">
+                <span class="search-icon" aria-hidden="true">🔍</span>
+                <input type="text" id="searchInput" class="search-input" aria-label="Pesquisar conteúdo" placeholder="Pesquisar conceito... (ex: Inércia, Newton, Ação e Reação)">
+            </div>
+            <div id="no-results"><p>😕 Termo não encontrado na teoria da Dinâmica.</p></div>
+
+            <section class="content-group">
+                <div class="section-badge">💪 1. O que é uma Força?</div>
+                <article class="theory-box search-target">
+                    <h3>Puxões e Empurrões</h3>
+                    <p>A Força é uma <strong>interação</strong> entre dois corpos que pode causar dois efeitos principais: mudar o movimento de um objeto (acelerá-lo ou travá-lo) ou deformá-lo (como amassar uma lata).</p>
+                    
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li><strong>Grandeza Vetorial:</strong> A Força precisa de Módulo (valor), Direção e Sentido para fazer sentido. É representada por um vetor (seta).</li>
+                        <li><strong>Unidade SI:</strong> A força é medida em <strong>Newtons (N)</strong>.</li>
+                        <li><strong>Força Resultante (Fᵣ):</strong> Quando várias forças puxam um objeto ao mesmo tempo, a Força Resultante é a "soma vetorial" de todas elas (a única força imaginária que substituiria todas as outras juntas).</li>
+                    </ul>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">👑 2. As Três Leis de Newton</div>
+                <article class="theory-box search-target">
+                    <h3>A Base do Universo</h3>
+                    <p>Isaac Newton formulou três leis simples que explicam quase todos os movimentos que vemos no dia a dia:</p>
+                    
+                    <div class="visual-area" style="background: transparent; border: none; padding: 0;">
+                        <div class="l-grid">
+                            <!-- 1ª Lei -->
+                            <div class="l-card full-width">
+                                <div class="l-icon">🚌</div>
+                                <div class="l-title">1ª Lei: A Inércia</div>
+                                <div class="l-desc">A matéria tem "preguiça". Um corpo parado quer continuar parado. Um corpo em MRU quer continuar em MRU. Só muda se uma força resultante o empurrar. (Por isso usas cinto de segurança no carro!).</div>
+                            </div>
+                            
+                            <!-- 2ª Lei -->
+                            <div class="l-card">
+                                <div class="l-icon">🧮</div>
+                                <div class="l-title">2ª Lei: Princípio Fundamental</div>
+                                <div class="l-formula">Fᵣ = m × a</div>
+                                <div class="l-desc">A Força Resultante gera uma Aceleração. Quanto maior for a Massa (m), mais Força (F) é precisa para a mover.</div>
+                            </div>
+                            
+                            <!-- 3ª Lei -->
+                            <div class="l-card">
+                                <div class="l-icon">🥊</div>
+                                <div class="l-title">3ª Lei: Ação e Reação</div>
+                                <div class="l-desc">Para cada Ação existe uma Reação igual em valor e direção, mas de Sentido Oposto. <strong>ATENÇÃO:</strong> Elas nunca se anulam porque atuam em corpos diferentes!</div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">⚖️ 3. Forças Especiais</div>
+                <article class="theory-box search-target">
+                    <h3>Peso, Normal e Atrito</h3>
+                    <p>No estudo das forças mecânicas, existem algumas "personagens principais" que aparecem em quase todos os problemas:</p>
+                    
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li><strong>Força Peso (P):</strong> É a gravidade a puxar-te para o centro do planeta. Calcula-se: <strong>P = m × g</strong>. (Não confundir Peso com Massa!).</li>
+                        <li><strong>Força Normal (N):</strong> É a força que a superfície faz "para cima" para não seres esmagado contra o chão. Forma sempre 90º com o chão.</li>
+                        <li><strong>Força de Atrito (Fat):</strong> É a força "chata" do chão que tenta travar o movimento. Aponta sempre no sentido contrário ao do movimento (ou da tendência de movimento).</li>
+                        <li><strong>Tração (T):</strong> É a força transmitida através de fios, cabos ou cordas.</li>
+                    </ul>
+
+                    <div class="highlight-box blue">
+                        <strong>O Erro Fatal:</strong> Peso e Normal <strong>NÃO SÃO</strong> um par de Ação e Reação! O Peso é a Terra a puxar-te. A reação do Peso é o teu corpo a puxar a Terra para cima. A Normal é o chão a empurrar o teu pé, a reação é o teu pé a empurrar o chão.
+                    </div>
+                </article>
+            </section>
+
+            <button class="btn-action" onclick="changeApplicationView('practice')">
+                Iniciar a Avaliação (30 Questões) ➜
+            </button>
+        </main>
+
+        <!-- VISTA: PRÁTICA (QUIZ) -->
+        <main id="viewPractice" class="view-section">
+            <div style="margin-bottom: 20px; background-color: var(--white); padding: 15px; border-radius: 12px; border: 3px solid var(--border-color); box-shadow: 4px 4px 0px var(--border-color);">
+                <h2 style="color:var(--theme-dark); font-weight:900; margin-bottom: 5px;">A Prova de Fogo - IFCE</h2>
+                <p style="color: var(--theme-contrast); font-size: 0.95rem; font-weight:600;">
+                    30 questões de Dinâmica. Testa a tua Inércia, as fórmulas de Newton e a diferença entre Massa e Peso. Acerta <strong>80% (24/30)</strong>.
+                </p>
+            </div>
+            
+            <div class="question-map" id="qMap"></div>
+            <div id="quizContainer" style="margin-bottom: 40px;"></div>
+        </main>
+
+        <!-- VISTA: RESULTADOS -->
+        <main id="viewResult" class="view-section">
+            <div class="result-card">
+                <h2 style="font-weight:900; text-transform:uppercase;">Relatório Final</h2>
+                <div class="stars-container" id="finalStars">⭐⭐⭐</div>
+                <div class="percentage-big" id="finalPercent">0%</div>
+                <p style="font-size:1.2rem; font-weight:700; color:#555;" id="finalScoreText">Acertaste 0 de 30</p>
+                <div id="review-container" style="text-align: left; margin-top: 20px;"></div>
+            </div>
+            <div id="action-buttons"></div>
+        </main>
+
+    </div>
+
+    <!-- RODAPÉ DE NAVEGAÇÃO -->
+    <footer class="quiz-footer" id="quizFooter">
+        <button class="nav-btn btn-prev" id="btnPrev" onclick="navigateQuestion(-1)">Anterior</button>
+        <button class="nav-btn btn-next" id="btnNext" onclick="navigateQuestion(1)">Próxima</button>
+    </footer>
+
+<script>
+    /* --- ESTRUTURA DE DADOS (BASE DE QUESTÕES - DINÂMICA IFCE) --- */
+    const questionsDatabase = [
+        { 
+            level: "Fácil", 
+            text: "Na Física (Dinâmica), como se define o conceito de Força?", 
+            options: ["É a energia armazenada num corpo em movimento.", "É a velocidade de um objeto no vazio.", "É o esforço puramente muscular medido em kg.", "É uma interação entre dois corpos que pode alterar o estado de repouso, alterar o estado de movimento ou deformar um corpo."], 
+            correctIndex: 3, 
+            explanation: { 
+                correctText: "A Força é exatamente isso: uma 'puxada' ou um 'empurrão' que atua de forma vetorial. Ela é a Causa da aceleração ou deformação.", 
+                otherOptions: ["Energia, velocidade e esforço muscular são grandezas e conceitos completamente diferentes da definição mecânica de Força."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Qual é a unidade de medida obrigatória no Sistema Internacional (SI) para quantificar qualquer tipo de Força (seja peso, atrito ou empurrão)?", 
+            options: ["Joule (J)", "Watt (W)", "Newton (N)", "Quilograma (kg)"], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "A Força mede-se em Newtons (N), em homenagem a Isaac Newton (1 N = 1 kg.m/s²).", 
+                otherOptions: ["Joule é Energia. Watt é Potência. Quilograma é Massa."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Qual das leis de Newton diz que: 'Um corpo em repouso tende a continuar em repouso, e um corpo em movimento retilíneo uniforme tende a manter esse movimento, a não ser que uma Força Resultante atue sobre ele'?", 
+            options: ["Lei da Gravitação Universal", "1ª Lei de Newton (Lei da Inércia)", "2ª Lei de Newton (Princípio Fundamental da Dinâmica)", "3ª Lei de Newton (Ação e Reação)"], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "A 1ª Lei de Newton descreve o princípio da Inércia (a 'preguiça' da matéria em alterar o seu estado atual).", 
+                otherOptions: ["As outras opções correspondem a outras leis mecânicas distintas."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Quando estás de pé num autocarro a andar a 60 km/h e o motorista trava bruscamente (frenagem de emergência), o teu corpo é projetado violentamente para a frente. Este fenómeno é explicado por qual conceito físico?", 
+            options: ["Ação e Reação", "Atrito", "Força Centrípeta", "Inércia"], 
+            correctIndex: 3, 
+            explanation: { 
+                correctText: "Por Inércia, o teu corpo 'queria' continuar a viajar para a frente a 60 km/h (o estado em que já se encontrava). O autocarro travou, mas o teu corpo não, sendo projetado até que algo o segure (o cinto ou um poste).", 
+                otherOptions: ["Não é uma reação a um empurrão, é a tendência natural da massa em manter a velocidade."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "O que diz a 2ª Lei de Newton (Princípio Fundamental da Dinâmica)?", 
+            options: ["Que as forças vêm sempre aos pares.", "Que a velocidade é sempre constante.", "Que a Força Resultante (Fᵣ) que atua num corpo é igual ao produto da sua Massa (m) pela sua Aceleração (a).", "Que todo o corpo flutua se for mais leve que a água."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "A célebre fórmula F = m × a. Ela prova que, para acelerares um corpo com muita massa (como um camião), precisas de uma Força gigantesca. Para um corpo leve (uma bicicleta), precisas de pouca força para obter a mesma aceleração.", 
+                otherOptions: ["A primeira é a 3ª Lei de Newton. Flutuabilidade é Arquimedes (Impulsão)."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Cálculo da 2ª Lei: Um bloco de 5 kg está sobre uma mesa sem atrito. É empurrado por uma Força Resultante constante de 20 Newtons. Qual será a Aceleração adquirida por este bloco?", 
+            options: ["100 m/s²", "15 m/s²", "4 m/s²", "0,25 m/s²"], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "F = m × a. O problema diz que F = 20 e m = 5. Logo, 20 = 5 × a. Passando o 5 a dividir: a = 20 / 5 = 4 m/s².", 
+                otherOptions: ["100 seria a multiplicação da Força pela Massa, o que seria o cálculo errado."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: `Na imagem abaixo, duas pessoas puxam uma caixa para a DIREITA (forças de 30 N e 40 N). Uma terceira pessoa puxa a mesma caixa para a ESQUERDA com uma força de 20 N. Qual é o Vetor Força Resultante (Fᵣ)?
+                <div class="q-svg-container">
+                    <svg width="250" height="80" viewBox="0 0 250 80" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <rect x="100" y="20" width="50" height="40" fill="#F59E0B" stroke="#0F172A" stroke-width="2"/>
+                      <line x1="150" y1="30" x2="190" y2="30" stroke="#3B82F6" stroke-width="3" marker-end="url(#arrow)"/>
+                      <line x1="150" y1="50" x2="210" y2="50" stroke="#3B82F6" stroke-width="3" marker-end="url(#arrow)"/>
+                      <line x1="100" y1="40" x2="60" y2="40" stroke="#EF4444" stroke-width="3" marker-end="url(#arrow)"/>
+                      <text x="195" y="25" font-size="10" font-weight="bold">30N</text>
+                      <text x="215" y="45" font-size="10" font-weight="bold">40N</text>
+                      <text x="40" y="35" font-size="10" font-weight="bold">20N</text>
+                      <defs><marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="context-stroke"/></marker></defs>
+                    </svg>
+                </div>`, 
+            options: ["90 N para a direita.", "50 N para a direita.", "50 N para a esquerda.", "10 N para a esquerda."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Primeiro soma as que ajudam (mesmo sentido): Direita = 30 + 40 = 70 N. Depois subtrai quem atrapalha (sentido oposto): 70 N (Direita) - 20 N (Esquerda) = 50 N. A resultante sobra para o lado mais forte (Direita).", 
+                otherOptions: ["Erro matemático ou troca de sentido."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "O que estabelece a 3ª Lei de Newton (Ação e Reação)?", 
+            options: ["Para cada ação há sempre uma força de reação de igual módulo (valor), igual direção, mas em sentido contrário.", "A força anula-se a si mesma dentro do corpo.", "As forças de ação e reação empurram-se mutuamente no mesmo sentido.", "Objetos mais pesados reagem com mais força."], 
+            correctIndex: 0, 
+            explanation: { 
+                correctText: "Se tu empurrares a parede (Ação), a parede empurra a tua mão de volta (Reação) com a mesma força exata, na mesma linha (direção), mas atirando-te para trás (sentido contrário).", 
+                otherOptions: ["A força de reação não muda de valor baseada no peso ou noutros fatores."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Uma rasteira clássica de provas: Um camião a 100 km/h choca de frente com uma mosca. O camião faz uma Força de AÇÃO sobre a mosca, esmagando-a. Pela 3ª Lei de Newton, a mosca faz uma Força de REAÇÃO contra o vidro do camião. Quem aplicou a Força MAIOR?", 
+            options: ["O camião, porque tem muito mais massa (kg).", "O camião, porque ia mais rápido.", "A mosca, porque parou bruscamente.", "Nenhum. A força que o camião fez na mosca é EXATAMENTE IGUAL à força que a mosca fez no camião."], 
+            correctIndex: 3, 
+            explanation: { 
+                correctText: "A 3ª Lei é implacável: Ação e Reação têm módulos (valores) rigorosamente iguais! A força do embate é a mesma para os dois. A mosca é esmagada não porque a força nela foi maior, mas porque o seu corpo frágil não aguentou essa força (a aceleração destruidora resultante nela foi enorme devido à sua pequena massa, F=m.a).", 
+                otherOptions: ["A massa não muda o princípio da Ação/Reação, apenas a consequência do impacto."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Ainda sobre a 3ª Lei de Newton: Se os pares de Força de Ação e Reação têm o mesmo valor mas apontam em sentidos contrários, PORQUE É QUE elas NUNCA se anulam matematicamente (não dão zero)?", 
+            options: ["Porque a força de reação demora 1 segundo a acontecer.", "Porque atuam sempre em CORPOS DIFERENTES, por isso nunca se somam ou subtraem no mesmo objeto.", "Porque elas anulam-se sim, é por isso que o universo está em equilíbrio.", "Porque a gravidade impede o cancelamento."], correctIndex: 1, explanation: { correctText: "Para que forças se anulem e deem zero (Equilíbrio), elas têm de puxar o MESMO bloco. Na Ação/Reação, se a TUA MÃO empurra a PAREDE (a força atua na parede), a PAREDE empurra a TUA MÃO (a força atua na tua mão). Como atuam em corpos distintos, cada corpo sente a sua força isoladamente. Nunca se cortam!", otherOptions: ["Afirmar que se anulam é o erro conceptual mais comum nos exames."] } },
+        { 
+            level: "Fácil", 
+            text: "Qual é a principal diferença conceitual e física entre Massa e Peso?", 
+            options: ["Massa é pesada na balança em Newtons, o Peso é fixo em Quilogramas.", "A Massa é uma quantidade escalar fixa de matéria (kg). O Peso é a força vetorial da gravidade a puxar essa massa para baixo (N).", "A Massa só existe no espaço, o Peso só existe na água.", "São duas palavras diferentes para exatamente a mesma grandeza física."], correctIndex: 1, explanation: { correctText: "Massa é 'quanta matéria tu tens' (medida em kg, igual na Terra ou em Marte). Peso é 'com que força o planeta te puxa' (medida em Newtons, muda conforme o planeta).", otherOptions: ["Incorreto."] } },
+        { 
+            level: "Médio", 
+            text: "Um aluno do IFCE tem uma massa corporal de 60 kg na Terra. Se ele for transportado para a Lua (onde a gravidade é 6 vezes menor que na Terra), qual será a sua NOVA MASSA na Lua?", options: ["10 kg", "600 kg", "60 kg", "Zero kg"], correctIndex: 2, explanation: { correctText: "A MASSA não muda! Ele continua com as mesmas células, ossos e músculos. A massa dele lá será exatamente 60 kg. O que mudaria drasticamente (ficaria 6 vezes menor) era o seu PESO.", otherOptions: ["Dividir a massa por 6 é o erro da desatenção ao texto."] } },
+        { 
+            level: "Médio", 
+            text: "Cálculo do Peso: Considera que a aceleração da gravidade na Terra é g = 10 m/s². Qual é a Força Peso (a força com que a Terra o puxa) de um saco de cimento de 50 kg?", options: ["5 N", "50 N", "500 N", "10 N"], correctIndex: 2, explanation: { correctText: "A fórmula do Peso é uma aplicação direta da 2ª Lei de Newton (P = m × g). Logo, Peso = 50 kg × 10 m/s² = 500 Newtons.", otherOptions: ["Multiplicação simples da massa pela gravidade."] } },
+        { 
+            level: "Médio", 
+            text: "Todo o corpo apoiado no chão (superfície sólida) sofre a ação de uma força de contato que empurra o corpo 'para fora' do chão, impedindo que ele atravesse o chão. Como se chama essa Força perpendicular à superfície?", options: ["Força de Atrito (Fat).", "Força Normal (N).", "Força de Tensão.", "Força Elástica."], correctIndex: 1, explanation: { correctText: "A Força Normal é a reação da superfície ao empurrão de contacto (ela é sempre perpendicular/faz 90º com o chão). É ela que te impede de caíres para o centro da terra quando o teu Peso te puxa.", otherOptions: ["Atrito é contra o escorregamento. Tensão é em cordas."] } },
+        { 
+            level: "Difícil", 
+            text: `Rasteira clássica! Analisa um bloco pousado em repouso absoluto numa mesa horizontal plana. O Peso (P) empurra-o para baixo, a Normal (N) empurra-o para cima. O bloco não voa nem afunda, pois P = N. Porque é que Peso e Normal NÃO SÃO um par de Ação e Reação de Newton?
+                <div class="q-svg-container">
+                    <svg width="150" height="150" viewBox="0 0 150 150" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                      <line x1="20" y1="100" x2="130" y2="100" stroke="#0F172A" stroke-width="4"/> <!-- Mesa -->
+                      <rect x="50" y="60" width="50" height="40" fill="#3B82F6" stroke="#0F172A" stroke-width="2"/> <!-- Bloco -->
+                      <line x1="75" y1="80" x2="75" y2="130" stroke="#EF4444" stroke-width="3" marker-end="url(#arrow)"/> <!-- Peso -->
+                      <line x1="75" y1="80" x2="75" y2="30" stroke="#10B981" stroke-width="3" marker-end="url(#arrow)"/> <!-- Normal -->
+                      <text x="85" y="125" font-size="12" font-weight="bold" fill="#EF4444">Peso</text>
+                      <text x="85" y="40" font-size="12" font-weight="bold" fill="#10B981">Normal</text>
+                    </svg>
+                </div>`, options: ["Porque têm valores diferentes.", "Porque não têm a mesma direção.", "Porque ambas as forças ATUAM NO MESMO CORPO (o bloco), e os pares de Ação/Reação atuam obrigatoriamente em corpos diferentes.", "Apenas o Peso é uma força real."], correctIndex: 2, explanation: { correctText: "Memoriza isto para os exames: Pares de Ação-Reação nunca atuam no mesmo objeto (logo, nunca se anulam). O Peso atua no bloco e a sua reação atua puxando o planeta Terra. A Normal atua no bloco e a sua reação empurra a mesa. Como Peso e Normal atuam ambas sobre o bloco, elas anulam-se (dão Força Resultante zero), mas NÃO são ação-reação.", otherOptions: ["Elas têm valores iguais num piso plano, têm mesma direção (vertical), mas atuam no mesmo alvo."] } },
+        { 
+            level: "Médio", 
+            text: "Um carro está avariado. Para puxá-lo, é amarrada uma corda de aço forte que é puxada por um reboque. Qual é o nome que a Física dá à Força que é transmitida através de cordas, fios ou cabos?", options: ["Força Magnética.", "Força Normal.", "Força Elástica.", "Força de Tração (ou Tensão)."], correctIndex: 3, explanation: { correctText: "Sempre que houver um fio, um cabo de guindaste, um elevador pendurado ou uma corda esticada, a força transmitida através dela chama-se Tração (T).", otherOptions: ["Elástica é em molas/elásticos."] } },
+        { level: "Fácil", text: "Ao empurrares um sofá pesado de madeira num chão de carpete áspero, sentes uma enorme dificuldade porque há uma força invisível a 'travar' o teu movimento. Que Força é essa e para onde ela aponta?", options: ["A Força Peso, que aponta para a direita.", "A Força de Atrito (Fat), que aponta sempre na direção paralela ao chão, em SENTIDO OPOSTO à tentativa de escorregamento do corpo.", "A Força Normal, que aponta para a esquerda.", "A Força Resultante Nula."], correctIndex: 1, explanation: { correctText: "A Força de Atrito surge pelas rugosidades microscópicas do piso e do sofá 'agarrando-se' umas nas outras. Opõe-se sempre à tentativa de deslize (se empurras para a frente, ela puxa para trás).", otherOptions: ["Incorreto."] } },
+        { level: "Difícil", text: "Existem dois tipos de Atrito: o Estático (quando o corpo ainda não se moveu) e o Cinético/Dinâmico (quando o corpo já está a deslizar). Qual deles é geralmente MAIOR na física?", options: ["O Atrito Cinético (deslizante) é maior, por isso é difícil manter a caixa em movimento.", "O Atrito Estático Máximo é MAIOR. Por isso, a parte mais difícil de empurrar um carro pesado é o exato momento de o 'tirar do lugar' (vencer o repouso inicial).", "Ambos são exatamente iguais em qualquer piso.", "Depende da cor do objeto."], correctIndex: 1, explanation: { correctText: "Para tirar algo parado do lugar (vencer o atrito estático máximo), precisas de mais força do que para o manter a andar depois (atrito cinético). As rugosidades estão profundamente encaixadas quando o corpo repousa.", otherOptions: ["Assim que ele 'descola', o atrito cai um pouco."] } },
+        { level: "Médio", text: "Um paraquedista salta de um avião. Na queda, a gravidade puxa-o para baixo, acelerando-o. Qual é a força, que atua na direção vertical, mas apontando para CIMA, que tenta contrariar e travar essa queda?", options: ["A Força Normal do ar.", "A Força de Resistência (Atrito) do Ar.", "O Peso Negativo.", "A Força de Tração do vento."], correctIndex: 1, explanation: { correctText: "O ar é um fluido cheio de moléculas. Bater nelas a alta velocidade gera uma imensa força de Resistência do Ar (uma forma de atrito fluídico). Essa força aponta para cima, lutando contra o Peso.", otherOptions: ["Normal requer piso sólido. Tração requer fio."] } },
+        { level: "Difícil", text: "Velocidade Terminal: Se o paraquedista cair durante muito tempo (antes de abrir o paraquedas), a Resistência do Ar vai aumentando tanto que iguala rigorosamente a Força Peso (Resistência = Peso). O que acontece então com a Força Resultante (Fᵣ) e com o corpo do saltador?", options: ["A Força Resultante vira zero, e o paraquedista para instantaneamente no ar.", "A Força Resultante é o dobro, ele cai mais rápido.", "A Força Resultante torna-se ZERO. Como a força é nula, a aceleração também é nula. Ele para de acelerar, caindo até ao chão a uma VELOCIDADE CONSTANTE (MRU).", "A Força volta-o para cima, num salto."], correctIndex: 2, explanation: { correctText: "Se P (para baixo) empata com a Resistência (para cima), a Força Resultante dá Zero. Pela 1ª Lei de Newton (Inércia), se Fᵣ = 0, ele continua a fazer o que já estava a fazer: cair a alta velocidade, mas sem acelerar mais (atingiu a Velocidade Limite/Terminal).", otherOptions: ["Incorreto, inércia não manda parar o que já está a andar."] } },
+        { level: "Fácil", text: "Cálculo Rápido de F = m.a: Um corpo com 10 kg sofre a ação de uma única força de 30 N. Qual a aceleração adquirida?", options: ["3 m/s²", "300 m/s²", "40 m/s²", "0,3 m/s²"], correctIndex: 0, explanation: { correctText: "F = m × a. Temos 30 = 10 × a. Logo, a = 30 / 10 = 3 m/s².", otherOptions: ["Incorreto."] } },
+        { level: "Médio", text: "Se aplicares EXATAMENTE a mesma Força Resultante num carrinho de compras vazio (Massa pequena) e num carro real avariado (Massa gigante), o que preverá a 2ª Lei de Newton sobre a aceleração deles?", options: ["Ambos terão a mesma aceleração, pois a força é a mesma.", "O carro pesado terá muito MAIOR aceleração.", "O carrinho vazio terá MAIOR aceleração, pois a massa e a aceleração são Inversamente Proporcionais (se um sobe, o outro desce para a mesma força).", "Nenhum deles se vai mexer."], correctIndex: 2, explanation: { correctText: "F = m × a. Se a Força F é um valor fixo (ex: 100), quanto maior for o 'm' (massa), menor terá de ser o 'a' (aceleração) para equilibrar a equação. É muito mais fácil acelerar corpos leves.", otherOptions: ["Incorreto."] } },
+        { level: "Difícil", text: "Um elevador de vidro moderno do IFCE está PARADO (em repouso absoluto) no 3º andar. Um aluno dentro do elevador tem Peso de 600 N. Qual é o valor da Força Normal (a força do chão do elevador contra os pés dele) neste exato momento?", options: ["Maior que 600 N.", "Menor que 600 N.", "Zero.", "Exatamente 600 N."], correctIndex: 3, explanation: { correctText: "Se o elevador está parado, a aceleração vertical é zero. Logo, as forças devem estar perfeitamente equilibradas (Força Resultante = 0). O chão (Normal para cima) tem de empatar exatamente com o Peso (600 N para baixo) para cancelar.", otherOptions: ["Se a Normal fosse maior, ele voava. Se fosse menor, ele afundava pelo chão."] } },
+        { level: "Difícil", text: "Agora imagina que esse mesmo elevador (com o aluno de Peso 600 N) COMEÇA a SUBIR rapidamente (Acelerando para CIMA). O que acontece ao valor da Força Normal que o chão do elevador faz contra os pés do aluno?", options: ["Fica igual a 600 N.", "Torna-se ZERO (ele levita).", "Torna-se MAIOR que 600 N (o aluno sente-se 'mais pesado' ao arrancar para cima).", "Torna-se negativa."], correctIndex: 2, explanation: { correctText: "Para acelerar para cima, a Força para cima (Normal) TEM de VENCER a Força para baixo (Peso de 600N). Logo, Normal > Peso. O chão empurra os pés dele com mais de 600 N, dando aquela sensação nas pernas de peso extra quando o elevador arranca a subir.", otherOptions: ["Se fosse menor, o elevador descia."] } },
+        { level: "Fácil", text: "Se um corpo no espaço intergaláctico (longe de gravidade e atrito) não sofrer a ação de absolutamente NENHUMA força (Fᵣ = 0), e ele já vinha a voar a 10.000 km/h, o que lhe vai acontecer?", options: ["Vai travar gradualmente e parar.", "Vai explodir devido à falta de forças.", "Vai continuar a viajar em linha reta a 10.000 km/h infinitamente, pela Lei da Inércia.", "Vai curvar e fazer um círculo elítico."], correctIndex: 2, explanation: { correctText: "1ª Lei de Newton: Sem forças para perturbar o sistema, a inércia faz o corpo manter o seu Movimento Retilíneo Uniforme para toda a eternidade.", otherOptions: ["Não tem atrito do espaço para travar."] } },
+        { level: "Médio", text: "As leis de Newton são Leis DINÂMICAS. Como a Aceleração é a ponte que liga a Dinâmica à Cinemática (Movimento), sempre que Fᵣ = 0, a Aceleração é ZERO. O que isto significa para a velocidade do corpo?", options: ["Que a velocidade é variável.", "Que o corpo está obrigatoriamente parado.", "Que o corpo está parado (V=0) OU está em MRU (V constante). Em ambos os casos a aceleração é zero.", "Que a velocidade também é sempre zero em qualquer referencial."], correctIndex: 2, explanation: { correctText: "Crucial! Força Resultante zero (Equilíbrio Mecânico) não significa apenas que o corpo está parado na estrada (Estático). Pode significar que ele viaja numa reta perfeita a velocidade constante para sempre sem gastar combustível (Dinâmico/MRU).", otherOptions: ["Acreditar que F=0 obriga a estar parado é o maior erro da mecânica."] } },
+        { level: "Médio", text: "Um comboio e uma borboleta andam na mesma linha. O comboio é puxado pelo seu motor. A Força é uma grandeza que é 'armazenada' dentro dos corpos em movimento e consumida com o tempo?", options: ["Sim, quanto mais força tens armazenada, mais rápido vais.", "Sim, é a força interna que mantém a Inércia viva.", "Não! A Força NÃO se armazena. A força só existe no exato MOMENTO e durante o tempo em que a interação/empurrão acontece.", "Apenas corpos elétricos armazenam força magnética."], correctIndex: 2, explanation: { correctText: "Atenção: tu não 'guardas' força. Tu tens Inércia, Velocidade e Energia. A força é como um soco: existe no instante em que te empurra. Quando a mão te larga, tu voas por Inércia, não porque 'levas força armazenada contigo'.", otherOptions: ["Armazena-se Energia, não Força."] } },
+        { level: "Difícil", text: "Cálculo Exigente do IFCE: Duas forças Perpendiculares (formam 90º em L) puxam um bloco numa mesa. Uma força puxa 3 N para a direita. A outra puxa 4 N para a frente (cima). Qual o valor do Vetor Força Resultante (Fᵣ)?", options: ["7 N", "1 N", "12 N", "5 N"], correctIndex: 3, explanation: { correctText: "Para vetores formando ângulo de 90º (perpendiculares), NÃO SOMES direto! Tens de usar o Teorema de Pitágoras (a hipotenusa é a resultante). R² = 3² + 4² => R² = 9 + 16 = 25. A raiz de 25 é 5 Newtons. É o mágico triângulo 3-4-5.", otherOptions: ["7N seria no mesmo sentido.", "1N seria sentidos opostos."] } },
+        { level: "Médio", text: "Uma força constante de atrito de -10 N atua num carrinho de 2 kg que ia a 20 m/s. Quanto tempo demora o carrinho a travar completamente (V=0)? (Usa a 2ª Lei F=m.a e depois V=V₀+at).", options: ["2 s", "4 s", "10 s", "5 s"], correctIndex: 1, explanation: { correctText: "1º F=ma: -10 = 2 × a => a = -5 m/s² (desaceleração). 2º A velocidade cai 5m/s por segundo. Começou em 20. Vai parar em 4 segundos. (0 = 20 - 5t => 5t=20 => t=4s).", otherOptions: ["Requer associar duas fórmulas: Dinâmica e depois Cinemática."] } },
+        { level: "Fácil", text: "Para terminar as Leis de Newton: Se estiveres a flutuar solto no espaço, do lado de fora do escafandro, e atirares um objeto pesado (uma chave de fendas) com força para a FRENTE, o que acontece com o teu corpo pelas Leis de Newton?", options: ["Ficas parado a ver a ferramenta fugir.", "Tu aceleras também para a FRENTE seguindo a ferramenta.", "Pela Ação e Reação, a força atirou a ferramenta para a frente, então ela faz uma força igual que atira o teu corpo para TRÁS.", "Tu giras em círculos."], correctIndex: 2, explanation: { correctText: "Esta é a 3ª Lei de Newton (e como os foguetes se movem no espaço vazio). Atiras massa para trás, e a reação joga-te para a frente (ou vice-versa).", otherOptions: ["Incorreto."] } }
+    ];
+
+    /* --- GESTÃO DE ESTADO (STATE) --- */
+    const quizState = {
+        currentIndex: 0,
+        userAnswers: new Array(questionsDatabase.length).fill(null),
+        confettiAnimationId: null
+    };
+
+    /* --- FUNCIONALIDADES DE PESQUISA (TEORIA) --- */
+    function initializeSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const contentGroups = document.querySelectorAll('.content-group');
+        const noResultsMsg = document.getElementById('no-results');
+
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', function(event) {
+            const searchTerm = normalizeText(event.target.value);
+            let totalVisibleElements = 0;
+            
+            contentGroups.forEach(group => {
+                const groupContent = normalizeText(group.textContent);
+                const isMatch = groupContent.includes(searchTerm);
+                
+                group.style.display = isMatch ? 'flex' : 'none';
+                if (isMatch) totalVisibleElements++;
+            });
+            
+            noResultsMsg.style.display = totalVisibleElements === 0 ? 'block' : 'none';
+        });
+    }
+
+    function normalizeText(text) {
+        return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    /* --- CONTROLO DE VISTAS (VIEWS) --- */
+    function changeApplicationView(viewName) {
+        const views = ['viewExplanation', 'viewPractice', 'viewResult'];
+        
+        views.forEach(viewId => document.getElementById(viewId).classList.remove('active'));
+        
+        const quizFooter = document.getElementById('quizFooter');
+        if (quizFooter) quizFooter.style.display = 'none';
+
+        if (viewName === 'explanation') {
+            document.getElementById('viewExplanation').classList.add('active');
+            document.getElementById('btnExp').classList.add('active');
+            document.getElementById('btnPrac').classList.remove('active');
+        } else if (viewName === 'practice') {
+            document.getElementById('viewPractice').classList.add('active');
+            if (quizFooter) quizFooter.style.display = 'flex';
+            document.getElementById('btnExp').classList.remove('active');
+            document.getElementById('btnPrac').classList.add('active');
+            
+            renderCurrentQuestion();
+            renderNavigationMap();
+        } else if (viewName === 'result') {
+            document.getElementById('viewResult').classList.add('active');
+        }
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* --- GERAÇÃO INTERFACE DO QUIZ --- */
+    function getDifficultyBadgeClass(level) {
+        const mapping = { 'Fácil': 'dif-facil', 'Médio': 'dif-medio', 'Difícil': 'dif-dificil' };
+        return mapping[level] || 'dif-facil';
+    }
+
+    function buildOptionsHTML(question, selectedAnswerIndex) {
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        return question.options.map((optionText, optionIndex) => {
+            let cssClass = '';
+            
+            if (selectedAnswerIndex !== null) {
+                if (optionIndex === question.correctIndex) cssClass = 'correct';
+                else if (optionIndex === selectedAnswerIndex) cssClass = 'wrong';
+                else cssClass = 'disabled';
+            }
+
+            const isDisabled = selectedAnswerIndex !== null ? 'disabled' : '';
+
+            return `
+                <button class="option-btn ${cssClass}" onclick="handleOptionSelection(${optionIndex})" ${isDisabled}>
+                    <div class="opt-circle">${alphabet[optionIndex]}</div>
+                    <div>${optionText}</div>
+                </button>
+            `;
+        }).join('');
+    }
+
+    function buildFeedbackHTML(question, selectedAnswerIndex) {
+        const isCorrect = selectedAnswerIndex === question.correctIndex;
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        const titleClass = isCorrect ? 'success' : 'error';
+        const titleText = isCorrect ? '✅ Raciocínio Correto!' : '❌ Diagnóstico de Força Falhou!';
+        
+        const distortionsHTML = question.explanation.otherOptions.map((explanationText, idx) => {
+            if (idx === question.correctIndex) return '';
+            return `<div class="feedback-item wrong-opt"><strong>${alphabet[idx]})</strong> ${explanationText}</div>`;
+        }).join('');
+
+        return `
+            <div class="feedback-box show">
+                <div class="feedback-title ${titleClass}" style="color: ${isCorrect ? 'var(--correct-border)' : 'var(--wrong-border)'}">${titleText}</div>
+                <div class="feedback-item correct-opt"><strong>O Fato Físico:</strong> ${question.options[question.correctIndex]}</div>
+                <div style="margin-top:15px;font-size:1rem;color:var(--text-color);margin-bottom:15px;font-weight:600;">${question.explanation.correctText}</div>
+                <div style="margin-top:15px;border-top:2px dashed var(--theme-dark);padding-top:15px;">
+                    <small style="color:var(--text-color);"><strong>Análise dos Desvios:</strong></small>
+                    ${distortionsHTML}
+                </div>
+            </div>
+        `;
+    }
+
+    function renderCurrentQuestion() {
+        const container = document.getElementById('quizContainer');
+        if (!container) return;
+
+        const question = questionsDatabase[quizState.currentIndex];
+        const selectedAnswerIndex = quizState.userAnswers[quizState.currentIndex];
+        const badgeClass = getDifficultyBadgeClass(question.level);
+        
+        let feedbackHTML = selectedAnswerIndex !== null ? buildFeedbackHTML(question, selectedAnswerIndex) : '';
+
+        container.innerHTML = `
+            <div class="quiz-question-card">
+                <span class="difficulty-badge ${badgeClass}">${question.level}</span>
+                <div style="margin-bottom:25px;">
+                    <span class="quiz-question-counter">QUESTÃO ${quizState.currentIndex + 1} DE ${questionsDatabase.length}</span>
+                    <h2 class="quiz-question-text">${question.text}</h2>
+                </div>
+                <div class="options-list">
+                    ${buildOptionsHTML(question, selectedAnswerIndex)}
+                </div>
+                ${feedbackHTML}
+            </div>
+        `;
+        
+        updateNavigationButtons();
+    }
+
+    /* --- LÓGICA DO QUIZ --- */
+    function handleOptionSelection(selectedIndex) {
+        if (quizState.userAnswers[quizState.currentIndex] !== null) return;
+        
+        quizState.userAnswers[quizState.currentIndex] = selectedIndex;
+        const isCorrect = selectedIndex === questionsDatabase[quizState.currentIndex].correctIndex;
+        
+        if (isCorrect) startSuccessAnimation();
+        else triggerErrorShakeEffect();
+        
+        renderCurrentQuestion();
+        renderNavigationMap();
+    }
+
+    function triggerErrorShakeEffect() {
+        const container = document.getElementById('quizContainer');
+        if (container) { 
+            container.classList.remove('shake-effect'); 
+            void container.offsetWidth; 
+            container.classList.add('shake-effect'); 
+            setTimeout(() => container.classList.remove('shake-effect'), 500); 
+        }
+    }
+
+    /* --- ANIMAÇÕES (CONFETTI) --- */
+    function startSuccessAnimation() {
+        const duration = 1500;
+        const end = Date.now() + duration;
+        
+        stopSuccessAnimation();
+        
+        function animateFrame() {
+            if(window.confetti && typeof confetti === 'function') {
+                const config = { particleCount: 5, spread: 55, colors: ['#EF4444', '#B91C1C', '#F59E0B', '#3B82F6'] };
+                confetti({ ...config, angle: 60, origin: { x: 0, y: 0.6 } });
+                confetti({ ...config, angle: 120, origin: { x: 1, y: 0.6 } });
+            }
+            if (Date.now() < end) quizState.confettiAnimationId = requestAnimationFrame(animateFrame);
+        }
+        animateFrame();
+    }
+
+    function stopSuccessAnimation() {
+        if (window.confetti && typeof confetti.reset === 'function') confetti.reset(); 
+        if (quizState.confettiAnimationId) {
+            cancelAnimationFrame(quizState.confettiAnimationId);
+            quizState.confettiAnimationId = null;
+        }
+    }
+
+    /* --- NAVEGAÇÃO MAPA --- */
+    function renderNavigationMap() {
+        const mapContainer = document.getElementById('qMap');
+        if (!mapContainer) return;
+        
+        mapContainer.innerHTML = questionsDatabase.map((question, index) => {
+            const isCurrent = index === quizState.currentIndex;
+            const userAnswer = quizState.userAnswers[index];
+            const hasAnswered = userAnswer !== null;
+            const isCorrect = userAnswer === question.correctIndex;
+            
+            let cssClass = 'map-dot';
+            if (isCurrent) cssClass += ' active';
+            if (hasAnswered) cssClass += isCorrect ? ' answered-correct' : ' answered-wrong';
+            
+            return `<div class="${cssClass}" onclick="goToQuestion(${index})">${index + 1}</div>`;
+        }).join('');
+        
+        setTimeout(() => { 
+            const activeDot = mapContainer.querySelector('.map-dot.active'); 
+            if (activeDot) activeDot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); 
+        }, 50);
+    }
+
+    function goToQuestion(targetIndex) { 
+        stopSuccessAnimation();
+        quizState.currentIndex = targetIndex; 
+        renderCurrentQuestion(); 
+        renderNavigationMap(); 
+    }
+    
+    function navigateQuestion(directionOffset) { 
+        const nextIndex = quizState.currentIndex + directionOffset; 
+        if (nextIndex >= 0 && nextIndex < questionsDatabase.length) goToQuestion(nextIndex); 
+    }
+
+    function updateNavigationButtons() {
+        const btnPrev = document.getElementById('btnPrev');
+        const btnNext = document.getElementById('btnNext');
+        
+        if (btnPrev) btnPrev.disabled = (quizState.currentIndex === 0);
+        
+        if (btnNext) {
+            const isLastQuestion = quizState.currentIndex === questionsDatabase.length - 1;
+            if (isLastQuestion) { 
+                btnNext.textContent = "Finalizar Avaliação"; 
+                btnNext.onclick = finishQuiz; 
+            } else { 
+                btnNext.textContent = "Próxima ➡️"; 
+                btnNext.onclick = () => navigateQuestion(1); 
+            }
+        }
+    }
+
+    /* --- CÁLCULO DE RESULTADOS --- */
+    function calculateStars(percent) {
+        if (percent === 100) return "⭐⭐⭐⭐⭐";
+        if (percent >= 80) return "⭐⭐⭐⭐";
+        if (percent >= 60) return "⭐⭐⭐";
+        if (percent >= 40) return "⭐⭐";
+        if (percent > 0) return "⭐";
+        return "🌑"; // zero stars
+    }
+
+    function finishQuiz() {
+        const unansweredCount = quizState.userAnswers.filter(answer => answer === null).length;
+        
+        if (unansweredCount > 0) {
+            const confirmMessage = `Existem ${unansweredCount} questões por responder. Quer terminar mesmo assim (as em branco serão dadas como erradas)?`;
+            if (!confirm(confirmMessage)) return;
+        }
+
+        stopSuccessAnimation();
+
+        const correctAnswersCount = quizState.userAnswers.filter((answer, index) => answer === questionsDatabase[index].correctIndex).length;
+        const totalQuestions = questionsDatabase.length;
+        const percentageScore = Math.round((correctAnswersCount / totalQuestions) * 100);
+        const isApproved = percentageScore >= 80;
+        
+        renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved);
+        changeApplicationView('result');
+    }
+
+    function renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved) {
+        document.getElementById('finalPercent').textContent = `${percentageScore}%`;
+        document.getElementById('finalScoreText').textContent = `Acertaste ${correctAnswersCount} de ${totalQuestions}`;
+        document.getElementById('finalStars').textContent = calculateStars(percentageScore);
+        
+        const reviewContainer = document.getElementById('review-container');
+        const actionButtonsContainer = document.getElementById('action-buttons');
+        
+        let summaryHTML = '';
+
+        if (isApproved) {
+            summaryHTML += `
+                <div class="result-summary-box success">
+                    <strong>🎉 FÍSICA APLICADA COM SUCESSO!</strong> A tua compreensão das Leis de Newton e das diferenças entre Massa e Peso está fantástica.
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REPETIR PARA 100%</button>`;
+        } else {
+            summaryHTML += `
+                <div class="result-summary-box error">
+                    <strong>⚠️ INÉRCIA NO ESTUDO!</strong> Foste avaliado abaixo da meta (80%). Lembra-te: Força não se armazena e Ação/Reação nunca se anulam!
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REFAZER AVALIAÇÃO</button>`;
+        }
+        
+        if (correctAnswersCount < totalQuestions) {
+            summaryHTML += '<h4 style="margin-bottom:15px; color:var(--text-color); font-size:1.15rem;">Revisão das Leis e Cálculos:</h4>';
+            questionsDatabase.forEach((question, index) => {
+                const userAnswerIndex = quizState.userAnswers[index];
+                if (userAnswerIndex !== question.correctIndex) {
+                    const userAnswerText = userAnswerIndex === null ? "Deixaste em branco" : question.options[userAnswerIndex];
+                    const correctAnswerText = question.options[question.correctIndex];
+                    
+                    let plainQuestionText = question.text.replace(/<div class="q-svg-container">[\s\S]*?<\/div>/gi, ' [Vetor Omitido] ');
+
+                    summaryHTML += `
+                        <div class="error-log-item">
+                            <strong style="color:var(--theme-dark); font-size:1.05rem; display:block; margin-bottom:8px;">Q${index + 1}: ${plainQuestionText}</strong>
+                            <span style="color:var(--wrong-border); font-weight: 600; display:block; margin-bottom:5px;">A tua análise: ${userAnswerText}</span>
+                            <span style="color:var(--correct-border); font-weight: 700; display:block;">O Fato Exato: ${correctAnswerText}</span>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        reviewContainer.innerHTML = summaryHTML;
+    }
+
+    function resetQuiz() { 
+        quizState.userAnswers = new Array(questionsDatabase.length).fill(null); 
+        quizState.currentIndex = 0; 
+        changeApplicationView('practice'); 
+    }
+    
+    // START APPLICATION
+    initializeSearch();
+    changeApplicationView('explanation');
+</script>
+</body>
+</html>

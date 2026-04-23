@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Física: Conservação de Energia - Promover</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* --- VARIÁVEIS DE COR E TEMA: PÊNDULO & MONTANHA-RUSSA --- */
+        :root {
+            --bg-color: #F0FDFA; /* Verde-água muito claro */
+            --text-color: #134E4A; /* Verde-água muito escuro */
+            --border-color: #0F766E; /* Verde-água profundo */
+            --white: #FFFFFF;
+            
+            --theme-light: #CCFBF1; /* Verde-água pastel */
+            --theme-medium: #14B8A6; /* Verde-água vivo */
+            --theme-dark: #0D9488; /* Verde-água escuro */
+            --theme-contrast: #F59E0B; /* Âmbar Dourado (Energia) */
+            --theme-accent: #0EA5E9; /* Ciano (Cinética/Velocidade) */
+            --theme-text-active: #FFFFFF;
+            
+            --correct-bg: #D1FAE5;
+            --correct-border: #059669;
+            --wrong-bg: #FFE4E6;
+            --wrong-border: #BE123C;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 15px 120px 15px;
+            background-image: linear-gradient(rgba(20, 184, 166, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(20, 184, 166, 0.1) 1px, transparent 1px);
+            background-size: 25px 25px;
+        }
+
+        /* --- ANIMAÇÕES --- */
+        @keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1) rotate(-5deg); color: var(--theme-contrast); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+        .pulse-effect { animation: pulse 2s infinite; display: inline-block; }
+        .shake-effect { animation: shake 0.4s ease-in-out; }
+
+        /* --- LAYOUT PRINCIPAL --- */
+        .container { width: 100%; max-width: 650px; display: flex; flex-direction: column; gap: 25px; }
+        .logo-header { display: flex; flex-direction: column; align-items: center; padding: 15px 0 25px 0; text-align: center; }
+        .css-logo { font-size: 1.5rem; font-weight: 900; color: var(--theme-text-active); text-transform: uppercase; letter-spacing: -1px; border: 3px solid var(--border-color); padding: 8px 24px; border-radius: 12px; background: var(--theme-dark); box-shadow: 4px 4px 0px var(--theme-contrast); margin-bottom: 15px; transform: rotate(-2deg); }
+        h1 { font-size: 2rem; font-weight: 900; color: var(--text-color); text-transform: uppercase; letter-spacing: -0.5px; line-height: 1.1; }
+        .subtitle { font-size: 1rem; color: var(--white); font-weight: 700; margin-top: 5px; background: var(--theme-contrast); padding: 4px 12px; border-radius: 8px; border: 2px solid var(--border-color); }
+
+        /* --- NAVEGAÇÃO --- */
+        .toggle-container { background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 6px; display: flex; box-shadow: 4px 4px 0px var(--border-color); position: sticky; top: 15px; z-index: 50; }
+        .toggle-btn { flex: 1; border: none; background: none; padding: 12px 0; border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.05rem; color: var(--text-color); cursor: pointer; transition: all 0.2s ease; }
+        .toggle-btn.active { background-color: var(--theme-dark); color: var(--theme-text-active); border: 2px solid var(--border-color); box-shadow: 2px 2px 0px var(--border-color); }
+
+        .view-section { display: none; animation: fadeIn 0.3s ease; flex-direction: column; gap: 35px; }
+        .view-section.active { display: flex; }
+
+        /* --- PESQUISA --- */
+        .search-container { position: relative; width: 100%; }
+        .search-input { width: 100%; padding: 16px 20px 16px 55px; border: 3px solid var(--border-color); border-radius: 12px; background-color: var(--white); font-family: 'Poppins', sans-serif; font-size: 1.05rem; font-weight: 600; color: var(--text-color); box-shadow: 4px 4px 0px var(--border-color); outline: none; transition: all 0.2s ease; }
+        .search-input:focus { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--theme-contrast); border-color: var(--theme-dark); }
+        .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 1.4rem; }
+        #no-results { text-align: center; color: var(--wrong-border); font-weight: 800; display: none; background: var(--wrong-bg); padding: 15px; border: 3px solid var(--wrong-border); border-radius: 8px; }
+
+        /* --- TEORIA --- */
+        .content-group { display: flex; flex-direction: column; position: relative; padding-top: 15px; }
+        .section-badge { display: inline-flex; align-items: center; gap: 10px; background-color: var(--theme-dark); color: var(--white); font-size: 1.1rem; font-weight: 800; padding: 8px 20px; border-radius: 8px; border: 3px solid var(--border-color); box-shadow: 3px 3px 0px var(--theme-contrast); text-transform: uppercase; position: absolute; top: -5px; left: 15px; z-index: 10; transform: rotate(-1.5deg); }
+        .theory-box { display: flex; flex-direction: column; padding: 35px 25px 25px 35px; border-radius: 12px; background-color: var(--white); border: 3px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); font-weight: 500; font-size: 1rem; line-height: 1.7; position: relative; overflow: hidden; gap: 20px; border-left: 14px solid var(--theme-medium); }
+        .theory-box h3 { font-size: 1.35rem; font-weight: 900; color: var(--theme-dark); margin-bottom: 5px; display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px; }
+        .theory-box h4 { font-size: 1.1rem; font-weight: 800; color: var(--text-color); margin-top: 10px; border-bottom: 2px solid var(--theme-light); padding-bottom: 5px; }
+        
+        .inline-example { display: block; width: fit-content; max-width: 100%; margin-top: 6px; margin-bottom: 6px; padding: 12px 20px; background-color: var(--theme-light); border: 2px solid var(--border-color); border-radius: 8px; font-size: 1.25rem; color: var(--theme-dark); font-weight: 900; letter-spacing: 1px; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); text-align: center; }
+        .visual-area { background: var(--bg-color); border: 3px dashed var(--theme-medium); border-radius: 12px; padding: 25px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; width: 100%; }
+        
+        .highlight-box { background-color: #FEF3C7; border: 3px solid var(--border-color); border-left: 8px solid var(--theme-contrast); padding: 18px 20px; border-radius: 8px; font-size: 0.95rem; color: #78350F; font-weight: 600; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); }
+        .highlight-box.blue { background-color: #E0F2FE; border-left-color: var(--theme-accent); color: #0C4A6E; }
+
+        /* --- CARDS DE FÓRMULAS --- */
+        .g-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; width: 100%; margin-top: 10px; }
+        .g-card { flex: 1 1 calc(50% - 15px); min-width: 130px; border-radius: 12px; padding: 15px 10px; text-align: center; border: 3px solid var(--border-color); display: flex; flex-direction: column; align-items: center; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); background-color: var(--white); transition: transform 0.2s; }
+        .g-card:hover { transform: translateY(-3px); }
+        .g-card.full-width { flex: 1 1 100%; max-width: 280px; }
+        .g-icon { font-size: 2.5rem; margin-bottom: 8px; line-height: 1; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.15)); }
+        .g-title { font-size: 1.05rem; font-weight: 900; margin-bottom: 4px; text-transform: uppercase; color: var(--theme-dark); }
+        .g-formula { font-size: 1.15rem; font-weight: 800; color: var(--theme-text-active); margin-bottom: 4px; line-height: 1.2; background: var(--theme-dark); padding: 4px 10px; border-radius: 6px; border: 2px solid var(--border-color); }
+        .g-desc { font-size: 0.85rem; font-weight: 600; color: var(--text-color); margin-top: 6px; line-height: 1.3; }
+
+        /* Elemento para imagens SVG dentro das teorias e perguntas */
+        .q-svg-container { display: flex; justify-content: center; margin: 15px 0; }
+
+        /* --- BOTÕES GERAIS --- */
+        .btn-action { width: 100%; padding: 20px; background-color: var(--theme-dark); color: white; border: 3px solid var(--border-color); border-radius: 12px; font-size: 1.15rem; font-weight: 900; cursor: pointer; box-shadow: 6px 6px 0px var(--theme-contrast); transition: all 0.1s; text-transform: uppercase; margin-top: 10px; }
+        .btn-action:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0px var(--theme-contrast); }
+
+        /* --- QUIZ UI --- */
+        .difficulty-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; border: 2px solid var(--border-color); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
+        .dif-facil { background: #D1FAE5; color: #065F46; }
+        .dif-medio { background: #FEF08A; color: #713F12; }
+        .dif-dificil { background: #FECACA; color: #7F1D1D; }
+
+        .question-map { display: flex; gap: 8px; overflow-x: auto; padding: 10px 5px; margin-bottom: 20px; white-space: nowrap; scroll-behavior: smooth; }
+        .question-map::-webkit-scrollbar { display: none; }
+        .map-dot { min-width: 38px; height: 38px; border: 2px solid var(--border-color); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; color: var(--theme-dark); background: white; cursor: pointer; transition: all 0.2s; }
+        .map-dot.active { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); transform: scale(1.15); }
+        .map-dot.answered-correct { background-color: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .map-dot.answered-wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .quiz-question-card { border: 4px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); padding: 30px; border-radius: 16px; background: var(--white); }
+        .quiz-question-counter { font-size: 0.85rem; font-weight: 900; color: var(--theme-dark); letter-spacing: 1px; }
+        .quiz-question-text { font-size: 1.15rem; margin-top: 8px; color: var(--text-color); font-weight: 800; line-height: 1.5; margin-bottom: 20px;}
+
+        .option-btn { display: flex; align-items: center; width: 100%; padding: 18px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.1s ease; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 600; text-align: left; color: var(--text-color); }
+        .option-btn:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px var(--theme-contrast); }
+        .opt-circle { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--border-color); margin-right: 15px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.05rem; flex-shrink: 0; background: var(--theme-light); color: var(--theme-dark); }
+        .option-btn.correct { background-color: var(--correct-bg); border-color: var(--correct-border); box-shadow: 3px 3px 0px var(--correct-border); }
+        .option-btn.correct .opt-circle { background-color: var(--correct-border); color: white; border-color: var(--correct-border); }
+        .option-btn.wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); opacity: 0.9; box-shadow: none; }
+        .option-btn.wrong .opt-circle { background-color: var(--wrong-border); color: white; border-color: var(--wrong-border); }
+        .option-btn.disabled { pointer-events: none; opacity: 0.7; }
+
+        /* --- FEEDBACK DA QUESTÃO --- */
+        .feedback-box { display: block; margin-top: 25px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 25px; animation: slideUp 0.3s ease-out; box-shadow: 5px 5px 0px rgba(0,0,0,0.1); }
+        .feedback-title { font-weight: 900; text-transform: uppercase; font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .feedback-item { margin-bottom: 10px; font-size: 0.95rem; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); line-height: 1.5; font-weight: 500; }
+        .feedback-item.correct-opt { background: var(--correct-bg); border-color: var(--correct-border); color: #064E3B; font-weight: 700; box-shadow: 3px 3px 0px var(--correct-border); }
+        .feedback-item.wrong-opt { background: #FFE4E6; border-color: #BE123C; color: #7F1D1D; border-style: dashed; margin-top: 8px; }
+
+        /* --- RESULTADOS --- */
+        .result-card { background: white; border: 4px solid var(--border-color); border-radius: 16px; padding: 40px 20px; box-shadow: 8px 8px 0px var(--border-color); margin-bottom: 30px; text-align: center; }
+        .stars-container { font-size: 2.5rem; margin: 15px 0; letter-spacing: 5px; }
+        .percentage-big { font-size: 5rem; font-weight: 900; color: var(--theme-dark); line-height: 1; margin: 15px 0; text-shadow: 4px 4px 0px var(--theme-contrast); }
+        
+        .result-summary-box { padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 3px solid; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); }
+        .result-summary-box.success { background: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .result-summary-box.error { background: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .error-log-item { margin-bottom: 15px; padding: 20px; background: var(--bg-color); border-radius: 12px; border: 3px dashed var(--theme-medium); text-align: left;}
+
+        /* --- RODAPÉ DE NAVEGAÇÃO --- */
+        .quiz-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--white); border-top: 3px solid var(--border-color); padding: 15px 20px; display: none; justify-content: center; gap: 20px; z-index: 100; box-shadow: 0px -4px 10px rgba(0,0,0,0.05); }
+        .nav-btn { padding: 15px 30px; border-radius: 12px; font-weight: 900; border: 3px solid var(--border-color); cursor: pointer; box-shadow: 3px 3px 0px var(--border-color); font-family: 'Poppins', sans-serif; text-transform: uppercase; background: white; color: var(--text-color); font-size: 1rem; transition: transform 0.1s; }
+        .nav-btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 0px 0px 0px transparent; }
+        .btn-next { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); border-color: var(--border-color); }
+        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <header class="logo-header">
+            <div class="css-logo"><span class="pulse-effect">🎢</span> PROMOVER</div>
+            <h1>Física / 9º Ano</h1>
+            <p class="subtitle">Conservação da Energia Mecânica</p>
+        </header>
+
+        <div class="toggle-container">
+            <button class="toggle-btn active" id="btnExp" onclick="changeApplicationView('explanation')">📘 Teoria</button>
+            <button class="toggle-btn" id="btnPrac" onclick="changeApplicationView('practice')">🧠 Prática (30)</button>
+        </div>
+
+        <!-- VISTA: TEORIA -->
+        <main id="viewExplanation" class="view-section active">
+            
+            <div class="search-container">
+                <span class="search-icon" aria-hidden="true">🔍</span>
+                <input type="text" id="searchInput" class="search-input" aria-label="Pesquisar conteúdo" placeholder="Pesquisar conceito... (ex: Conservação, Pêndulo, Dissipativo)">
+            </div>
+            <div id="no-results"><p>😕 Termo não encontrado na teoria de Energia.</p></div>
+
+            <section class="content-group">
+                <div class="section-badge">⚖️ 1. A Conta Bancária do Universo</div>
+                <article class="theory-box search-target">
+                    <h3>A Energia Mecânica (E<sub>m</sub>)</h3>
+                    <p>A Energia Mecânica de um corpo não é uma "nova" energia. É apenas a <strong>SOMA TOTAL</strong> do "dinheiro vivo" (Energia Cinética) com o "dinheiro guardado no cofre" (Energias Potenciais).</p>
+                    
+                    <div class="inline-example">E<sub>m</sub> = E<sub>c</sub> + E<sub>p</sub></div>
+                    
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li><strong>O Princípio da Conservação:</strong> Se não houver atrito nem resistência do ar (Sistemas Conservativos), o universo não cobra "taxas". Toda a energia que perdes de altura, ganhas perfeitamente em velocidade. <strong>A Energia Mecânica não se altera do início ao fim da viagem.</strong></li>
+                    </ul>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">🎢 2. A Montanha-Russa Perfeita</div>
+                <article class="theory-box search-target">
+                    <h3>Trocas de Energia</h3>
+                    <p>Observa como o carrinho sem atrito troca de energia durante o percurso:</p>
+                    
+                    <div class="visual-area">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="280" height="150" viewBox="0 0 280 150">
+                            <!-- Pista -->
+                            <path d="M 20 20 Q 80 160 140 80 T 260 130" fill="none" stroke="#1E293B" stroke-width="4"/>
+                            
+                            <!-- Ponto A (Topo) -->
+                            <circle cx="20" cy="20" r="6" fill="#F59E0B" stroke="#0F172A" stroke-width="2"/>
+                            <text x="20" y="10" text-anchor="middle" font-size="12" font-weight="bold">A (V=0, h max)</text>
+                            
+                            <!-- Ponto B (Fundo) -->
+                            <circle cx="95" cy="110" r="6" fill="#0EA5E9" stroke="#0F172A" stroke-width="2"/>
+                            <text x="95" y="130" text-anchor="middle" font-size="12" font-weight="bold">B (V max, h=0)</text>
+                            
+                            <!-- Ponto C (Subida) -->
+                            <circle cx="165" cy="65" r="6" fill="#10B981" stroke="#0F172A" stroke-width="2"/>
+                            <text x="165" y="50" text-anchor="middle" font-size="12" font-weight="bold">C (Soma: V + h)</text>
+                        </svg>
+                    </div>
+
+                    <div class="highlight-box blue">
+                        <strong>E<sub>m(A)</sub> = E<sub>m(B)</sub> = E<sub>m(C)</sub></strong><br>
+                        Se o carrinho parte do repouso em <strong>A</strong> com 1000 J de Energia Potencial. Quando chega ao ponto <strong>B</strong> (h=0), não tem mais energia potencial, logo os 1000 J viraram pura Energia Cinética (atingindo a velocidade máxima).
+                    </div>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">🕰️ 3. O Pêndulo Simples</div>
+                <article class="theory-box search-target">
+                    <h3>O vai-e-vem da energia</h3>
+                    <p>O pêndulo de um relógio antigo é o melhor exemplo de conservação:</p>
+
+                    <div class="visual-area">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="200" height="150" viewBox="0 0 200 150">
+                            <line x1="50" y1="20" x2="150" y2="20" stroke="#1E293B" stroke-width="4"/> <!-- Teto -->
+                            
+                            <!-- Fios -->
+                            <line x1="100" y1="20" x2="40" y2="100" stroke="#64748B" stroke-dasharray="4"/>
+                            <line x1="100" y1="20" x2="160" y2="100" stroke="#64748B" stroke-dasharray="4"/>
+                            <line x1="100" y1="20" x2="100" y2="130" stroke="#134E4A" stroke-width="2"/>
+                            
+                            <!-- Bolas -->
+                            <circle cx="40" cy="100" r="8" fill="#F59E0B" stroke="#0F172A"/> <!-- Esquerda (Alto) -->
+                            <circle cx="160" cy="100" r="8" fill="#F59E0B" stroke="#0F172A"/> <!-- Direita (Alto) -->
+                            <circle cx="100" cy="130" r="8" fill="#0EA5E9" stroke="#0F172A"/> <!-- Meio (Baixo) -->
+                            
+                            <!-- Legendas -->
+                            <text x="30" y="85" font-size="10" font-weight="bold">V=0</text>
+                            <text x="170" y="85" font-size="10" font-weight="bold">V=0</text>
+                            <text x="100" y="150" text-anchor="middle" font-size="10" font-weight="bold" fill="#0EA5E9">V MÁXIMA</text>
+                        </svg>
+                    </div>
+
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li>Nos <strong>extremos</strong>, a bola atinge a altura máxima, pára por um milésimo de segundo (E<sub>c</sub> = 0), e volta a cair.</li>
+                        <li>No <strong>meio</strong>, atinge a cota mais baixa da viagem (h=0), passando "a voar" com a Velocidade Máxima.</li>
+                    </ul>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">🔥 4. O Ladrão de Energia</div>
+                <article class="theory-box search-target">
+                    <h3>Sistemas Dissipativos</h3>
+                    <p>Na vida real não há pistas perfeitamente lisas. Quando deixas cair uma bola de basquetebol, ela nunca ressalta até à altura original da qual a largaste.</p>
+                    
+                    <div class="highlight-box">
+                        <strong>Para onde foi a Energia?</strong> A força de atrito e a resistência do ar roubam parte da Energia Mecânica, dissipando-a para a atmosfera em forma de <strong>Calor (Energia Térmica)</strong> e <strong>Som</strong>.<br><br>
+                        <em>A Matemática Real:</em> E<sub>m(Inicial)</sub> = E<sub>m(Final)</sub> + Energia Dissipada
+                    </div>
+                </article>
+            </section>
+
+            <button class="btn-action" onclick="changeApplicationView('practice')">
+                Iniciar a Avaliação (30 Questões) ➜
+            </button>
+        </main>
+
+        <!-- VISTA: PRÁTICA (QUIZ) -->
+        <main id="viewPractice" class="view-section">
+            <div style="margin-bottom: 20px; background-color: var(--white); padding: 15px; border-radius: 12px; border: 3px solid var(--border-color); box-shadow: 4px 4px 0px var(--border-color);">
+                <h2 style="color:var(--theme-dark); font-weight:900; margin-bottom: 5px;">A Prova de Fogo - IFCE</h2>
+                <p style="color: var(--theme-contrast); font-size: 0.95rem; font-weight:600;">
+                    30 questões de Conservação e Dissipação. Domina o "E<sub>m(A)</sub> = E<sub>m(B)</sub>" e acerta <strong>80% (24/30)</strong>.
+                </p>
+            </div>
+            
+            <div class="question-map" id="qMap"></div>
+            <div id="quizContainer" style="margin-bottom: 40px;"></div>
+        </main>
+
+        <!-- VISTA: RESULTADOS -->
+        <main id="viewResult" class="view-section">
+            <div class="result-card">
+                <h2 style="font-weight:900; text-transform:uppercase;">Relatório Final</h2>
+                <div class="stars-container" id="finalStars">⭐⭐⭐</div>
+                <div class="percentage-big" id="finalPercent">0%</div>
+                <p style="font-size:1.2rem; font-weight:700; color:#555;" id="finalScoreText">Acertaste 0 de 30</p>
+                <div id="review-container" style="text-align: left; margin-top: 20px;"></div>
+            </div>
+            <div id="action-buttons"></div>
+        </main>
+
+    </div>
+
+    <!-- RODAPÉ DE NAVEGAÇÃO -->
+    <footer class="quiz-footer" id="quizFooter">
+        <button class="nav-btn btn-prev" id="btnPrev" onclick="navigateQuestion(-1)">Anterior</button>
+        <button class="nav-btn btn-next" id="btnNext" onclick="navigateQuestion(1)">Próxima</button>
+    </footer>
+
+<script>
+    /* --- ESTRUTURA DE DADOS (BASE DE QUESTÕES - CONSERVAÇÃO IFCE) --- */
+    const questionsDatabase = [
+        { 
+            level: "Fácil", 
+            text: "O que a Física define rigorosamente como a 'Energia Mecânica' (Em) de um corpo num determinado instante?", 
+            options: ["É a energia gasta apenas pelos motores das máquinas.", "É a subtração da Energia Cinética pela Energia Potencial.", "É a SOMA da Energia Cinética com a Energia Potencial daquele corpo.", "É a energia térmica libertada pelo atrito."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "A Energia Mecânica Total é o pacote inteiro que o corpo possui: Em = Ec + Ep (tudo o que ele tem a mover-se somado a tudo o que ele tem guardado).", 
+                otherOptions: ["As outras definições não têm base na mecânica clássica."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Um corpo cai livremente de uma varanda no vácuo (sistema conservativo, sem atrito). Durante a queda, à medida que a sua altura diminui, o que podemos afirmar sobre a sua Energia Mecânica Total?", 
+            options: ["Diminui, pois a altura está a diminuir.", "Aumenta, pois a velocidade está a aumentar.", "Mantém-se RIGOROSAMENTE CONSTANTE do início ao fim da queda.", "Fica igual a zero."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Num sistema sem dissipação (sem ar), a perda de Energia Potencial é perfeitamente compensada pelo ganho de Energia Cinética. A soma das duas (Mecânica Total) não sofre qualquer alteração.", 
+                otherOptions: ["As energias parciais mudam, mas a soma (Mecânica) não."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Um skatista atinge o ponto mais alto de uma rampa em forma de 'U' e, por uma fração de segundo, para no ar antes de começar a descer. Nesse exato instante (no topo da rampa), qual é a sua composição de Energia Mecânica?", 
+            options: ["Toda a sua energia é puramente Cinética.", "Toda a sua energia é puramente Potencial Gravitacional (Ec = 0).", "Ele não tem nenhuma energia.", "Ele tem metade Cinética e metade Potencial."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Como ele parou no ar (v = 0), a sua Energia Cinética é zero. Assim, 100% da sua Energia Mecânica está armazenada na forma de Altura (Energia Potencial Gravitacional).", 
+                otherOptions: ["Sem velocidade, não há cinética."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Ainda sobre o skatista no 'U' (sem atrito). Ao descer a rampa e passar exatamente pelo FUNDO do vale (o ponto mais baixo, encostado ao chão h=0), o que acontece à sua energia?", 
+            options: ["Ele atinge a Velocidade Máxima, logo a sua Energia Cinética é MÁXIMA e a sua Energia Potencial é Zero.", "Ele para bruscamente.", "A sua Energia Mecânica aumenta 10 vezes.", "A Energia Potencial atinge o seu valor máximo."], 
+            correctIndex: 0, 
+            explanation: { 
+                correctText: "No fundo da rampa (h=0), o 'cofre' da altura esvaziou. Toda essa energia foi transformada em velocidade. É por isso que passamos 'a voar' pelo ponto mais baixo de uma montanha-russa.", 
+                otherOptions: ["A energia total conserva-se, logo se a Potencial zera, a Cinética tem de bater no máximo."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: `Observa o pêndulo. Se largarmos a bola do Ponto A a partir do repouso, em qual dos pontos indicados ela atinge a MAIOR energia cinética?
+                <div class="q-svg-container">
+                    <svg width="200" height="150" viewBox="0 0 200 150" style="background:#fff; border:2px solid #ccc; border-radius:8px;">
+                        <line x1="50" y1="20" x2="150" y2="20" stroke="#1E293B" stroke-width="4"/> 
+                        <line x1="100" y1="20" x2="40" y2="100" stroke="#0F172A" stroke-dasharray="4"/>
+                        <line x1="100" y1="20" x2="160" y2="100" stroke="#0F172A" stroke-dasharray="4"/>
+                        <line x1="100" y1="20" x2="100" y2="130" stroke="#0F172A" stroke-width="2"/>
+                        <circle cx="40" cy="100" r="8" fill="#F59E0B"/> 
+                        <circle cx="160" cy="100" r="8" fill="#F59E0B"/> 
+                        <circle cx="100" cy="130" r="8" fill="#0EA5E9"/> 
+                        <text x="25" y="95" font-weight="bold">A</text>
+                        <text x="170" y="95" font-weight="bold">C</text>
+                        <text x="85" y="145" font-weight="bold">B (Fundo)</text>
+                    </svg>
+                </div>`, 
+            options: ["No Ponto A (Extremo).", "No Ponto C (Extremo).", "No Ponto B (O fundo da trajetória).", "A energia cinética é igual em todos os pontos."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "O ponto B é o ponto de menor altura do pêndulo. Como a Energia Potencial atingiu o seu mínimo aqui, a Energia Cinética atinge o seu pico (velocidade máxima).", 
+                otherOptions: ["Em A e C a bola para para inverter o sentido (Ec = 0)."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Um pássaro carrega uma noz de 0,5 kg no bico. Ele está a voar a 10 metros de altura a uma velocidade de 2 m/s. Qual é a ENERGIA MECÂNICA TOTAL da noz em relação ao chão? (Usa g = 10 m/s²).", 
+            options: ["50 J", "1 J", "51 J", "100 J"], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Em = Ep + Ec. Ep = mgh = 0,5 × 10 × 10 = 50 J. Ec = (m·v²)/2 = (0,5 × 2²)/2 = (0,5 × 4)/2 = 1 J. Em = 50 + 1 = 51 Joules.", 
+                otherOptions: ["Muitos alunos calculam só a altura (50J) e esquecem que a noz já está a viajar na velocidade do pássaro!"] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Um corpo de massa 2 kg é abandonado (cai do repouso) de uma varanda a 20 metros de altura. Desprezando a resistência do ar, com que ENERGIA CINÉTICA exata ele baterá no chão? (Usa g = 10 m/s²).", 
+            options: ["40 J", "400 J", "100 J", "20 J"], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "O truque ninja da conservação! Não precisas de calcular a velocidade final. Como é uma queda perfeita, toda a Energia Potencial do topo virou Cinética no chão. Ep_topo = 2 × 10 × 20 = 400 J. Logo, Ec_chão = 400 J.", 
+                otherOptions: ["Tentar usar Torricelli não é errado, mas calcular direto pela conservação da energia poupa muito tempo."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Se deixarmos cair uma moeda de uma janela (V₀=0), qual é a fórmula direta derivada da Conservação da Energia (Epg = Ec) para calcular a Velocidade (V) com que ela bate no chão de uma altura h?", 
+            options: ["V = h / g", "V = &radic;(2 &middot; g &middot; h)", "V = m &middot; g &middot; h", "V = 2 &middot; g &middot; t"], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "mgh = (mv²)/2. Cortas a massa (m) dos dois lados. Passas o 2 a multiplicar: 2gh = v². Logo, v = &radic;(2gh). Esta fórmula salva vidas nas provas do IFCE!", 
+                otherOptions: ["Nota crucial: a velocidade de queda não depende da massa da moeda."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Ao usar a fórmula mágica deduzida V = &radic;(2 &middot; g &middot; h), reparamos que a 'massa' desapareceu da equação final. O que é que isto comprova no mundo real (se ignorarmos a resistência do ar)?", 
+            options: ["Que a matemática não serve para a física.", "Que uma bola pesada de bowling e uma pena atiradas da mesma altura baterão no chão rigorosamente com a MESMA VELOCIDADE.", "Que objetos sem massa caem mais rápido.", "Que a gravidade não puxa objetos leves."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Se não há atrito do ar para travar a pena, a massa é irrelevante para a aceleração de queda (como provado por Galileu na Torre de Pisa). Ambas caem lado a lado.", 
+                otherOptions: ["O arruíno desta regra na Terra é puramente aerodinâmico (o ar espalma a pena)."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Um carrinho de montanha-russa é abandonado (V=0) de um pico de 5 metros de altura. Vai deslizar para um vale sem atrito. Usando a fórmula V = &radic;(2 &middot; g &middot; h) com g=10 m/s², qual é a sua velocidade no ponto mais baixo da pista?", 
+            options: ["10 m/s", "50 m/s", "100 m/s", "5 m/s"], 
+            correctIndex: 0, 
+            explanation: { 
+                correctText: "V = &radic;(2 × 10 × 5) => V = &radic;100. A raiz de 100 é 10. A velocidade lá em baixo será de 10 m/s (36 km/h).", 
+                otherOptions: ["Esquecer a raiz quadrada no final e responder 100 m/s é o erro número um."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: `Rasteira clássica! Uma bola cai do 4º andar. A meio do caminho para o chão, ela já perdeu metade da sua Altura. Nesse ponto EXATO a MEIO da viagem, o que podemos afirmar sobre a sua velocidade e energias?`, 
+            options: ["A sua velocidade é o dobro da final.", "Nesse ponto, a sua Energia Potencial é RIGOROSAMENTE IGUAL à sua Energia Cinética (Ep = Ec). Ambas representam 50% da Energia Mecânica total.", "A sua energia mecânica cortou-se pela metade.", "Ela tem zero de cinética."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Se perdeu 50% da altura, o 'cofre' da Potencial desceu para metade. Pela lei da conservação, os 50% de energia libertados já viraram Cinética. Logo, as duas contas bancárias estão empatadas a meio da descida.", 
+                otherOptions: ["A energia mecânica total nunca corta pela metade num sistema livre."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Num parque aquático, um jovem escorrega num escorrega gigante curvo. O amigo dele atira-se num escorrega em linha reta vertical (queda-livre pura). Ambos partem da mesma ALTURA h e não há atrito. Quem chega lá abaixo com maior VELOCIDADE no final do tubo?", 
+            options: ["O amigo da queda-livre, por ser uma linha reta.", "O jovem da curva.", "Eles chegam com EXATAMENTE A MESMA VELOCIDADE, pois ambos converteram a mesma quantidade de mgh em mv²/2.", "O mais pesado ganha."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "A beleza da conservação de energia: não importa a curva ou o ziguezague da pista. Se partiram da mesma altura (h) sem atrito, a conversão de Ep para Ec é 100% igual. Ambos terão V = &radic;(2gh) lá no fundo.", 
+                otherOptions: ["Atenção: O da queda livre pode chegar PRIMEIRO (em menos tempo), mas a velocidade registada no radar lá no fundo será idêntica!"] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Cálculo Inverso de Conservação: Um polícia dispara um tiro perfeitamente na VERTICAL (para cima). A bala sai da arma com uma velocidade de 30 m/s. Se não houver atrito do ar, que ALTURA MÁXIMA atingirá a bala antes de parar para cair? (g = 10 m/s²).", 
+            options: ["30 metros", "90 metros", "45 metros", "150 metros"], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Igualamos no papel: Ec(chão) = Ep(topo). Fica: (m·v²)/2 = m·g·h. Corta o 'm'. Fica: v²/2 = 10·h. Sabendo que v=30, temos 30²/2 = 900/2 = 450. Fica 450 = 10h. Logo, h = 450/10 = 45 metros.", 
+                otherOptions: ["O erro mais comum é esquecer de dividir a velocidade ao quadrado por 2 e dar 90m."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "A fórmula Trabalho (W) = Variação de Energia Cinética (&Delta;Ec) é conhecida como o Teorema da Energia Cinética. Se um carro de 1.000 kg viaja a 10 m/s e acelera até 20 m/s, ele ganhou 150.000 J de energia. De onde veio essa energia matemática?", 
+            options: ["Criou-se do nada pelo vácuo.", "Do TRABALHO mecânico realizado pelo Motor do carro, que queimou gasolina para injetar esses 150.000 Joules nas rodas.", "Veio da gravidade.", "Da força normal do asfalto."], correctIndex: 1, explanation: { correctText: "As coisas não ganham velocidade por magia. Para a Energia Cinética subir, alguma Força exterior teve de realizar Trabalho sobre o corpo (neste caso, a combustão no motor puxando o carro para a frente).", otherOptions: ["Normal e Gravidade não realizam trabalho na horizontal."] } },
+        { level: "Fácil", text: "Até agora falámos do mundo perfeito. Mas na Vida Real, a Energia Mecânica Inicial de um carro a descer a serra nunca é igual à Energia Mecânica Final. Ela sempre DIMINUI. Como se chama a este tipo de sistema real?", options: ["Sistema Conservativo.", "Sistema Dissipativo (ou não-conservativo).", "Sistema Acelerado.", "Sistema Magnético."], correctIndex: 1, explanation: { correctText: "Na vida real, há sempre forças que se opõem ao movimento (Atrito, Resistência do ar). Elas roubam a energia útil da viagem, chamando-se Sistemas Dissipativos.", otherOptions: ["Conservativo é o mundo da fantasia matemática sem atrito."] } },
+        { level: "Médio", text: "Num Sistema Dissipativo, se a Energia Mecânica do carro da montanha-russa diminuiu, para onde foi a energia que 'desapareceu'?", options: ["Foi destruída pelo atrito.", "Foi sugada pelo buraco negro da terra.", "Transformou-se noutras formas de energia NÃO mecânicas, principalmente em Energia Térmica (Calor) e Energia Sonora (o chiar dos carris) devido ao atrito.", "Transformou-se em massa adicional para o carrinho."], correctIndex: 2, explanation: { correctText: "A lei de Lavoisier reina! A energia apenas mudou de forma. O atrito atuou esfregando os eixos, esquentando os travões e dissipando a energia pura para o ambiente.", otherOptions: ["Energia nunca pode ser destruída."] } },
+        { level: "Difícil", text: "Cálculo de Dissipação (Enem/IFCE): Uma bola é largada de uma varanda e tinha 500 J de energia potencial no topo. Ela atinge o chão com apenas 400 J de energia cinética na velocidade do choque. Quanto Trabalho foi realizado pela Força de Resistência do Ar na queda?", options: ["900 Joules", "-100 Joules", "100 Joules (Mas o Trabalho Resistente é Negativo)", "-500 Joules"], correctIndex: 2, explanation: { correctText: "O sistema começou com 500J e chegou com 400J. Desapareceram 100 Joules de energia útil. Esse foi o Trabalho (T) realizado pelo ar a raspar na bola. Como travou o movimento, dizemos que o Trabalho é Resistente (W = -100 J).", otherOptions: ["As outras contas violam a subtração básica (500 - 400)."] } },
+        { level: "Fácil", text: "Se atirares uma bola de borracha contra o chão, ela comprime, ressalta e sobe. Mas nota: ela NUNCA sobe de volta até à tua mão (volta sempre um pouco mais abaixo). Este é o sinal óbvio de que a colisão com o chão foi:", options: ["Elástica perfeita.", "Dissipativa, porque parte da energia mecânica foi perdida para amassar a bola e gerar o som do 'pimba' no chão.", "Conservativa.", "Acelerada."], correctIndex: 1, explanation: { correctText: "Como ela não conseguiu Epg suficiente para regressar à altura inicial, provamos que a Energia Mecânica (o pacote total) encolheu na viagem. Parte ficou no chão sob a forma térmica e deformação da borracha.", otherOptions: ["Um ressalto perfeito (elástico) só existe na teoria escolar."] } },
+        { level: "Médio", text: "Numa espingarda de chumbinhos, usas força para esmagar uma mola lá dentro e travá-la. Quando apertas o gatilho, a mola solta-se e o chumbinho dispara pela casa fora. Qual foi a cadeia principal de transferência de energias?", options: ["Energia Térmica &rarr; Energia Eólica &rarr; Cinética.", "Energia Potencial Elástica da mola &rarr; transferida para a Energia Cinética de voo do chumbinho.", "Energia Cinética &rarr; Potencial Gravitacional.", "Não houve conversão."], correctIndex: 1, explanation: { correctText: "O 'cofre' de tensão da mola esmagada abriu-se, passando todo o seu saldo energético para a velocidade (Cinética) do chumbo.", otherOptions: ["Errar as fases desta cadeia reprova em provas abertas do IFCE."] } },
+        { level: "Difícil", text: "Cálculo Misto de Mola para Altura: Numa máquina de pinball, uma mola comprimida dispara uma bola de metal (m = 0,1 kg) por uma rampa ACIMA. A mola guardava 2 Joules (Epe) antes de disparar. Se não houver atrito, que ALTURA MÁXIMA (h) a bola alcançará na rampa? (Usa g = 10 m/s²).", options: ["20 metros", "1 metro", "2 metros", "0,2 metros"], correctIndex: 2, explanation: { correctText: "Conservação direta! A Mola tem 2 Joules. No final, toda essa energia vira Altura (Epg). Logo, 2 J = m·g·h. Substituindo: 2 = 0,1 × 10 × h => 2 = 1 × h => h = 2 metros. Perfeito e elegante!", otherOptions: ["Muitos alunos perdem tempo tentando calcular a velocidade do meio do caminho, quando bastava igualar a ponta inicial à ponta final."] } },
+        { level: "Médio", text: "Um ciclista pedala e, de repente, depara-se com uma subida de serra muito íngreme. Ele para de pedalar. O que vai acontecer, energeticamente, enquanto ele sobe a ladeira por inércia?", options: ["A sua energia cinética será CONVERTIDA em energia potencial gravitacional, fazendo-o subir mas perdendo rapidamente a velocidade até parar.", "A sua energia mecânica vai duplicar.", "Ele vai aquecer os pneus gerando apenas energia potencial.", "Ele não vai conseguir subir um metro."], correctIndex: 0, explanation: { correctText: "Ao subir a ladeira, ele está a encher o 'cofre' da altura (Epg). Como a energia total tem de se manter (e ele não pedala para repor), esse ganho em altura custa a sua velocidade (Ec cai). Ele pára no momento em que Ec bater no zero.", otherOptions: ["Se a energia duplicasse ele voava."] } },
+        { level: "Difícil", text: "Uma das rasteiras mais difíceis das provas: Um carro viaja a 30 km/h e, numa emergência, trava até parar, derrapando e deixando uma marca de pneus de 10 metros no chão. Se ele viesse ao DOBRO da velocidade (60 km/h) e fizesse a mesma travagem, a marca de pneus no chão seria de quantos metros?", options: ["10 metros na mesma.", "20 metros (o dobro).", "40 metros (QUATRO VEZES maior, porque a Energia Cinética cresce com o quadrado da velocidade!).", "5 metros."], correctIndex: 2, explanation: { correctText: "Genial! O Trabalho de travagem (Fat × d) tem de empatar com a Energia Cinética. Como a Energia é m.v²/2, se v=2x, a Energia é 4x maior. Os travões terão de esfregar no asfalto 4x mais distância para queimar essa energia monstruosa. 10m vira 40m!", otherOptions: ["Pensar que o dobro da velocidade dá o dobro da travagem (20m) é causa de imensos choques na vida real."] } },
+        { level: "Fácil", text: "A energia potencial de um arco de tiro com arco depende exclusivamente de quê, segundo a fórmula E = (k·x²)/2?", options: ["Da massa do arco e da seta.", "Da tensão elástica (dureza k) do material e do quanto o atirador ESTICOU (deformação x) a corda para trás.", "Da cor da madeira do arco.", "Da velocidade do vento no dia."], correctIndex: 1, explanation: { correctText: "Apenas duas coisas contam num arco: o material de que é feito (fator 'k') e os centímetros que puxaste para trás ('x'). A massa da seta não interfere na energia guardada, apenas na velocidade com que ela sairá depois.", otherOptions: ["Incorreto."] } },
+        { level: "Médio", text: "Quando um motorista acelera o carro numa RETA PLANA e ele vai de 0 a 100 km/h, o Trabalho do Motor transformou-se quase na sua totalidade em que tipo de energia para o veículo?", options: ["Energia Potencial Gravitacional.", "Energia Térmica nas janelas.", "Energia Potencial Elástica.", "Energia Cinética."], correctIndex: 3, explanation: { correctText: "Como a estrada é plana (não há ganho de altura nem de Epg), todo o trabalho mecânico do motor foca-se unicamente em empurrar o carro para a frente (construindo a sua Velocidade / Cinética).", otherOptions: ["Se subisse uma serra, teria de partilhar o motor com a Potencial."] } },
+        { level: "Difícil", text: "O que a fórmula do Teorema do Trabalho-Energia (W = ΔEc) nos permite afirmar sobre um carro que está a descer uma ladeira com o pé levemente no travão, mantendo a velocidade EXATAMENTE CONSTANTE a 40 km/h?", options: ["O Trabalho da Gravidade é zero.", "O Trabalho da Força Resultante é ZERO. O trabalho que a gravidade injeta é perfeitamente anulado pelo trabalho negativo que os travões roubam, resultando num ΔEc = 0.", "O carro está a gerar energia mecânica infinita.", "Os travões estão a falhar."], correctIndex: 1, explanation: { correctText: "Se a velocidade é 40 km/h constante, a Energia Cinética final e inicial é a mesma. Logo, ΔEc = 0. Pelo teorema, se ΔEc=0, o Trabalho Total foi zero. O travão rouba tudo o que a gravidade dá. Perfeito equilíbrio dissipativo.", otherOptions: ["A gravidade faz trabalho positivo aqui."] } },
+        { level: "Médio", text: "Um aluno empurra uma mola muito dura contra a parede (k=10.000 N/m). Ele não consegue esmagá-la muito, apenas 2 centímetros (x = 0,02 m). Ele gastou 2 Joules de Energia (Epe). Se ele tentar comprimi-la o DOBRO (4 cm), o esforço (energia) exigido vai ser:", options: ["2 Joules.", "4 Joules.", "8 Joules, pois a deformação 'x' cresceu para o dobro (2x), ativando o efeito ao quadrado (2²=4x) na fórmula da energia da mola.", "Zero Joules."], correctIndex: 2, explanation: { correctText: "Não importa se é arco, mola ou carro: deformações e velocidades têm o termo ao QUADRADO. Se a compressão exigida é o dobro, o 'suor' energético exigido dispara quatro vezes para 8 Joules.", otherOptions: ["Subestimar o comportamento exponencial de uma mola leva a estiramentos musculares!"] } },
+        { level: "Fácil", text: "Um livro enorme cai em cima de um prego, enterrando-o na madeira. O livro tinha Energia Mecânica (a cair) e, ao bater no prego, realizou Trabalho (força x distância). O que fez essa Energia Mecânica desaparecer?", options: ["O livro ressaltou sem perda.", "A energia perdeu-se em luz radiante.", "O Trabalho Resistente feito pela madeira dura do bloco opôs-se à entrada do prego, sugando a energia cinética e gerando muito atrito/calor.", "A gravidade desligou no choque."], correctIndex: 2, explanation: { correctText: "Bater o prego rasga e amassa a madeira. Essa força monstruosa contra o movimento (Resistente) engoliu instantaneamente o saldo cinético do livro no choque inelástico.", otherOptions: ["Incorreto."] } },
+        { level: "Médio", text: "Um rapaz segura uma bola no topo de um desfiladeiro. A bola tem 2.000 J de Energia Potencial. Ele simplesmente solta a bola das mãos. Sabendo a Lei da Conservação, que energia a bola terá a EXACTOS 3 QUARTOS da descida para o chão?", options: ["Epg = 1000 J e Ec = 1000 J.", "Epg = 500 J (pois só resta 1/4 da altura final) e a sua Energia Cinética será GIGANTE, valendo 1.500 J.", "Epg = 1500 J e Ec = 500 J.", "Epg = 0 J."], correctIndex: 1, explanation: { correctText: "A matemática da conservação não falha. No fundo (3/4 descidos), só sobra um tiquinho de altura (1/4 = 500 J). A enorme altura que já foi sacrificada (3/4) virou o prêmio da velocidade. O carro conta com 1500 J de velocidade acumulada.", otherOptions: ["A terceira opção seria se ele tivesse descido só um quarto do caminho."] } },
+        { level: "Fácil", text: "Na Física, costumamos dizer que a gravidade atua sobre todos. Contudo, há uma forma de esconder a tua Energia Potencial Gravitacional nas fórmulas. Como o fazes?", options: ["Saindo do planeta.", "Alterando o NÍVEL DE REFERÊNCIA. Se tu definires que a mesa onde a bola já está encostada é o ponto Altura Zero (h=0), a matemática assume que a Epg é 0 J.", "Usando uma caixa de chumbo.", "Abrandando o tempo."], correctIndex: 1, explanation: { correctText: "O valor da Potencial Gravitacional não é divino. Tu és o cientista, tu defines onde é o teu eixo Y igual a zero. Pode ser o chão, o tampo da mesa, ou o buraco de um poço. A energia altera de acordo com a tua 'régua'.", otherOptions: ["Incorreto."] } },
+        { level: "Difícil", text: "Para terminar o módulo Mestre: O Pêndulo de Newton (aquelas bolas de metal suspensas que batem umas nas outras de forma contínua em cima da secretária). Elas são um excelente exemplo de conservação de energia e de outra grandeza mecânica. Porque é que, na vida real, elas acabam sempre por parar ao fim de uns minutos?", options: ["Porque as bolas de metal esquecem a Lei da Inércia.", "Devido às Forças Dissipativas! Os choques metálicos nunca são 100% elásticos. Parte da energia voa na forma de som (o famoso 'clack clack') e o atrito com as cordas arrefece o sistema mecânico até zero.", "Porque a gravidade aumenta durante o processo.", "A energia foi convertida em raios X invisíveis."], correctIndex: 1, explanation: { correctText: "As coisas no mundo real não perpetuam o movimento porque os atritos, o som das batidas e a deformação minúscula do aço 'gastam' a valiosa energia cinética gota a gota, transferindo-a para o ambiente como calor.", otherOptions: ["Em teoria perfeita, elas balançariam até ao fim dos tempos."] } }
+    ];
+
+    /* --- GESTÃO DE ESTADO (STATE) --- */
+    const quizState = {
+        currentIndex: 0,
+        userAnswers: new Array(questionsDatabase.length).fill(null),
+        confettiAnimationId: null
+    };
+
+    /* --- FUNCIONALIDADES DE PESQUISA (TEORIA) --- */
+    function initializeSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const contentGroups = document.querySelectorAll('.content-group');
+        const noResultsMsg = document.getElementById('no-results');
+
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', function(event) {
+            const searchTerm = normalizeText(event.target.value);
+            let totalVisibleElements = 0;
+            
+            contentGroups.forEach(group => {
+                const groupContent = normalizeText(group.textContent);
+                const isMatch = groupContent.includes(searchTerm);
+                
+                group.style.display = isMatch ? 'flex' : 'none';
+                if (isMatch) totalVisibleElements++;
+            });
+            
+            noResultsMsg.style.display = totalVisibleElements === 0 ? 'block' : 'none';
+        });
+    }
+
+    function normalizeText(text) {
+        return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    /* --- CONTROLO DE VISTAS (VIEWS) --- */
+    function changeApplicationView(viewName) {
+        const views = ['viewExplanation', 'viewPractice', 'viewResult'];
+        
+        views.forEach(viewId => document.getElementById(viewId).classList.remove('active'));
+        
+        const quizFooter = document.getElementById('quizFooter');
+        if (quizFooter) quizFooter.style.display = 'none';
+
+        if (viewName === 'explanation') {
+            document.getElementById('viewExplanation').classList.add('active');
+            document.getElementById('btnExp').classList.add('active');
+            document.getElementById('btnPrac').classList.remove('active');
+        } else if (viewName === 'practice') {
+            document.getElementById('viewPractice').classList.add('active');
+            if (quizFooter) quizFooter.style.display = 'flex';
+            document.getElementById('btnExp').classList.remove('active');
+            document.getElementById('btnPrac').classList.add('active');
+            
+            renderCurrentQuestion();
+            renderNavigationMap();
+        } else if (viewName === 'result') {
+            document.getElementById('viewResult').classList.add('active');
+        }
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* --- GERAÇÃO INTERFACE DO QUIZ --- */
+    function getDifficultyBadgeClass(level) {
+        const mapping = { 'Fácil': 'dif-facil', 'Médio': 'dif-medio', 'Difícil': 'dif-dificil' };
+        return mapping[level] || 'dif-facil';
+    }
+
+    function buildOptionsHTML(question, selectedAnswerIndex) {
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        return question.options.map((optionText, optionIndex) => {
+            let cssClass = '';
+            
+            if (selectedAnswerIndex !== null) {
+                if (optionIndex === question.correctIndex) cssClass = 'correct';
+                else if (optionIndex === selectedAnswerIndex) cssClass = 'wrong';
+                else cssClass = 'disabled';
+            }
+
+            const isDisabled = selectedAnswerIndex !== null ? 'disabled' : '';
+
+            return `
+                <button class="option-btn ${cssClass}" onclick="handleOptionSelection(${optionIndex})" ${isDisabled}>
+                    <div class="opt-circle">${alphabet[optionIndex]}</div>
+                    <div>${optionText}</div>
+                </button>
+            `;
+        }).join('');
+    }
+
+    function buildFeedbackHTML(question, selectedAnswerIndex) {
+        const isCorrect = selectedAnswerIndex === question.correctIndex;
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        const titleClass = isCorrect ? 'success' : 'error';
+        const titleText = isCorrect ? '✅ Raciocínio Conservado!' : '❌ Diagnóstico de Energia Falhou!';
+        
+        const distortionsHTML = question.explanation.otherOptions.map((explanationText, idx) => {
+            if (idx === question.correctIndex) return '';
+            return `<div class="feedback-item wrong-opt"><strong>${alphabet[idx]})</strong> ${explanationText}</div>`;
+        }).join('');
+
+        return `
+            <div class="feedback-box show">
+                <div class="feedback-title ${titleClass}" style="color: ${isCorrect ? 'var(--correct-border)' : 'var(--wrong-border)'}">${titleText}</div>
+                <div class="feedback-item correct-opt"><strong>A Lei da Física:</strong> ${question.options[question.correctIndex]}</div>
+                <div style="margin-top:15px;font-size:1rem;color:var(--text-color);margin-bottom:15px;font-weight:600;">${question.explanation.correctText}</div>
+                <div style="margin-top:15px;border-top:2px dashed var(--border-color);padding-top:15px;">
+                    <small style="color:var(--text-color);"><strong>Análise da Dissipação:</strong></small>
+                    ${distortionsHTML}
+                </div>
+            </div>
+        `;
+    }
+
+    function renderCurrentQuestion() {
+        const container = document.getElementById('quizContainer');
+        if (!container) return;
+
+        const question = questionsDatabase[quizState.currentIndex];
+        const selectedAnswerIndex = quizState.userAnswers[quizState.currentIndex];
+        const badgeClass = getDifficultyBadgeClass(question.level);
+        
+        let feedbackHTML = selectedAnswerIndex !== null ? buildFeedbackHTML(question, selectedAnswerIndex) : '';
+
+        container.innerHTML = `
+            <div class="quiz-question-card">
+                <span class="difficulty-badge ${badgeClass}">${question.level}</span>
+                <div style="margin-bottom:25px;">
+                    <span class="quiz-question-counter">QUESTÃO ${quizState.currentIndex + 1} DE ${questionsDatabase.length}</span>
+                    <h2 class="quiz-question-text">${question.text}</h2>
+                </div>
+                <div class="options-list">
+                    ${buildOptionsHTML(question, selectedAnswerIndex)}
+                </div>
+                ${feedbackHTML}
+            </div>
+        `;
+        
+        updateNavigationButtons();
+    }
+
+    /* --- LÓGICA DO QUIZ --- */
+    function handleOptionSelection(selectedIndex) {
+        if (quizState.userAnswers[quizState.currentIndex] !== null) return;
+        
+        quizState.userAnswers[quizState.currentIndex] = selectedIndex;
+        const isCorrect = selectedIndex === questionsDatabase[quizState.currentIndex].correctIndex;
+        
+        if (isCorrect) startSuccessAnimation();
+        else triggerErrorShakeEffect();
+        
+        renderCurrentQuestion();
+        renderNavigationMap();
+    }
+
+    function triggerErrorShakeEffect() {
+        const container = document.getElementById('quizContainer');
+        if (container) { 
+            container.classList.remove('shake-effect'); 
+            void container.offsetWidth; 
+            container.classList.add('shake-effect'); 
+            setTimeout(() => container.classList.remove('shake-effect'), 500); 
+        }
+    }
+
+    /* --- ANIMAÇÕES (CONFETTI) --- */
+    function startSuccessAnimation() {
+        const duration = 1500;
+        const end = Date.now() + duration;
+        
+        stopSuccessAnimation();
+        
+        function animateFrame() {
+            if(window.confetti && typeof confetti === 'function') {
+                const config = { particleCount: 5, spread: 55, colors: ['#10B981', '#0EA5E9', '#0D9488', '#F59E0B'] };
+                confetti({ ...config, angle: 60, origin: { x: 0, y: 0.6 } });
+                confetti({ ...config, angle: 120, origin: { x: 1, y: 0.6 } });
+            }
+            if (Date.now() < end) quizState.confettiAnimationId = requestAnimationFrame(animateFrame);
+        }
+        animateFrame();
+    }
+
+    function stopSuccessAnimation() {
+        if (window.confetti && typeof confetti.reset === 'function') confetti.reset(); 
+        if (quizState.confettiAnimationId) {
+            cancelAnimationFrame(quizState.confettiAnimationId);
+            quizState.confettiAnimationId = null;
+        }
+    }
+
+    /* --- NAVEGAÇÃO MAPA --- */
+    function renderNavigationMap() {
+        const mapContainer = document.getElementById('qMap');
+        if (!mapContainer) return;
+        
+        mapContainer.innerHTML = questionsDatabase.map((question, index) => {
+            const isCurrent = index === quizState.currentIndex;
+            const userAnswer = quizState.userAnswers[index];
+            const hasAnswered = userAnswer !== null;
+            const isCorrect = userAnswer === question.correctIndex;
+            
+            let cssClass = 'map-dot';
+            if (isCurrent) cssClass += ' active';
+            if (hasAnswered) cssClass += isCorrect ? ' answered-correct' : ' answered-wrong';
+            
+            return `<div class="${cssClass}" onclick="goToQuestion(${index})">${index + 1}</div>`;
+        }).join('');
+        
+        setTimeout(() => { 
+            const activeDot = mapContainer.querySelector('.map-dot.active'); 
+            if (activeDot) activeDot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); 
+        }, 50);
+    }
+
+    function goToQuestion(targetIndex) { 
+        stopSuccessAnimation();
+        quizState.currentIndex = targetIndex; 
+        renderCurrentQuestion(); 
+        renderNavigationMap(); 
+    }
+    
+    function navigateQuestion(directionOffset) { 
+        const nextIndex = quizState.currentIndex + directionOffset; 
+        if (nextIndex >= 0 && nextIndex < questionsDatabase.length) goToQuestion(nextIndex); 
+    }
+
+    function updateNavigationButtons() {
+        const btnPrev = document.getElementById('btnPrev');
+        const btnNext = document.getElementById('btnNext');
+        
+        if (btnPrev) btnPrev.disabled = (quizState.currentIndex === 0);
+        
+        if (btnNext) {
+            const isLastQuestion = quizState.currentIndex === questionsDatabase.length - 1;
+            if (isLastQuestion) { 
+                btnNext.textContent = "Finalizar Avaliação"; 
+                btnNext.onclick = finishQuiz; 
+            } else { 
+                btnNext.textContent = "Próxima ➡️"; 
+                btnNext.onclick = () => navigateQuestion(1); 
+            }
+        }
+    }
+
+    /* --- CÁLCULO DE RESULTADOS --- */
+    function calculateStars(percent) {
+        if (percent === 100) return "⭐⭐⭐⭐⭐";
+        if (percent >= 80) return "⭐⭐⭐⭐";
+        if (percent >= 60) return "⭐⭐⭐";
+        if (percent >= 40) return "⭐⭐";
+        if (percent > 0) return "⭐";
+        return "🌑"; // zero stars
+    }
+
+    function finishQuiz() {
+        const unansweredCount = quizState.userAnswers.filter(answer => answer === null).length;
+        
+        if (unansweredCount > 0) {
+            const confirmMessage = `Existem ${unansweredCount} questões por responder. Quer terminar mesmo assim (as em branco serão dadas como erradas)?`;
+            if (!confirm(confirmMessage)) return;
+        }
+
+        stopSuccessAnimation();
+
+        const correctAnswersCount = quizState.userAnswers.filter((answer, index) => answer === questionsDatabase[index].correctIndex).length;
+        const totalQuestions = questionsDatabase.length;
+        const percentageScore = Math.round((correctAnswersCount / totalQuestions) * 100);
+        const isApproved = percentageScore >= 80;
+        
+        renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved);
+        changeApplicationView('result');
+    }
+
+    function renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved) {
+        document.getElementById('finalPercent').textContent = `${percentageScore}%`;
+        document.getElementById('finalScoreText').textContent = `Acertaste ${correctAnswersCount} de ${totalQuestions}`;
+        document.getElementById('finalStars').textContent = calculateStars(percentageScore);
+        
+        const reviewContainer = document.getElementById('review-container');
+        const actionButtonsContainer = document.getElementById('action-buttons');
+        
+        let summaryHTML = '';
+
+        if (isApproved) {
+            summaryHTML += `
+                <div class="result-summary-box success">
+                    <strong>🎉 CONSERVAÇÃO PERFEITA!</strong> O teu domínio da transferência de Energia Mecânica, Queda Livre e Pêndulos está imbatível. A vaga no IFCE é tua!
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REPETIR PARA 100%</button>`;
+        } else {
+            summaryHTML += `
+                <div class="result-summary-box error">
+                    <strong>⚠️ SISTEMA DISSIPATIVO!</strong> Foste avaliado abaixo da meta (80%). Revisa urgente as trocas onde Ec vira Epg e não esqueças a fórmula V = √(2gh).
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REFAZER AVALIAÇÃO</button>`;
+        }
+        
+        if (correctAnswersCount < totalQuestions) {
+            summaryHTML += '<h4 style="margin-bottom:15px; color:var(--text-color); font-size:1.15rem;">Revisão Teórica e Algébrica:</h4>';
+            questionsDatabase.forEach((question, index) => {
+                const userAnswerIndex = quizState.userAnswers[index];
+                if (userAnswerIndex !== question.correctIndex) {
+                    const userAnswerText = userAnswerIndex === null ? "Deixaste em branco" : question.options[userAnswerIndex];
+                    const correctAnswerText = question.options[question.correctIndex];
+                    
+                    let plainQuestionText = question.text.replace(/<div class="q-svg-container">[\s\S]*?<\/div>/gi, ' [Diagrama Omitido] ');
+
+                    summaryHTML += `
+                        <div class="error-log-item">
+                            <strong style="color:var(--theme-dark); font-size:1.05rem; display:block; margin-bottom:8px;">Q${index + 1}: ${plainQuestionText}</strong>
+                            <span style="color:var(--wrong-border); font-weight: 600; display:block; margin-bottom:5px;">A tua análise: ${userAnswerText}</span>
+                            <span style="color:var(--correct-border); font-weight: 700; display:block;">A Resposta Correta: ${correctAnswerText}</span>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        reviewContainer.innerHTML = summaryHTML;
+    }
+
+    function resetQuiz() { 
+        quizState.userAnswers = new Array(questionsDatabase.length).fill(null); 
+        quizState.currentIndex = 0; 
+        changeApplicationView('practice'); 
+    }
+    
+    // START APPLICATION
+    initializeSearch();
+    changeApplicationView('explanation');
+</script>
+</body>
+</html>

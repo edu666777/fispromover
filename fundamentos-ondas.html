@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Física: Fundamentos das Ondas - Promover</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* --- VARIÁVEIS DE COR E TEMA: ONDAS E FREQUÊNCIAS (Azul Oceano/Ciano) --- */
+        :root {
+            --bg-color: #F0F9FF; /* Azul muito claro (fundo) */
+            --text-color: #082F49; /* Azul marinho escuro (texto principal) */
+            --border-color: #0369A1; /* Azul forte / Contorno */
+            --white: #FFFFFF;
+            
+            --theme-light: #E0F2FE; /* Ciano pastel */
+            --theme-medium: #0EA5E9; /* Ciano vivo */
+            --theme-dark: #0284C7; /* Azul profundo */
+            --theme-contrast: #F59E0B; /* Âmbar (Contraste para botões/destaques) */
+            --theme-accent: #8B5CF6; /* Roxo (Ondas Eletromagnéticas) */
+            --theme-text-active: #FFFFFF;
+            
+            --correct-bg: #D1FAE5;
+            --correct-border: #059669;
+            --wrong-bg: #FFE4E6;
+            --wrong-border: #BE123C;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 15px 120px 15px;
+            background-image: linear-gradient(rgba(14, 165, 233, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(14, 165, 233, 0.1) 1px, transparent 1px);
+            background-size: 25px 25px;
+        }
+
+        /* --- ANIMAÇÕES --- */
+        @keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1) rotate(-5deg); color: var(--theme-contrast); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+        .pulse-effect { animation: pulse 2s infinite; display: inline-block; }
+        .shake-effect { animation: shake 0.4s ease-in-out; }
+
+        /* --- LAYOUT PRINCIPAL --- */
+        .container { width: 100%; max-width: 650px; display: flex; flex-direction: column; gap: 25px; }
+        .logo-header { display: flex; flex-direction: column; align-items: center; padding: 15px 0 25px 0; text-align: center; }
+        .css-logo { font-size: 1.5rem; font-weight: 900; color: var(--theme-text-active); text-transform: uppercase; letter-spacing: -1px; border: 3px solid var(--border-color); padding: 8px 24px; border-radius: 12px; background: var(--theme-dark); box-shadow: 4px 4px 0px var(--theme-contrast); margin-bottom: 15px; transform: rotate(-2deg); }
+        h1 { font-size: 2rem; font-weight: 900; color: var(--text-color); text-transform: uppercase; letter-spacing: -0.5px; line-height: 1.1; }
+        .subtitle { font-size: 1rem; color: var(--white); font-weight: 700; margin-top: 5px; background: var(--theme-contrast); padding: 4px 12px; border-radius: 8px; border: 2px solid var(--border-color); }
+
+        /* --- NAVEGAÇÃO --- */
+        .toggle-container { background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 6px; display: flex; box-shadow: 4px 4px 0px var(--border-color); position: sticky; top: 15px; z-index: 50; }
+        .toggle-btn { flex: 1; border: none; background: none; padding: 12px 0; border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.05rem; color: var(--text-color); cursor: pointer; transition: all 0.2s ease; }
+        .toggle-btn.active { background-color: var(--theme-dark); color: var(--theme-text-active); border: 2px solid var(--border-color); box-shadow: 2px 2px 0px var(--border-color); }
+
+        .view-section { display: none; animation: fadeIn 0.3s ease; flex-direction: column; gap: 35px; }
+        .view-section.active { display: flex; }
+
+        /* --- PESQUISA --- */
+        .search-container { position: relative; width: 100%; }
+        .search-input { width: 100%; padding: 16px 20px 16px 55px; border: 3px solid var(--border-color); border-radius: 12px; background-color: var(--white); font-family: 'Poppins', sans-serif; font-size: 1.05rem; font-weight: 600; color: var(--text-color); box-shadow: 4px 4px 0px var(--border-color); outline: none; transition: all 0.2s ease; }
+        .search-input:focus { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--theme-contrast); border-color: var(--theme-dark); }
+        .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 1.4rem; }
+        #no-results { text-align: center; color: var(--wrong-border); font-weight: 800; display: none; background: var(--wrong-bg); padding: 15px; border: 3px solid var(--wrong-border); border-radius: 8px; }
+
+        /* --- TEORIA --- */
+        .content-group { display: flex; flex-direction: column; position: relative; padding-top: 15px; }
+        .section-badge { display: inline-flex; align-items: center; gap: 10px; background-color: var(--theme-dark); color: var(--white); font-size: 1.1rem; font-weight: 800; padding: 8px 20px; border-radius: 8px; border: 3px solid var(--border-color); box-shadow: 3px 3px 0px var(--theme-contrast); text-transform: uppercase; position: absolute; top: -5px; left: 15px; z-index: 10; transform: rotate(-1.5deg); }
+        .theory-box { display: flex; flex-direction: column; padding: 35px 25px 25px 35px; border-radius: 12px; background-color: var(--white); border: 3px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); font-weight: 500; font-size: 1rem; line-height: 1.7; position: relative; overflow: hidden; gap: 20px; border-left: 14px solid var(--theme-medium); }
+        .theory-box h3 { font-size: 1.35rem; font-weight: 900; color: var(--theme-dark); margin-bottom: 5px; display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px; }
+        .theory-box h4 { font-size: 1.1rem; font-weight: 800; color: var(--text-color); margin-top: 10px; border-bottom: 2px solid var(--theme-light); padding-bottom: 5px; }
+        
+        .inline-example { display: block; width: fit-content; max-width: 100%; margin-top: 6px; margin-bottom: 6px; padding: 12px 20px; background-color: var(--theme-light); border: 2px solid var(--border-color); border-radius: 8px; font-size: 1.2rem; color: var(--theme-dark); font-weight: 900; letter-spacing: 1px; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); text-align: center; }
+        .visual-area { background: var(--bg-color); border: 3px dashed var(--theme-medium); border-radius: 12px; padding: 25px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; width: 100%; }
+        
+        .highlight-box { background-color: #FEF3C7; border: 3px solid var(--border-color); border-left: 8px solid var(--theme-contrast); padding: 18px 20px; border-radius: 8px; font-size: 0.95rem; color: #78350F; font-weight: 600; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); }
+        .highlight-box.blue { background-color: #E0F2FE; border-left-color: var(--theme-contrast); color: #0C4A6E; }
+
+        /* Elemento para imagens SVG */
+        .q-svg-container { display: flex; justify-content: center; margin: 15px 0; }
+
+        /* --- BOTÕES GERAIS --- */
+        .btn-action { width: 100%; padding: 20px; background-color: var(--theme-dark); color: white; border: 3px solid var(--border-color); border-radius: 12px; font-size: 1.15rem; font-weight: 900; cursor: pointer; box-shadow: 6px 6px 0px var(--theme-contrast); transition: all 0.1s; text-transform: uppercase; margin-top: 10px; }
+        .btn-action:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0px var(--theme-contrast); }
+
+        /* --- QUIZ UI --- */
+        .difficulty-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; border: 2px solid var(--border-color); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
+        .dif-facil { background: #D1FAE5; color: #065F46; }
+        .dif-medio { background: #FEF08A; color: #713F12; }
+        .dif-dificil { background: #FECACA; color: #7F1D1D; }
+
+        .question-map { display: flex; gap: 8px; overflow-x: auto; padding: 10px 5px; margin-bottom: 20px; white-space: nowrap; scroll-behavior: smooth; }
+        .question-map::-webkit-scrollbar { display: none; }
+        .map-dot { min-width: 38px; height: 38px; border: 2px solid var(--border-color); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; color: var(--theme-dark); background: white; cursor: pointer; transition: all 0.2s; }
+        .map-dot.active { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); transform: scale(1.15); }
+        .map-dot.answered-correct { background-color: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .map-dot.answered-wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .quiz-question-card { border: 4px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); padding: 30px; border-radius: 16px; background: var(--white); }
+        .quiz-question-counter { font-size: 0.85rem; font-weight: 900; color: var(--theme-dark); letter-spacing: 1px; }
+        .quiz-question-text { font-size: 1.15rem; margin-top: 8px; color: var(--text-color); font-weight: 800; line-height: 1.5; margin-bottom: 20px;}
+
+        .option-btn { display: flex; align-items: center; width: 100%; padding: 18px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.1s ease; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 600; text-align: left; color: var(--text-color); }
+        .option-btn:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px var(--theme-contrast); }
+        .opt-circle { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--border-color); margin-right: 15px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.05rem; flex-shrink: 0; background: var(--theme-light); color: var(--theme-dark); }
+        .option-btn.correct { background-color: var(--correct-bg); border-color: var(--correct-border); box-shadow: 3px 3px 0px var(--correct-border); }
+        .option-btn.correct .opt-circle { background-color: var(--correct-border); color: white; border-color: var(--correct-border); }
+        .option-btn.wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); opacity: 0.9; box-shadow: none; }
+        .option-btn.wrong .opt-circle { background-color: var(--wrong-border); color: white; border-color: var(--wrong-border); }
+        .option-btn.disabled { pointer-events: none; opacity: 0.7; }
+
+        /* --- FEEDBACK DA QUESTÃO --- */
+        .feedback-box { display: block; margin-top: 25px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 25px; animation: slideUp 0.3s ease-out; box-shadow: 5px 5px 0px rgba(0,0,0,0.1); }
+        .feedback-title { font-weight: 900; text-transform: uppercase; font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .feedback-item { margin-bottom: 10px; font-size: 0.95rem; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); line-height: 1.5; font-weight: 500; }
+        .feedback-item.correct-opt { background: var(--correct-bg); border-color: var(--correct-border); color: #064E3B; font-weight: 700; box-shadow: 3px 3px 0px var(--correct-border); }
+        .feedback-item.wrong-opt { background: #FFE4E6; border-color: #BE123C; color: #7F1D1D; border-style: dashed; margin-top: 8px; }
+
+        /* --- RESULTADOS --- */
+        .result-card { background: white; border: 4px solid var(--border-color); border-radius: 16px; padding: 40px 20px; box-shadow: 8px 8px 0px var(--border-color); margin-bottom: 30px; text-align: center; }
+        .stars-container { font-size: 2.5rem; margin: 15px 0; letter-spacing: 5px; }
+        .percentage-big { font-size: 5rem; font-weight: 900; color: var(--theme-dark); line-height: 1; margin: 15px 0; text-shadow: 4px 4px 0px var(--theme-contrast); }
+        
+        .result-summary-box { padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 3px solid; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); }
+        .result-summary-box.success { background: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .result-summary-box.error { background: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .error-log-item { margin-bottom: 15px; padding: 20px; background: var(--bg-color); border-radius: 12px; border: 3px dashed var(--theme-medium); text-align: left;}
+
+        /* --- RODAPÉ DE NAVEGAÇÃO --- */
+        .quiz-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--white); border-top: 3px solid var(--border-color); padding: 15px 20px; display: none; justify-content: center; gap: 20px; z-index: 100; box-shadow: 0px -4px 10px rgba(0,0,0,0.05); }
+        .nav-btn { padding: 15px 30px; border-radius: 12px; font-weight: 900; border: 3px solid var(--border-color); cursor: pointer; box-shadow: 3px 3px 0px var(--border-color); font-family: 'Poppins', sans-serif; text-transform: uppercase; background: white; color: var(--text-color); font-size: 1rem; transition: transform 0.1s; }
+        .nav-btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 0px 0px 0px transparent; }
+        .btn-next { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); border-color: var(--border-color); }
+        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <header class="logo-header">
+            <div class="css-logo"><span class="pulse-effect">🌊</span> PROMOVER</div>
+            <h1>Física / 9º Ano</h1>
+            <p class="subtitle">Ondulatória: Fundamentos das Ondas</p>
+        </header>
+
+        <div class="toggle-container">
+            <button class="toggle-btn active" id="btnExp" onclick="changeApplicationView('explanation')">📘 Teoria</button>
+            <button class="toggle-btn" id="btnPrac" onclick="changeApplicationView('practice')">🧠 Prática (30)</button>
+        </div>
+
+        <!-- VISTA: TEORIA -->
+        <main id="viewExplanation" class="view-section active">
+            
+            <div class="search-container">
+                <span class="search-icon" aria-hidden="true">🔍</span>
+                <input type="text" id="searchInput" class="search-input" aria-label="Pesquisar conteúdo" placeholder="Pesquisar conceito... (ex: Mecânica, Frequência, Luz)">
+            </div>
+            <div id="no-results"><p>😕 Termo não encontrado na teoria das ondas.</p></div>
+
+            <section class="content-group">
+                <div class="section-badge">🎯 1. O que é uma Onda?</div>
+                <article class="theory-box search-target">
+                    <h3>Transporte de Energia</h3>
+                    <p>Uma onda é uma perturbação que se propaga através de um meio ou no vácuo. A regra mais absoluta e sagrada da física ondulatória é:</p>
+                    
+                    <div class="highlight-box blue" style="text-align: center; font-size: 1.1rem;">
+                        <strong>As ondas transportam ENERGIA, mas NUNCA transportam MATÉRIA!</strong>
+                    </div>
+
+                    <p style="margin-top: 15px;">Se atirares uma pedra a um lago, as ondas movem-se para a margem, mas a água (e um barquinho de papel que lá esteja) apenas sobe e desce, ficando no mesmo lugar geográfico.</p>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">🌐 2. Natureza das Ondas</div>
+                <article class="theory-box search-target">
+                    <h3>Mecânicas vs. Eletromagnéticas</h3>
+                    
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:12px;">
+                        <li><strong>Ondas Mecânicas:</strong> Precisam obrigatoriamente de um meio material (sólido, líquido ou gás) para se propagarem. O choque entre partículas é o que faz a onda andar. <em>Exemplos: O Som, ondas no mar, onda numa corda, terremotos.</em> <strong>(Nunca se propagam no vácuo).</strong></li>
+                        <li><strong>Ondas Eletromagnéticas (EM):</strong> São formadas por campos elétricos e magnéticos. Não precisam de matéria! Conseguem viajar no <strong>vácuo</strong> perfeito do espaço. <em>Exemplos: Luz visível, Ondas de Rádio, Raio-X, Micro-ondas, Wi-Fi, Radiação Ultravioleta.</em></li>
+                    </ul>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">📏 3. Anatomia de uma Onda</div>
+                <article class="theory-box search-target">
+                    <h3>Cristas, Vales e Comprimento</h3>
+                    <p>Para medir as ondas, usamos uma linguagem visual padronizada:</p>
+                    
+                    <div class="visual-area">
+                        <span style="font-size: 0.85rem; font-weight: 700; color: #0284C7; text-transform: uppercase; margin-bottom: 10px;">Elementos da Onda Transversal</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="auto" viewBox="0 0 350 160" style="max-width: 350px;">
+                            <!-- Eixo central -->
+                            <line x1="20" y1="80" x2="330" y2="80" stroke="#94A3B8" stroke-dasharray="4" stroke-width="2"/>
+                            <!-- Onda Senoidal -->
+                            <path d="M 30 80 Q 67.5 10 105 80 T 180 80 T 255 80 T 330 80" fill="none" stroke="#0EA5E9" stroke-width="4"/>
+                            
+                            <!-- Guias visuais para Lambda -->
+                            <line x1="67.5" y1="45" x2="67.5" y2="15" stroke="#94A3B8" stroke-dasharray="2" stroke-width="1"/>
+                            <line x1="217.5" y1="45" x2="217.5" y2="15" stroke="#94A3B8" stroke-dasharray="2" stroke-width="1"/>
+
+                            <!-- Crista -->
+                            <circle cx="67.5" cy="45" r="4" fill="#F59E0B"/>
+                            <text x="52.5" y="35" font-size="12" font-weight="bold" fill="#F59E0B">Crista</text>
+                            
+                            <!-- Vale -->
+                            <circle cx="142.5" cy="115" r="4" fill="#F59E0B"/>
+                            <text x="127.5" y="135" font-size="12" font-weight="bold" fill="#F59E0B">Vale</text>
+                            
+                            <!-- Comprimento de Onda (Lambda) -->
+                            <line x1="67.5" y1="15" x2="217.5" y2="15" stroke="#0284C7" stroke-width="2" marker-start="url(#arrow-start)" marker-end="url(#arrow-end)"/>
+                            <text x="137.5" y="10" font-size="14" font-weight="bold" fill="#0284C7">λ</text>
+                            
+                            <!-- Amplitude -->
+                            <line x1="217.5" y1="80" x2="217.5" y2="45" stroke="#8B5CF6" stroke-width="2" marker-end="url(#arrow-end)"/>
+                            <text x="225" y="65" font-size="12" font-weight="bold" fill="#8B5CF6">Amp</text>
+
+                            <defs>
+                                <marker id="arrow-start" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#0284C7"/></marker>
+                                <marker id="arrow-end" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#0284C7"/></marker>
+                            </defs>
+                        </svg>
+                    </div>
+
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li><strong>Crista:</strong> O ponto mais alto da onda.</li>
+                        <li><strong>Vale:</strong> O ponto mais baixo da onda.</li>
+                        <li><strong>Amplitude (A):</strong> Altura máxima da onda em relação ao eixo de repouso (do meio até à crista). Está ligada à força/volume/energia.</li>
+                        <li><strong>Comprimento de Onda (λ - Lambda):</strong> A distância entre duas cristas seguidas (ou dois vales seguidos). Representa o tamanho de 1 ciclo completo.</li>
+                    </ul>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">⏱️ 4. Frequência e Período</div>
+                <article class="theory-box search-target">
+                    <h3>O Tempo das Ondas</h3>
+                    <p>O <strong>Período (T)</strong> é o tempo (em segundos) que uma onda demora a dar 1 volta completa (1 ciclo).</p>
+                    <p>A <strong>Frequência (f)</strong> é a quantidade de ondas completas que passam num único segundo. É medida em <strong>Hertz (Hz)</strong>.</p>
+                    
+                    <div class="highlight-box" style="margin-top: 10px;">
+                        <strong>Eles são o inverso um do outro!</strong><br>
+                        Se uma onda bate 10 vezes por segundo (10 Hz), o período de 1 única onda é 1/10 de segundo.<br>
+                        <em>Fórmula:</em> <strong>f = 1 / T</strong>
+                    </div>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">🧮 5. Equação Fundamental da Ondulatória</div>
+                <article class="theory-box search-target">
+                    <h3>Vem Lamber a Ferida</h3>
+                    <p>Para calcular a Velocidade (v) com que uma onda avança, multiplicamos o seu tamanho pela sua frequência. É a equação mais importante que vai sair na prova:</p>
+                    
+                    <span class="inline-example" style="margin: 15px auto;">v = λ · f</span>
+                    
+                    <p>Onde:<br>
+                    <strong>v</strong> = Velocidade (metros por segundo - m/s)<br>
+                    <strong>λ</strong> = Comprimento de onda (metros - m)<br>
+                    <strong>f</strong> = Frequência (Hertz - Hz)</p>
+                </article>
+            </section>
+
+            <button class="btn-action" onclick="changeApplicationView('practice')">
+                Iniciar a Avaliação (30 Questões) ➜
+            </button>
+        </main>
+
+        <!-- VISTA: PRÁTICA (QUIZ) -->
+        <main id="viewPractice" class="view-section">
+            <div style="margin-bottom: 20px; background-color: var(--white); padding: 15px; border-radius: 12px; border: 3px solid var(--border-color); box-shadow: 4px 4px 0px var(--border-color);">
+                <h2 style="color:var(--theme-dark); font-weight:900; margin-bottom: 5px;">A Prova de Fogo - IFCE</h2>
+                <p style="color: var(--theme-contrast); font-size: 0.95rem; font-weight:600;">
+                    30 questões essenciais sobre Ondulatória, Frequências, Som e Luz. O teu objetivo é a aprovação: acerta <strong>80% (24/30)</strong>.
+                </p>
+            </div>
+            
+            <div class="question-map" id="qMap"></div>
+            <div id="quizContainer" style="margin-bottom: 40px;"></div>
+        </main>
+
+        <!-- VISTA: RESULTADOS -->
+        <main id="viewResult" class="view-section">
+            <div class="result-card">
+                <h2 style="font-weight:900; text-transform:uppercase;">Relatório Final</h2>
+                <div class="stars-container" id="finalStars">⭐⭐⭐</div>
+                <div class="percentage-big" id="finalPercent">0%</div>
+                <p style="font-size:1.2rem; font-weight:700; color:#555;" id="finalScoreText">Acertaste 0 de 30</p>
+                <div id="review-container" style="text-align: left; margin-top: 20px;"></div>
+            </div>
+            <div id="action-buttons"></div>
+        </main>
+
+    </div>
+
+    <!-- RODAPÉ DE NAVEGAÇÃO -->
+    <footer class="quiz-footer" id="quizFooter">
+        <button class="nav-btn btn-prev" id="btnPrev" onclick="navigateQuestion(-1)">Anterior</button>
+        <button class="nav-btn btn-next" id="btnNext" onclick="navigateQuestion(1)">Próxima</button>
+    </footer>
+
+<script>
+    /* --- ESTRUTURA DE DADOS (BASE DE QUESTÕES - ONDULATÓRIA IFCE) --- */
+    const questionsDatabase = [
+        { 
+            level: "Fácil", 
+            text: "Na praia do Futuro, um surfista observa as ondas do mar a passar por uma boia. A boia apenas sobe e desce enquanto as ondas avançam para a praia. Este fenómeno demonstra o princípio mais básico da ondulatória, que afirma:", 
+            options: [
+                "As ondas transportam matéria e energia simultaneamente.", 
+                "As ondas transportam apenas matéria do mar para a areia.", 
+                "As ondas transportam apenas energia, sem arrastar a matéria com elas.", 
+                "A água da praia não é uma onda real, pois não tem energia cinética."
+            ], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Regra sagrada: Ondas transferem ENERGIA através do meio, mas a matéria (a água, a corda, a boia) apenas oscila localmente, voltando à posição inicial.", 
+                otherOptions: ["Se houvesse transporte de matéria, o mar já teria esvaziado todo para cima da areia.", "Matéria nunca é transportada pela onda.", "A onda da água é real e mecânica."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Existem dois grandes grupos de ondas na natureza baseados na necessidade (ou não) de um meio para existirem. As ondas que OBRIGATORIAMENTE precisam de um meio material (ar, água, metais) para se propagarem são chamadas de:", 
+            options: ["Ondas Eletromagnéticas.", "Ondas Transversais.", "Ondas Dimensionais.", "Ondas Mecânicas."], 
+            correctIndex: 3, 
+            explanation: { 
+                correctText: "As Ondas Mecânicas (como o som, as ondas do mar e as vibrações de uma mola) dependem do choque físico entre os átomos do meio para viajar.", 
+                otherOptions: ["EM não precisam de matéria.", "Transversal refere-se à direção de vibração, não à natureza material.", "Termo inventado."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Em muitos filmes de ficção científica (como Star Wars), vemos naves a explodir no espaço profundo e ouvimos um estrondo gigantesco. Segundo as leis da física ondulatória, o que está errado com esta cena?", 
+            options: [
+                "Nada está errado, o som é mais forte no espaço do que na Terra.", 
+                "O Som é uma onda Eletromagnética e precisaria de oxigénio para queimar.", 
+                "O Som é uma onda Mecânica. Sendo o espaço um Vácuo (ausência de matéria), é fisicamente impossível o som propagar-se e ser ouvido.", 
+                "A explosão só faria barulho se a nave estivesse a viajar à velocidade da luz."
+            ], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "No espaço sideral há vácuo. Como o som é mecânico e precisa de ar, água ou metal para propagar a vibração, qualquer explosão lá fora é 100% silenciosa.", 
+                otherOptions: ["O som não existe no vácuo.", "O som NÃO é eletromagnético.", "Velocidade não tem a ver com a existência do meio."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Ao contrário do som, nós conseguimos VER as estrelas e o Sol aqui da Terra, mesmo com a gigantesca distância de vácuo entre nós. A Luz do Sol consegue chegar até nós porque é uma:", 
+            options: [
+                "Onda de calor materializada.", 
+                "Onda Mecânica superpoderosa.", 
+                "Partícula acústica de alta frequência.", 
+                "Onda Eletromagnética, que pode propagar-se quer em meios materiais transparentes, quer no vácuo do espaço."
+            ], 
+            correctIndex: 3, 
+            explanation: { 
+                correctText: "A luz é composta por campos magnéticos e elétricos cruzados (Onda EM). As ondas EM são as únicas que viajam no 'nada' absoluto (vácuo).", 
+                otherOptions: ["Luz não é calor materializado.", "Ondas mecânicas morrem no vácuo.", "Acústica é som."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "A distância exata entre duas Cristas sucessivas (ou entre dois Vales sucessivos) de uma onda é o tamanho de um ciclo completo. Na física, a esta medida dá-se o nome de:", 
+            options: ["Período.", "Comprimento de onda (Representado por λ - Lambda).", "Amplitude.", "Frequência Angular."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "O Comprimento de Onda (λ) é literalmente o 'tamanho' físico da onda medido em metros. Vai do topo de uma montanha até ao topo da montanha seguinte.", 
+                otherOptions: ["Período é TEMPO, não distância.", "Amplitude é a ALTURA da onda (metade da crista ao vale).", "Frequência é quantidade por segundo."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Num lago do IFCE, um pato oscila para cima e para baixo devido às pequenas ondas formadas. Observas que 10 ondas completas passam pelo pato num intervalo exato de 2 segundos. Qual é a Frequência desta onda?", 
+            options: ["20 Hz", "5 Hz", "10 Hz", "0.2 Hz"], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "A Frequência (f) é a quantidade de ciclos em APENAS 1 segundo. Se passam 10 ondas em 2s, basta dividir: 10/2 = 5 ondas por segundo (5 Hz).", 
+                otherOptions: ["20 seria se multiplicasses.", "10 é a quantidade em dois segundos.", "0.2 seria o período."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "A Frequência (f) e o Período (T) são grandezas perfeitamente inversas. O que significa rigorosamente o 'Período' de uma onda mecânica?", 
+            options: [
+                "A distância que a onda percorre num segundo.", 
+                "A altura máxima que a onda atinge durante a perturbação.", 
+                "O número de ondas que batem num objeto por minuto.", 
+                "O tempo exato (em segundos) que a onda demora para completar APENAS UM ciclo (uma oscilação inteira)."
+            ], 
+            correctIndex: 3, 
+            explanation: { 
+                correctText: "Período é cronómetro! Se uma onda leva 0,5 segundos a bater e voltar, o período T é 0,5s. É o tempo de vida de uma única repetição.", 
+                otherOptions: ["Isso é Velocidade.", "Isso é Amplitude.", "Isso é Frequência (se fosse por segundo/minuto)."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "As ondas também se classificam pela direção em que vibram face à direção que andam. A onda do Som no ar é uma onda onde as moléculas empurram-se 'para a frente e para trás' na mesma direção em que o som viaja. Como se chama este tipo de onda?", 
+            options: ["Onda Transversal.", "Onda Eletromagnética Mista.", "Onda Longitudinal.", "Onda Estacionária."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Nas Ondas Longitudinais (como o som ou uma mola comprimida), a vibração das partículas ocorre de forma paralela ao avanço da onda. As moléculas andam para a frente e para trás.", 
+                otherOptions: ["Transversal vibra perpendicularmente (fazendo curvas para cima e para baixo, como a corda da guitarra ou a luz).", "O som é mecânico.", "Estacionária é outro fenómeno de ressonância."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Quando tocas a corda de um violão para cima e soltas, a corda vibra na vertical (sobe e desce), mas a onda corre horizontalmente ao longo do braço do instrumento. Esse padrão de vibração de 90 graus (perpendicular) torna-a numa onda:", 
+            options: ["Polarizada Longitudinal.", "Eletromagnética.", "Gravitacional.", "Transversal."], 
+            correctIndex: 3, 
+            explanation: { 
+                correctText: "Se o movimento que cria a onda faz 90 graus (uma cruz) com o caminho que a onda percorre, chamamos-lhe Onda Transversal. A luz e as cordas são o melhor exemplo.", 
+                otherOptions: ["O termo polarizada não define a direção fundamental aqui, e o som é que é longitudinal.", "A corda é material/mecânica.", "Isso mexe com o espaço-tempo."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Qual destas alternativas lista APENAS ondas Eletromagnéticas (aquelas que viajam à velocidade da luz e funcionam no vácuo)?", 
+            options: [
+                "Luz, Som, Raios Gama.", 
+                "Ultrassom, Wi-Fi, Ondas de rádio.", 
+                "Micro-ondas, Raios-X, Luz Visível, Sinais de TV.", 
+                "Radar, Raios Solares, Ondas do Mar."
+            ], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "O espetro Eletromagnético (do menos perigoso ao mais radioativo) é: Rádio, Micro-ondas, Infravermelho, Luz Visível, Ultravioleta, Raios-X, Gama. Todos viajam no vácuo.", 
+                otherOptions: ["O Som é uma intrusa mecânica.", "O Ultrassom é som de alta frequência (mecânico).", "Ondas do mar precisam de água (mecânicas)."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Uma famosa rádio em Fortaleza emite uma onda com frequência de 100 MegaHertz (100.000.000 Hz). Sendo o sinal de rádio uma onda Eletromagnética, se te perguntarem qual é a natureza dessa onda para chegares a ouvir a música no rádio do carro, a resposta certa é:", 
+            options: [
+                "É uma onda sonora muito alta.", 
+                "É uma onda Eletromagnética (luz invisível de baixa energia) que não tem nada a ver com o som físico até ser descodificada pelas colunas do teu carro.", 
+                "É uma corrente de ar empurrada da antena.", 
+                "É uma onda mecânica com formato transversal."
+            ], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "A 'Onda de Rádio' NÃO é som! É radiação invisível (Eletromagnética) que viaja pelo ar na velocidade da luz. A antena do teu carro apanha essa radiação e o chip transforma o sinal elétrico em empurrões reais (som mecânico) através das colunas.", 
+                otherOptions: ["Rádio não é som no ar.", "Ar não é empurrado pela antena a quilómetros.", "EM não é mecânica."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Cálculo Rápido (Equação Fundamental): Uma onda na superfície de um tanque de água tem um Comprimento de onda (λ) de 2 metros e oscila com uma frequência de 3 Hz. Qual é a Velocidade (v) desta onda?", 
+            options: ["1,5 m/s", "5 m/s", "6 m/s", "0,66 m/s"], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "A Equação de Ouro da Física Ondulatória é v = λ · f.  Multiplicamos os 2 metros (comprimento) pelos 3 ciclos por segundo (Hertz). 2 x 3 = 6 m/s.", 
+                otherOptions: ["1.5 seria se dividisses (erro matemático).", "5 é soma.", "Não se divide nada na fórmula principal."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "As grandezas do SOM têm características próprias para o ouvido humano. Quando falas em 'Altura do Som' (som mais Agudo ou mais Grave), estás a alterar qual elemento físico da onda?", 
+            options: ["A Velocidade do som no ar.", "A Amplitude da onda (força).", "O Comprimento de Onda da voz.", "A Frequência da onda acústica."], 
+            correctIndex: 3, 
+            explanation: { 
+                correctText: "Na física acústica, 'Altura' é Frequência! Um som Agudo (fino, como um apito) tem alta frequência (vibra muito rápido). Um som Grave (grosso, motor a diesel) tem baixa frequência.", 
+                otherOptions: ["O som viaja sempre a ~340 m/s no ar independentemente de ser agudo ou grave.", "A Amplitude altera o Volume/Intensidade sonora, não se é fino ou grosso.", "Comprimento é consequência."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Continuando a falar do ouvido: Quando alguém te pede para 'Aumentar o Som' (aumentar o Volume / Intensidade sonora), o altifalante passa a bater com mais agressividade. Na onda no papel, o que sofreu aumento?", 
+            options: ["A Amplitude da onda, as cristas ficaram muito mais altas e vales mais profundos (mais energia transferida).", "A Frequência subiu para mais de 1000 Hz.", "O Período da música aumentou.", "A Velocidade da onda duplicou para 680 m/s."], 
+            correctIndex: 0, 
+            explanation: { 
+                correctText: "Volume (Intensidade Sonora) é Amplitude! Uma onda muito alta no gráfico (Amplitude grande) transporta muitos Joules de energia e faz doer o tímpano. Pensa num Tsunami: não é rápido, mas tem uma Amplitude mortal.", 
+                otherOptions: ["Frequência mudaria a afinação da voz (tudo ficaria com voz de esquilo).", "A velocidade no ar é fixa.", "Período não altera volume."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Um violão, um piano e uma flauta tocam a EXATA mesma nota musical (ex: um Dó a 261 Hz), com o mesmo Volume (amplitude). Mas tu fechas os olhos e consegues saber imediatamente qual instrumento tocou cada Dó. Porque não são iguais para os teus ouvidos?", 
+            options: [
+                "Porque viajam em velocidades diferentes do ar.", 
+                "Devido ao Fenómeno do Eco interior da sala.", 
+                "Graças ao TIMBRE. O Timbre é o 'formato do desenho' exclusivo da onda complexa que cada material (madeira, metal) emite ao vibrar, criando a identidade do som.", 
+                "Apenas porque os humanos ouvem as frequências de forma ilógica."
+            ], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "O Timbre é o formato real da onda. O Dó de um violão e de um piano têm a mesma altura e volume, mas o 'desenho do rabisco' da onda tem micro-imperfeições exclusivas (harmónicos) que ditam a assinatura do instrumento.", 
+                otherOptions: ["A velocidade de todos os sons é igual no ar.", "Não é eco.", "A biologia ouve as frequências perfeitamente separadas por harmónicos."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "O Velocidade do Som muda dependendo do meio material (Sólido, Líquido ou Gás). Em qual destes meios o som é MUITO MAIS RÁPIDO, viajando a velocidades incríveis como 5000 m/s?", 
+            options: ["No ar rarefeito das montanhas.", "Na água do oceano (líquido).", "Nos metais densos, como os trilhos de aço do comboio (sólidos).", "No vácuo espacial."], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "O som é um efeito de dominó entre as moléculas. Nos SÓLIDOS, os átomos estão muito próximos e rígidos, então a batida passa furiosamente rápido (Aço = 5000 m/s). Na água é 1500 m/s. No ar gasoso (átomos distantes) é lentíssimo: apenas 340 m/s.", 
+                otherOptions: ["O ar é o meio mais lento de todos.", "A água é média.", "O espaço é zero."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Ouve-se o trovão muito depois de se ver o relâmpago, num dia de tempestade, embora aconteçam no mesmo milissegundo nas nuvens. Qual é o motivo absoluto?", 
+            options: [
+                "A luz (onda EM) viaja a absurdos 300.000 quilómetros por segundo, chegando ao olho instantaneamente. O Som (onda mecânica) é muito lento, viajando a uns meros 340 metros por segundo no ar, e demora a chegar.", 
+                "O Som viaja em curvas por causa do vento e perde-se.", 
+                "A luz bate na Terra e volta, o som não.", 
+                "O trovão acontece fisicamente depois do raio como consequência térmica."
+            ], 
+            correctIndex: 0, 
+            explanation: { 
+                correctText: "A diferença colossal de velocidades na natureza. A luz percorre o universo num piscar de olhos (300 milhões de m/s), enquanto a onda de pressão do som anda a ritmo de um carro muito rápido (340 m/s), precisando de 3 segundos só para percorrer 1 km.", 
+                otherOptions: ["A causa mecânica ocorre simultânea: o raio corta o ar, o calor expande o ar violentamente (criando o estampido). A diferença está apenas na viagem até nós."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Na reflexão ondulatória, o Eco ocorre quando gritas para um desfiladeiro e a tua voz bate na parede de rocha e volta aos teus ouvidos. Para que consigas distinguir o 'Olá' que foi, do 'Olá' que voltou, deves estar no mínimo a que distância da barreira?", 
+            options: ["100 metros.", "Aproximadamente 17 metros, pois o cérebro humano precisa de um atraso mínimo de 0,1 segundos para não fundir os dois sons.", "2 metros.", "1 quilómetro exato."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "A 17 metros, o som anda 17 de ida e 17 de volta = 34m. Como a velocidade é ~340m/s, demora exatos 0,1s a fazer o percurso total. Este é o limite humano! Abaixo de 17m o eco transforma-se apenas em Reverberação (som de casa-de-banho).", 
+                otherOptions: ["Acima de 17 metros o eco é excelente, mas o mínimo é 17.", "2 metros é reverberação."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Refração de Ondas: Um raio de luz (Eletromagnética) viaja tranquilamente no ar, mas atinge a água de uma piscina e mergulha para o fundo. Ele sofreu Refração. O que acontece com as grandezas da onda quando MUDA de meio?", 
+            options: [
+                "A Frequência (f) mantém-se sempre constante (a cor da luz não muda). Mas a Velocidade (v) e o Comprimento de Onda (λ) diminuem, pois a água é um meio ótico mais duro/denso que o ar.", 
+                "Absolutamente tudo muda: cor, frequência e energia.", 
+                "A Velocidade aumenta drasticamente porque a água é líquido.", 
+                "A onda reflete e não entra na água."
+            ], 
+            correctIndex: 0, 
+            explanation: { 
+                correctText: "Na Refração, a Frequência NUNCA muda (é a identidade/cor gerada pela fonte). Mas a Velocidade é esmagada no meio mais denso (A luz perde velocidade na água). Pela equação v=λf, se o 'v' cai e o 'f' é constante, o 'λ' é obrigado a encolher também.", 
+                otherOptions: ["Frequência é imutável na mudança de meio.", "Luz perde velocidade na água (ao contrário do som).", "Parte da onda reflete, mas o exercício fala da parte refratada."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Sabe-se que o ouvido humano, em condições perfeitas de juventude, só tem capacidade biológica para ouvir ondas sonoras num espetro (janela) muito específico de frequências. Qual é esse espetro Audível?", 
+            options: [
+                "Entre 1 Hz e 1.000 Hz.", 
+                "Entre 20 Hz e 20.000 Hz. Tudo o que for abaixo é Infrassom (ex: sismos e elefantes) e acima é Ultrassom (morcegos, medicina).", 
+                "Entre 10.000 Hz e 1.000.000 Hz.", 
+                "Entre 0 e 100 Hz."
+            ], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "De 20 a 20 mil batidas por segundo. Com a idade avançada, as frequências agudas vão sendo destruídas no tímpano, descendo o limite superior para 15 mil ou 12 mil Hz.", 
+                otherOptions: ["O resto são bandas cegas para a biologia humana."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Um morcego cego e os submarinos militares usam o exato mesmo fenómeno ondulatório para 'ver' no escuro. Eles emitem ondas acústicas que batem na parede/presa e voltam. O cálculo do tempo de retorno revela a distância. Este fenómeno baseado em Reflexão de som de alta frequência chama-se:", 
+            options: ["Ressonância Quântica.", "Efeito Doppler.", "Difração Acústica.", "Ecolocalização (Sonar ou Ultrassom)."], 
+            correctIndex: 3, 
+            explanation: { 
+                correctText: "A Ecolocalização (no animal) ou o SONAR (na máquina) funcionam atirando pulsos de ultrassom invisíveis e cronometrando os Ecos.", 
+                otherOptions: ["Doppler é de aproximação.", "Difração é curvar.", "Ressonância é quebrar vidros com a voz."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Difração de Ondas: Estás no teu quarto com a porta entreaberta. Um colega grita no corredor, ele não te consegue ver diretamente pela ranhura, mas tu ouves a voz dele em todo o quarto. Porque é que a onda sonora não passa a direito apenas como um laser?", 
+            options: [
+                "Porque a porta reflete o som.", 
+                "Porque o Som sofre uma enorme Difração. As ondas contornam perfeitamente o obstáculo (a porta aberta) e espalham-se em leque preenchendo o quarto inteiro, dado que o seu comprimento de onda (metros) é comparável ao tamanho do buraco da porta.", 
+                "Porque o som quebra a porta ao meio em nível atómico.", 
+                "Porque a voz dele é mais forte."
+            ], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "A Difração é a impressionante capacidade que as ondas têm de se dobrar, contornar obstáculos ou expandirem-se ao passar por fendas apertadas. (É por isso que a net Wi-Fi passa por trás do armário).", 
+                otherOptions: ["A difração é a explicação geométrica.", "Som não quebra a porta com a voz.", "Se a luz não tem difração extrema no buraco da porta, é porque a luz tem um λ microscópico, gerando sombras duras."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Num dia solarengo, compras óculos de sol com lentes 'Polarizadas'. Elas retiram o reflexo brilhante insuportável do asfalto quente. A Polarização na física atua exclusivamente sobre qual tipo de onda?", 
+            options: [
+                "Ondas Longitudinais (Som), porque vibram numa direção unificada.", 
+                "Ondas Transversais (como a Luz EM). A luz solar vibra numa confusão em todos os eixos 3D (não polarizada). A lente é uma 'grade' que só deixa entrar a luz que está a vibrar num eixo específico (vertical), bloqueando o lixo luminoso na horizontal (o brilho refletido).", 
+                "Ondas Mecânicas exclusivamente.", 
+                "Ondas de Baixa Frequência infravermelha."
+            ], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Um fenómeno espetacular: Não podes polarizar ondas de Som, porque o som vai empurrando para a frente sem oscilação transversal. Mas a luz dança como uma cobra ondulando. Um filtro polarizador corta a luz 'deitada' e aceita a luz 'em pé'.", 
+                otherOptions: ["Som nunca polariza.", "As ondas de luz visível polarizam-se."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "O famoso 'Efeito Doppler': Estás na berma da estrada. Uma ambulância aproxima-se a alta velocidade com a sirene ligada. Ao passar por ti e se afastar de repente, ouves uma mudança agressiva no som. Qual é a física exata aqui?", 
+            options: [
+                "Na APROXIMAÇÃO, a ambulância 'esmaga' as frentes de onda (o λ diminui), recebendo tu uma Frequência superior (som Agudo). No AFASTAMENTO, o carro 'estica' as ondas deixadas para trás, logo ouves uma Frequência menor (som Grave).", 
+                "O som na aproximação torna-se longitudinal, e depois transversal.", 
+                "O motorista desliga a sirene no momento exato em que passa por ti para não te atordoar.", 
+                "As leis acústicas mudam apenas pelo barulho do motor."
+            ], 
+            correctIndex: 0, 
+            explanation: { 
+                correctText: "Fato Clássico de IFCE! O Efeito Doppler é a distorção da Frequência de uma onda devido ao movimento relativo da fonte face ao observador. Fónéeee... (Aproxima agudo) ... Fónooo (Afasta grave).", 
+                otherOptions: ["A direção transversal da onda não muda.", "A sirene toca sempre igual lá dentro da ambulância, tu és a vítima da ilusão ótica/acústica."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "Ressonância: Numa ópera, a cantora soprano grita uma nota muito aguda e prolongada e um copo de cristal na mesa quebra-se em milhares de pedaços sem ninguém lhe tocar. Este 'milagre' destrutivo do IFCE ocorre porque:", 
+            options: [
+                "A voz dela tem um volume tão monstruoso de decibéis (Amplitude) que a força bruta do ar parte o vidro por choque.", 
+                "Ela alcançou e manteve a Frequência Natural exata das moléculas daquele vidro. Quando a onda sonora de fora iguala a oscilação natural do vidro, há Absorção Máxima de energia em ritmo perfeito. A Amplitude interna cresce descontroladamente até à rutura (Ressonância).", 
+                "A voz causou uma interferência destrutiva na sala.", 
+                "O vidro era falso ou sofreu mudança de estado térmico."
+            ], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Ressonância é a grande assassina de pontes e copos! Se a frequência externa for um 'Match' perfeito com a identidade vibratória do objeto, ele cede pela sobrecarga de balanço cumulativo.", 
+                otherOptions: ["Volume sozinho não quebra cristal se a nota for de outra frequência (ex: um Grave muito alto bate no vidro mas o vidro ignora a vibração)."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Interferência Construtiva de Ondas: No laboratório, duas ondas numa corda viajam em sentido oposto e vão bater de frente. As duas são 'Cristas' (barrigas para cima) de 2 metros de Amplitude cada. No momento exato do impacto geográfico na corda, o que os alunos veem por uma fração de segundo?", 
+            options: [
+                "A corda fica plana com amplitude Zero.", 
+                "Uma super onda (super crista) fundida momentaneamente com a soma das duas, atingindo 4 metros de Amplitude. Logo a seguir as ondas trespassam-se e seguem a sua viagem sem sofrerem danos eternos.", 
+                "As ondas anulam-se para sempre e morrem ali no chão.", 
+                "A corda ganha uma cor brilhante devido ao choque de matéria."
+            ], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "Crista encontra Crista = Soma das montanhas (Interferência Construtiva = 2+2=4). No segundo a seguir o 'fantasma' separa-se e elas seguem ilesas, pois a onda só era energia de passagem.", 
+                otherOptions: ["Se fossem uma crista e um vale do mesmo tamanho seria Destrutiva (0).", "A energia nunca morre na corda.", "Falsas."] 
+            } 
+        },
+        { 
+            level: "Difícil", 
+            text: "A Radiação Ultravioleta (UV) e os Raios-X são Ondas Eletromagnéticas terríveis e mortais para o DNA humano (causando cancro), mas a Luz Visível vermelha não faz mal nenhum. Se ambas viajam à mesma velocidade no vácuo, o que dá aos Raios-X o poder mortífero de quebrar células?", 
+            options: [
+                "A Velocidade do Raio-X é superior.", 
+                "A sua Frequência violentamente Alta. Raios-X oscilam a triliões de Hertz. Segundo a física, quanto Maior a Frequência, menor o comprimento de onda e absurdamente MAIOR a ENERGIA carregada pelo fotão da onda, conseguindo penetrar materiais profundos.", 
+                "A sua Amplitude que tem metros de tamanho transversal.", 
+                "Raios-X carregam pedaços de massa de eletrão consigo."
+            ], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "A Energia de uma onda EM é pura escrava da sua Frequência (E=hf). Radiações que batem lentamente (Rádio e Micro-ondas) não ionizam células (não arrancam eletrões). Raios-X e Gama têm tanta batida por segundo que funcionam como lâminas de serra na pele.", 
+                otherOptions: ["Todas as EM têm igual velocidade no vácuo 'c'.", "Amplitude na EM seria brilho, não poder penetrante.", "EM não tem massa de repouso."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Ao lançarmos pedrinhas na água de um lago muito plácido vemos anéis (círculos) a espalhar-se geometricamente, em todas as direções da superfície. Na classificação de propagação, trata-se de uma onda:", 
+            options: ["Unidimensional (uma linha).", "Bidimensional (superfície plana, duas direções).", "Tridimensional (esfera tridimensional).", "Quântica Linear."], 
+            correctIndex: 1, 
+            explanation: { 
+                correctText: "A onda no lago espalha-se na planície da superfície da água (Largura e Comprimento), pelo que se propaga em 2D. (Um tiro de canhão ou uma lâmpada geram som/luz em Esfera 3D).", 
+                otherOptions: ["A corda de guitarra é unidimensional (só esquerda e direita num fio de metal).", "O Som no ar propaga-se a 3D (para cima, baixo, e lados)."] 
+            } 
+        },
+        { 
+            level: "Médio", 
+            text: "Para calcular a Frequência, também podes relacionar com a velocidade angular. Contudo, em cálculos do IFCE, é frequente testar a leitura de unidades do dia a dia: O Roteador (Router) Wi-Fi lá de casa transmite em 5 GHz (Gigahertz) e 2.4 GHz. Sendo 'Giga' o número 'bilhão', de que ondas fala o sinal wireless?", 
+            options: [
+                "Ondas sonoras ensurdecedoras que não ouvimos por proteção.", 
+                "Ondas de calor mecânicas de 5 mil milhões de graus.", 
+                "Micro-ondas eletromagnéticas do espetro de rádio cujos campos cruzados oscilam exatamente 5.000.000.000 de ciclos por cada segundo que passa.", 
+                "Ondas quânticas paradas no fio elétrico do poste."
+            ], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "Tudo o que se comunica invisivelmente hoje em dia (Wi-Fi, Bluetooth, TDT TV e Redes 5G de telemóvel) flutua na mágica zona das Ondas de Rádio / Micro-ondas. O '5 GHz' diz ao telemóvel para escutar a batida exata que vibra 5 mil milhões de vezes num relógio tic-tac.", 
+                otherOptions: ["Totalmente incorretas as naturezas mecânicas para comunicações em redes."] 
+            } 
+        },
+        { 
+            level: "Fácil", 
+            text: "Para fechar a Prova, analisa as cores da Luz Visível que enxergas. O arco-íris vai do Vermelho ao Violeta. Sabemos que a cor Violeta desvia muito mais no prisma do que a Vermelha, e está quase a tocar na morte perigosa do Ultra-Violeta. Qual é a física base da luz Violeta contra a Vermelha?", 
+            options: [
+                "A Violeta tem uma massa maior de partículas brancas.", 
+                "A Violeta é uma Onda Mecânica transversal pura e o Vermelho é Longitudinal.", 
+                "A Luz Violeta tem a maior Frequência e o menor Comprimento de Onda de todas as cores visíveis, enquanto a Vermelha é preguiçosa (baixo Hertz, λ largo e espesso).", 
+                "São de igual frequência, apenas mudam a velocidade na retina."
+            ], 
+            correctIndex: 2, 
+            explanation: { 
+                correctText: "A 'Cor' do fotão no teu olho não é mais do que a Frequência descodificada pelo cérebro. O Vermelho tem pouca energia/frequência e é largo (λ grande de quase 700 nm). O Violeta tem muita energia vibratória, alta frequência e λ pequenino (400 nm).", 
+                otherOptions: ["Luz é puramente EM sem massa.", "No vácuo viajam as duas à mesma vel."] 
+            } 
+        }
+    ];
+
+    /* --- GESTÃO DE ESTADO (STATE) --- */
+    const quizState = {
+        currentIndex: 0,
+        userAnswers: new Array(questionsDatabase.length).fill(null),
+        confettiAnimationId: null
+    };
+
+    /* --- FUNCIONALIDADES DE PESQUISA (TEORIA) --- */
+    function initializeSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const contentGroups = document.querySelectorAll('.content-group');
+        const noResultsMsg = document.getElementById('no-results');
+
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', function(event) {
+            const searchTerm = normalizeText(event.target.value);
+            let totalVisibleElements = 0;
+            
+            contentGroups.forEach(group => {
+                const groupContent = normalizeText(group.textContent);
+                const isMatch = groupContent.includes(searchTerm);
+                
+                group.style.display = isMatch ? 'flex' : 'none';
+                if (isMatch) totalVisibleElements++;
+            });
+            
+            noResultsMsg.style.display = totalVisibleElements === 0 ? 'block' : 'none';
+        });
+    }
+
+    function normalizeText(text) {
+        return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    /* --- CONTROLO DE VISTAS (VIEWS) --- */
+    function changeApplicationView(viewName) {
+        const views = ['viewExplanation', 'viewPractice', 'viewResult'];
+        
+        views.forEach(viewId => document.getElementById(viewId).classList.remove('active'));
+        
+        const quizFooter = document.getElementById('quizFooter');
+        if (quizFooter) quizFooter.style.display = 'none';
+
+        if (viewName === 'explanation') {
+            document.getElementById('viewExplanation').classList.add('active');
+            document.getElementById('btnExp').classList.add('active');
+            document.getElementById('btnPrac').classList.remove('active');
+        } else if (viewName === 'practice') {
+            document.getElementById('viewPractice').classList.add('active');
+            if (quizFooter) quizFooter.style.display = 'flex';
+            document.getElementById('btnExp').classList.remove('active');
+            document.getElementById('btnPrac').classList.add('active');
+            
+            renderCurrentQuestion();
+            renderNavigationMap();
+        } else if (viewName === 'result') {
+            document.getElementById('viewResult').classList.add('active');
+        }
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* --- GERAÇÃO INTERFACE DO QUIZ --- */
+    function getDifficultyBadgeClass(level) {
+        const mapping = { 'Fácil': 'dif-facil', 'Médio': 'dif-medio', 'Difícil': 'dif-dificil' };
+        return mapping[level] || 'dif-facil';
+    }
+
+    function buildOptionsHTML(question, selectedAnswerIndex) {
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        return question.options.map((optionText, optionIndex) => {
+            let cssClass = '';
+            
+            if (selectedAnswerIndex !== null) {
+                if (optionIndex === question.correctIndex) cssClass = 'correct';
+                else if (optionIndex === selectedAnswerIndex) cssClass = 'wrong';
+                else cssClass = 'disabled';
+            }
+
+            const isDisabled = selectedAnswerIndex !== null ? 'disabled' : '';
+
+            return `
+                <button class="option-btn ${cssClass}" onclick="handleOptionSelection(${optionIndex})" ${isDisabled}>
+                    <div class="opt-circle">${alphabet[optionIndex]}</div>
+                    <div>${optionText}</div>
+                </button>
+            `;
+        }).join('');
+    }
+
+    function buildFeedbackHTML(question, selectedAnswerIndex) {
+        const isCorrect = selectedAnswerIndex === question.correctIndex;
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        const titleClass = isCorrect ? 'success' : 'error';
+        const titleText = isCorrect ? '✅ Raciocínio Ondulatório Correto!' : '❌ Falha de Frequência!';
+        
+        const distortionsHTML = question.explanation.otherOptions.map((explanationText, idx) => {
+            if (idx === question.correctIndex || !explanationText) return '';
+            return `<div class="feedback-item wrong-opt"><strong>${alphabet[idx]})</strong> ${explanationText}</div>`;
+        }).join('');
+
+        return `
+            <div class="feedback-box show">
+                <div class="feedback-title ${titleClass}" style="color: ${isCorrect ? 'var(--correct-border)' : 'var(--wrong-border)'}">${titleText}</div>
+                <div class="feedback-item correct-opt"><strong>O Fato Exato:</strong> ${question.options[question.correctIndex]}</div>
+                <div style="margin-top:15px;font-size:1rem;color:var(--text-color);margin-bottom:15px;font-weight:600;">${question.explanation.correctText}</div>
+                ${distortionsHTML.trim() ? `
+                <div style="margin-top:15px;border-top:2px dashed var(--border-color);padding-top:15px;">
+                    <small style="color:var(--text-color);"><strong>Análise dos Erros:</strong></small>
+                    ${distortionsHTML}
+                </div>` : ''}
+            </div>
+        `;
+    }
+
+    function renderCurrentQuestion() {
+        const container = document.getElementById('quizContainer');
+        if (!container) return;
+
+        const question = questionsDatabase[quizState.currentIndex];
+        const selectedAnswerIndex = quizState.userAnswers[quizState.currentIndex];
+        const badgeClass = getDifficultyBadgeClass(question.level);
+        
+        let feedbackHTML = selectedAnswerIndex !== null ? buildFeedbackHTML(question, selectedAnswerIndex) : '';
+
+        container.innerHTML = `
+            <div class="quiz-question-card">
+                <span class="difficulty-badge ${badgeClass}">${question.level}</span>
+                <div style="margin-bottom:25px;">
+                    <span class="quiz-question-counter">QUESTÃO ${quizState.currentIndex + 1} DE ${questionsDatabase.length}</span>
+                    <h2 class="quiz-question-text">${question.text}</h2>
+                </div>
+                <div class="options-list">
+                    ${buildOptionsHTML(question, selectedAnswerIndex)}
+                </div>
+                ${feedbackHTML}
+            </div>
+        `;
+        
+        updateNavigationButtons();
+    }
+
+    /* --- LÓGICA DO QUIZ --- */
+    function handleOptionSelection(selectedIndex) {
+        if (quizState.userAnswers[quizState.currentIndex] !== null) return;
+        
+        quizState.userAnswers[quizState.currentIndex] = selectedIndex;
+        const isCorrect = selectedIndex === questionsDatabase[quizState.currentIndex].correctIndex;
+        
+        if (isCorrect) startSuccessAnimation();
+        else triggerErrorShakeEffect();
+        
+        renderCurrentQuestion();
+        renderNavigationMap();
+    }
+
+    function triggerErrorShakeEffect() {
+        const container = document.getElementById('quizContainer');
+        if (container) { 
+            container.classList.remove('shake-effect'); 
+            void container.offsetWidth; 
+            container.classList.add('shake-effect'); 
+            setTimeout(() => container.classList.remove('shake-effect'), 500); 
+        }
+    }
+
+    /* --- ANIMAÇÕES (CONFETTI) --- */
+    function startSuccessAnimation() {
+        const duration = 1500;
+        const end = Date.now() + duration;
+        
+        stopSuccessAnimation();
+        
+        function animateFrame() {
+            if(window.confetti && typeof confetti === 'function') {
+                const config = { particleCount: 5, spread: 55, colors: ['#0EA5E9', '#0284C7', '#8B5CF6', '#F59E0B'] };
+                confetti({ ...config, angle: 60, origin: { x: 0, y: 0.6 } });
+                confetti({ ...config, angle: 120, origin: { x: 1, y: 0.6 } });
+            }
+            if (Date.now() < end) quizState.confettiAnimationId = requestAnimationFrame(animateFrame);
+        }
+        animateFrame();
+    }
+
+    function stopSuccessAnimation() {
+        if (window.confetti && typeof confetti.reset === 'function') confetti.reset(); 
+        if (quizState.confettiAnimationId) {
+            cancelAnimationFrame(quizState.confettiAnimationId);
+            quizState.confettiAnimationId = null;
+        }
+    }
+
+    /* --- NAVEGAÇÃO MAPA --- */
+    function renderNavigationMap() {
+        const mapContainer = document.getElementById('qMap');
+        if (!mapContainer) return;
+        
+        mapContainer.innerHTML = questionsDatabase.map((question, index) => {
+            const isCurrent = index === quizState.currentIndex;
+            const userAnswer = quizState.userAnswers[index];
+            const hasAnswered = userAnswer !== null;
+            const isCorrect = userAnswer === question.correctIndex;
+            
+            let cssClass = 'map-dot';
+            if (isCurrent) cssClass += ' active';
+            if (hasAnswered) cssClass += isCorrect ? ' answered-correct' : ' answered-wrong';
+            
+            return `<div class="${cssClass}" onclick="goToQuestion(${index})">${index + 1}</div>`;
+        }).join('');
+        
+        setTimeout(() => { 
+            const activeDot = mapContainer.querySelector('.map-dot.active'); 
+            if (activeDot) activeDot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); 
+        }, 50);
+    }
+
+    function goToQuestion(targetIndex) { 
+        stopSuccessAnimation();
+        quizState.currentIndex = targetIndex; 
+        renderCurrentQuestion(); 
+        renderNavigationMap(); 
+    }
+    
+    function navigateQuestion(directionOffset) { 
+        const nextIndex = quizState.currentIndex + directionOffset; 
+        if (nextIndex >= 0 && nextIndex < questionsDatabase.length) goToQuestion(nextIndex); 
+    }
+
+    function updateNavigationButtons() {
+        const btnPrev = document.getElementById('btnPrev');
+        const btnNext = document.getElementById('btnNext');
+        
+        if (btnPrev) btnPrev.disabled = (quizState.currentIndex === 0);
+        
+        if (btnNext) {
+            const isLastQuestion = quizState.currentIndex === questionsDatabase.length - 1;
+            if (isLastQuestion) { 
+                btnNext.textContent = "Finalizar Avaliação"; 
+                btnNext.onclick = finishQuiz; 
+            } else { 
+                btnNext.textContent = "Próxima ➡️"; 
+                btnNext.onclick = () => navigateQuestion(1); 
+            }
+        }
+    }
+
+    /* --- CÁLCULO DE RESULTADOS --- */
+    function calculateStars(percent) {
+        if (percent === 100) return "⭐⭐⭐⭐⭐";
+        if (percent >= 80) return "⭐⭐⭐⭐";
+        if (percent >= 60) return "⭐⭐⭐";
+        if (percent >= 40) return "⭐⭐";
+        if (percent > 0) return "⭐";
+        return "🌑"; // zero stars
+    }
+
+    function finishQuiz() {
+        const unansweredCount = quizState.userAnswers.filter(answer => answer === null).length;
+        
+        if (unansweredCount > 0) {
+            const confirmMessage = `Existem ${unansweredCount} questões por responder. Queres terminar mesmo assim (as em branco serão dadas como erradas)?`;
+            if (!confirm(confirmMessage)) return;
+        }
+
+        stopSuccessAnimation();
+
+        const correctAnswersCount = quizState.userAnswers.filter((answer, index) => answer === questionsDatabase[index].correctIndex).length;
+        const totalQuestions = questionsDatabase.length;
+        const percentageScore = Math.round((correctAnswersCount / totalQuestions) * 100);
+        const isApproved = percentageScore >= 80;
+        
+        renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved);
+        changeApplicationView('result');
+    }
+
+    function renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved) {
+        document.getElementById('finalPercent').textContent = `${percentageScore}%`;
+        document.getElementById('finalScoreText').textContent = `Acertaste ${correctAnswersCount} de ${totalQuestions}`;
+        document.getElementById('finalStars').textContent = calculateStars(percentageScore);
+        
+        const reviewContainer = document.getElementById('review-container');
+        const actionButtonsContainer = document.getElementById('action-buttons');
+        
+        let summaryHTML = '';
+
+        if (isApproved) {
+            summaryHTML += `
+                <div class="result-summary-box success">
+                    <strong>🎉 DOMÍNIO ONDULATÓRIO!</strong> A tua base em grandezas de ondas, eletromagnetismo e natureza mecânica está impecável. Preparado para a Física do IFCE!
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REPETIR PARA 100%</button>`;
+        } else {
+            summaryHTML += `
+                <div class="result-summary-box error">
+                    <strong>⚠️ RUÍDO NA FREQUÊNCIA!</strong> Foste avaliado abaixo da meta (80%). Revisa a equação de v=λf e não esqueças a regra de ouro que as ondas NÃO transportam matéria!
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REFAZER AVALIAÇÃO</button>`;
+        }
+        
+        if (correctAnswersCount < totalQuestions) {
+            summaryHTML += '<h4 style="margin-bottom:15px; color:var(--text-color); font-size:1.15rem;">Revisão das Falhas Físicas:</h4>';
+            questionsDatabase.forEach((question, index) => {
+                const userAnswerIndex = quizState.userAnswers[index];
+                if (userAnswerIndex !== question.correctIndex) {
+                    const userAnswerText = userAnswerIndex === null ? "Deixaste em branco" : question.options[userAnswerIndex];
+                    const correctAnswerText = question.options[question.correctIndex];
+                    
+                    let plainQuestionText = question.text.replace(/<div class="q-svg-container">[\s\S]*?<\/div>/gi, ' [Desenho Omitido] ');
+
+                    summaryHTML += `
+                        <div class="error-log-item">
+                            <strong style="color:var(--theme-dark); font-size:1.05rem; display:block; margin-bottom:8px;">Q${index + 1}: ${plainQuestionText}</strong>
+                            <span style="color:var(--wrong-border); font-weight: 600; display:block; margin-bottom:5px;">A tua análise: ${userAnswerText}</span>
+                            <span style="color:var(--correct-border); font-weight: 700; display:block;">A Resposta Correta: ${correctAnswerText}</span>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        reviewContainer.innerHTML = summaryHTML;
+    }
+
+    function resetQuiz() { 
+        quizState.userAnswers = new Array(questionsDatabase.length).fill(null); 
+        quizState.currentIndex = 0; 
+        changeApplicationView('practice'); 
+    }
+    
+    // START APPLICATION
+    initializeSearch();
+    changeApplicationView('explanation');
+</script>
+</body>
+</html>
