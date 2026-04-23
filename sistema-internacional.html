@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Física: Sistema Internacional (SI) - Promover</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* --- VARIÁVEIS DE COR E TEMA: MEDIDA & PRECISÃO (Física Exata) --- */
+        :root {
+            --bg-color: #F0FDFA; /* Fundo verde-água muito claro */
+            --text-color: #134E4A; /* Verde-água escuro / Tinta de caneta */
+            --border-color: #0F766E; /* Contorno */
+            --white: #FFFFFF;
+            
+            --theme-light: #CCFBF1; /* Verde-água pastel */
+            --theme-medium: #14B8A6; /* Verde-água vivo */
+            --theme-dark: #0F766E; /* Verde-água profundo */
+            --theme-contrast: #EA580C; /* Laranja (Atenção/Alerta) */
+            --theme-accent: #0284C7; /* Azul Engenharia */
+            --theme-text-active: #FFFFFF;
+            
+            --correct-bg: #D1FAE5;
+            --correct-border: #059669;
+            --wrong-bg: #FFE4E6;
+            --wrong-border: #BE123C;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 15px 120px 15px;
+            background-image: linear-gradient(rgba(20, 184, 166, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(20, 184, 166, 0.1) 1px, transparent 1px);
+            background-size: 25px 25px;
+        }
+
+        /* --- ANIMAÇÕES --- */
+        @keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1) rotate(-5deg); color: var(--theme-contrast); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+        .pulse-effect { animation: pulse 2s infinite; display: inline-block; }
+        .shake-effect { animation: shake 0.4s ease-in-out; }
+
+        /* --- LAYOUT PRINCIPAL --- */
+        .container { width: 100%; max-width: 650px; display: flex; flex-direction: column; gap: 25px; }
+        .logo-header { display: flex; flex-direction: column; align-items: center; padding: 15px 0 25px 0; text-align: center; }
+        .css-logo { font-size: 1.5rem; font-weight: 900; color: var(--theme-text-active); text-transform: uppercase; letter-spacing: -1px; border: 3px solid var(--border-color); padding: 8px 24px; border-radius: 12px; background: var(--theme-dark); box-shadow: 4px 4px 0px var(--theme-contrast); margin-bottom: 15px; transform: rotate(-2deg); }
+        h1 { font-size: 2rem; font-weight: 900; color: var(--text-color); text-transform: uppercase; letter-spacing: -0.5px; line-height: 1.1; }
+        .subtitle { font-size: 1rem; color: var(--white); font-weight: 700; margin-top: 5px; background: var(--theme-contrast); padding: 4px 12px; border-radius: 8px; border: 2px solid var(--border-color); }
+
+        /* --- NAVEGAÇÃO --- */
+        .toggle-container { background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 6px; display: flex; box-shadow: 4px 4px 0px var(--border-color); position: sticky; top: 15px; z-index: 50; }
+        .toggle-btn { flex: 1; border: none; background: none; padding: 12px 0; border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.05rem; color: var(--text-color); cursor: pointer; transition: all 0.2s ease; }
+        .toggle-btn.active { background-color: var(--theme-dark); color: var(--theme-text-active); border: 2px solid var(--border-color); box-shadow: 2px 2px 0px var(--border-color); }
+
+        .view-section { display: none; animation: fadeIn 0.3s ease; flex-direction: column; gap: 35px; }
+        .view-section.active { display: flex; }
+
+        /* --- PESQUISA --- */
+        .search-container { position: relative; width: 100%; }
+        .search-input { width: 100%; padding: 16px 20px 16px 55px; border: 3px solid var(--border-color); border-radius: 12px; background-color: var(--white); font-family: 'Poppins', sans-serif; font-size: 1.05rem; font-weight: 600; color: var(--text-color); box-shadow: 4px 4px 0px var(--border-color); outline: none; transition: all 0.2s ease; }
+        .search-input:focus { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--theme-contrast); border-color: var(--theme-dark); }
+        .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 1.4rem; }
+        #no-results { text-align: center; color: var(--wrong-border); font-weight: 800; display: none; background: var(--wrong-bg); padding: 15px; border: 3px solid var(--wrong-border); border-radius: 8px; }
+
+        /* --- TEORIA --- */
+        .content-group { display: flex; flex-direction: column; position: relative; padding-top: 15px; }
+        .section-badge { display: inline-flex; align-items: center; gap: 10px; background-color: var(--theme-dark); color: var(--white); font-size: 1.1rem; font-weight: 800; padding: 8px 20px; border-radius: 8px; border: 3px solid var(--border-color); box-shadow: 3px 3px 0px var(--theme-contrast); text-transform: uppercase; position: absolute; top: -5px; left: 15px; z-index: 10; transform: rotate(-1.5deg); }
+        .theory-box { display: flex; flex-direction: column; padding: 35px 25px 25px 35px; border-radius: 12px; background-color: var(--white); border: 3px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); font-weight: 500; font-size: 1rem; line-height: 1.7; position: relative; overflow: hidden; gap: 20px; border-left: 14px solid var(--theme-medium); }
+        .theory-box h3 { font-size: 1.35rem; font-weight: 900; color: var(--theme-dark); margin-bottom: 5px; display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px; }
+        .theory-box h4 { font-size: 1.1rem; font-weight: 800; color: var(--text-color); margin-top: 10px; border-bottom: 2px solid var(--theme-light); padding-bottom: 5px; }
+        
+        .inline-example { display: block; width: fit-content; max-width: 100%; margin-top: 6px; margin-bottom: 6px; padding: 6px 14px; background-color: var(--theme-light); border: 2px solid var(--border-color); border-radius: 8px; font-size: 0.85rem; color: var(--text-color); font-weight: 700; letter-spacing: 0.5px; box-shadow: 2px 2px 0px rgba(0,0,0,0.05); }
+        .visual-area { background: var(--bg-color); border: 3px dashed var(--theme-medium); border-radius: 12px; padding: 25px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; width: 100%; }
+        
+        .highlight-box { background-color: #FEF3C7; border: 3px solid var(--border-color); border-left: 8px solid var(--theme-contrast); padding: 18px 20px; border-radius: 8px; font-size: 0.95rem; color: #78350F; font-weight: 600; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); }
+        .highlight-box.blue { background-color: #E0F2FE; border-left-color: #0284C7; color: #0C4A6E; }
+
+        /* --- CARDS DE UNIDADES --- */
+        .si-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; width: 100%; margin-top: 10px; }
+        .si-card { flex: 1 1 calc(50% - 15px); min-width: 130px; border-radius: 12px; padding: 15px 10px; text-align: center; border: 3px solid var(--border-color); display: flex; flex-direction: column; align-items: center; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); background-color: var(--white); transition: transform 0.2s; }
+        .si-card:hover { transform: translateY(-3px); }
+        .si-card.full-width { flex: 1 1 100%; max-width: 280px; }
+        .si-icon { font-size: 2.8rem; margin-bottom: 8px; line-height: 1; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.15)); }
+        .si-title { font-size: 1.05rem; font-weight: 900; margin-bottom: 4px; text-transform: uppercase; color: var(--theme-dark); }
+        .si-unit { font-size: 1.2rem; font-weight: 800; color: var(--theme-contrast); margin-bottom: 4px; line-height: 1.2; background: var(--theme-light); padding: 2px 10px; border-radius: 6px; border: 2px solid var(--border-color); }
+        .si-traits { font-size: 0.75rem; font-style: italic; font-weight: 700; opacity: 0.9; line-height: 1.2; margin-top: 5px; color: var(--text-color); }
+
+        /* --- BOTÕES GERAIS --- */
+        .btn-action { width: 100%; padding: 20px; background-color: var(--theme-dark); color: white; border: 3px solid var(--border-color); border-radius: 12px; font-size: 1.15rem; font-weight: 900; cursor: pointer; box-shadow: 6px 6px 0px var(--theme-contrast); transition: all 0.1s; text-transform: uppercase; margin-top: 10px; }
+        .btn-action:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0px var(--theme-contrast); }
+
+        /* --- QUIZ UI --- */
+        .difficulty-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; border: 2px solid var(--border-color); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
+        .dif-facil { background: #D1FAE5; color: #065F46; }
+        .dif-medio { background: #FEF08A; color: #713F12; }
+        .dif-dificil { background: #FECACA; color: #7F1D1D; }
+
+        .question-map { display: flex; gap: 8px; overflow-x: auto; padding: 10px 5px; margin-bottom: 20px; white-space: nowrap; scroll-behavior: smooth; }
+        .question-map::-webkit-scrollbar { display: none; }
+        .map-dot { min-width: 38px; height: 38px; border: 2px solid var(--border-color); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; color: var(--theme-dark); background: white; cursor: pointer; transition: all 0.2s; }
+        .map-dot.active { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); transform: scale(1.15); }
+        .map-dot.answered-correct { background-color: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .map-dot.answered-wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .quiz-question-card { border: 4px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); padding: 30px; border-radius: 16px; background: var(--white); }
+        .quiz-question-counter { font-size: 0.85rem; font-weight: 900; color: var(--theme-dark); letter-spacing: 1px; }
+        .quiz-question-text { font-size: 1.2rem; margin-top: 8px; color: var(--text-color); font-weight: 800; line-height: 1.5; margin-bottom: 25px;}
+
+        .option-btn { display: flex; align-items: center; width: 100%; padding: 18px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.1s ease; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 600; text-align: left; color: var(--text-color); }
+        .option-btn:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px var(--theme-contrast); }
+        .opt-circle { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--border-color); margin-right: 15px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.05rem; flex-shrink: 0; background: var(--theme-light); color: var(--theme-dark); }
+        .option-btn.correct { background-color: var(--correct-bg); border-color: var(--correct-border); box-shadow: 3px 3px 0px var(--correct-border); }
+        .option-btn.correct .opt-circle { background-color: var(--correct-border); color: white; border-color: var(--correct-border); }
+        .option-btn.wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); opacity: 0.9; box-shadow: none; }
+        .option-btn.wrong .opt-circle { background-color: var(--wrong-border); color: white; border-color: var(--wrong-border); }
+        .option-btn.disabled { pointer-events: none; opacity: 0.7; }
+
+        /* --- FEEDBACK DA QUESTÃO --- */
+        .feedback-box { display: block; margin-top: 25px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 25px; animation: slideUp 0.3s ease-out; box-shadow: 5px 5px 0px rgba(0,0,0,0.1); }
+        .feedback-title { font-weight: 900; text-transform: uppercase; font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .feedback-item { margin-bottom: 10px; font-size: 0.95rem; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); line-height: 1.5; font-weight: 500; }
+        .feedback-item.correct-opt { background: var(--correct-bg); border-color: var(--correct-border); color: #064E3B; font-weight: 700; box-shadow: 3px 3px 0px var(--correct-border); }
+        .feedback-item.wrong-opt { background: #F1F5F9; border-color: #94A3B8; color: #475569; border-style: dashed; margin-top: 8px; }
+
+        /* --- RESULTADOS --- */
+        .result-card { background: white; border: 4px solid var(--border-color); border-radius: 16px; padding: 40px 20px; box-shadow: 8px 8px 0px var(--border-color); margin-bottom: 30px; text-align: center; }
+        .stars-container { font-size: 2.5rem; margin: 15px 0; letter-spacing: 5px; }
+        .percentage-big { font-size: 5rem; font-weight: 900; color: var(--theme-dark); line-height: 1; margin: 15px 0; text-shadow: 4px 4px 0px var(--theme-contrast); }
+        
+        .result-summary-box { padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 3px solid; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); }
+        .result-summary-box.success { background: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .result-summary-box.error { background: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .error-log-item { margin-bottom: 15px; padding: 20px; background: var(--bg-color); border-radius: 12px; border: 3px dashed var(--theme-medium); text-align: left;}
+
+        /* --- RODAPÉ DE NAVEGAÇÃO --- */
+        .quiz-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--white); border-top: 3px solid var(--border-color); padding: 15px 20px; display: none; justify-content: center; gap: 20px; z-index: 100; box-shadow: 0px -4px 10px rgba(0,0,0,0.05); }
+        .nav-btn { padding: 15px 30px; border-radius: 12px; font-weight: 900; border: 3px solid var(--border-color); cursor: pointer; box-shadow: 3px 3px 0px var(--border-color); font-family: 'Poppins', sans-serif; text-transform: uppercase; background: white; color: var(--text-color); font-size: 1rem; transition: transform 0.1s; }
+        .nav-btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 0px 0px 0px transparent; }
+        .btn-next { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); border-color: var(--border-color); }
+        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <header class="logo-header">
+            <div class="css-logo"><span class="pulse-effect">📐</span> PROMOVER</div>
+            <h1>Física / 9º Ano</h1>
+            <p class="subtitle">O Sistema Internacional (SI)</p>
+        </header>
+
+        <div class="toggle-container">
+            <button class="toggle-btn active" id="btnExp" onclick="changeApplicationView('explanation')">📘 Teoria</button>
+            <button class="toggle-btn" id="btnPrac" onclick="changeApplicationView('practice')">🧠 Prática (30)</button>
+        </div>
+
+        <!-- VISTA: TEORIA -->
+        <main id="viewExplanation" class="view-section active">
+            
+            <div class="search-container">
+                <span class="search-icon" aria-hidden="true">🔍</span>
+                <input type="text" id="searchInput" class="search-input" aria-label="Pesquisar conteúdo" placeholder="Pesquisar conceito... (ex: Metro, Quilograma, Kelvin)">
+            </div>
+            <div id="no-results"><p>😕 Termo não encontrado na teoria.</p></div>
+
+            <section class="content-group">
+                <div class="section-badge">🌍 1. A Linguagem Universal</div>
+                <article class="theory-box search-target">
+                    <h3>O que é o SI?</h3>
+                    <p>No passado, cada país media as coisas à sua maneira: palmos, pés, léguas ou libras. Isto causava desastres! Em 1999, a NASA perdeu uma sonda marciana de 125 milhões de dólares porque uma equipa usou metros e a outra usou pés ingleses.</p>
+                    <p>Para resolver isto, criou-se o <strong>Sistema Internacional de Unidades (SI)</strong>: uma linguagem matemática padronizada usada por todos os cientistas do mundo.</p>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">📏 2. As Grandezas de Base</div>
+                <article class="theory-box search-target">
+                    <h3>O Trio M.K.S.</h3>
+                    <p>Existem 7 grandezas fundamentais no SI, mas na Mecânica clássica usamos principalmente três (M.K.S.):</p>
+                    
+                    <div class="visual-area" style="background: transparent; border: none; padding: 0;">
+                        <div class="si-grid">
+                            <!-- Comprimento -->
+                            <div class="si-card">
+                                <div class="si-icon">📏</div>
+                                <div class="si-title">Comprimento</div>
+                                <div class="si-unit">Metro (m)</div>
+                                <div class="si-traits">A base para distâncias. Nunca se usa "mts".</div>
+                            </div>
+                            
+                            <!-- Massa -->
+                            <div class="si-card">
+                                <div class="si-icon">⚖️</div>
+                                <div class="si-title">Massa</div>
+                                <div class="si-unit">Quilograma (kg)</div>
+                                <div class="si-traits">Atenção: É a ÚNICA unidade base que já tem um prefixo (quilo).</div>
+                            </div>
+                            
+                            <!-- Tempo -->
+                            <div class="si-card full-width">
+                                <div class="si-icon">⏱️</div>
+                                <div class="si-title">Tempo</div>
+                                <div class="si-unit">Segundo (s)</div>
+                                <div class="si-traits">Nas fórmulas de física, horas (h) e minutos (min) devem ser sempre convertidos para segundos.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="highlight-box">
+                        <strong>Outras bases importantes:</strong> Temperatura em <strong>Kelvin (K)</strong> (o Celsius não é SI!), Corrente Elétrica em <strong>Ampere (A)</strong>, Quantidade de Matéria em <strong>Mol (mol)</strong> e Intensidade Luminosa em <strong>Candela (cd)</strong>.
+                    </div>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">✍️ 3. Regras de Escrita</div>
+                <article class="theory-box search-target">
+                    <h3>Atenção aos Detalhes!</h3>
+                    <p>As bancas de exames como a do IFCE adoram testar se sabes escrever os símbolos corretamente.</p>
+                    
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li><strong>Sem Plural:</strong> Os símbolos matemáticos NUNCA vão para o plural. (Certo: 20 kg | Errado: 20 kgs).</li>
+                        <li><strong>O Espaço Obrigatório:</strong> Deixa sempre um espaço entre o número e o símbolo. (Certo: 5 m | Errado: 5m). *Exceção: Graus (30ºC).*</li>
+                        <li><strong>Letras Maiúsculas:</strong> Só usas letra MAIÚSCULA se a unidade for o nome de uma pessoa (um cientista). Ex: <strong>N</strong> (Newton), <strong>J</strong> (Joule), <strong>K</strong> (Kelvin). O metro e o segundo são minúsculos (<strong>m</strong>, <strong>s</strong>).</li>
+                    </ul>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">✖️ 4. O Poder dos Prefixos</div>
+                <article class="theory-box search-target">
+                    <h3>Multiplicar e Dividir</h3>
+                    <p>Usamos letrinhas antes das unidades para evitar escrever zeros a mais:</p>
+                    
+                    <div class="inline-example"><strong>Quilo (k):</strong> Significa "vezes mil" (x 1.000). Ex: 1 km = 1.000 m.</div>
+                    <div class="inline-example"><strong>Centi (c):</strong> Significa "dividir por cem" (÷ 100). Ex: 100 cm = 1 m.</div>
+                    <div class="inline-example"><strong>Mili (m):</strong> Significa "dividir por mil" (÷ 1.000). Ex: 1.000 mm = 1 m.</div>
+
+                    <div class="highlight-box blue">
+                        <strong>Grandezas Derivadas:</strong> Quando misturamos bases, temos grandezas derivadas. Ex: <strong>Área</strong> (m × m = m²), <strong>Volume</strong> (m × m × m = m³) e <strong>Velocidade</strong> (m ÷ s = m/s).
+                    </div>
+                </article>
+            </section>
+
+            <button class="btn-action" onclick="changeApplicationView('practice')">
+                Iniciar a Avaliação (30 Questões) ➜
+            </button>
+        </main>
+
+        <!-- VISTA: PRÁTICA (QUIZ) -->
+        <main id="viewPractice" class="view-section">
+            <div style="margin-bottom: 20px; background-color: var(--white); padding: 15px; border-radius: 12px; border: 3px solid var(--border-color); box-shadow: 4px 4px 0px var(--border-color);">
+                <h2 style="color:var(--theme-dark); font-weight:900; margin-bottom: 5px;">A Prova de Fogo - IFCE</h2>
+                <p style="color: var(--theme-contrast); font-size: 0.95rem; font-weight:600;">
+                    30 questões rigorosas sobre o SI (formato Ensino Técnico Integrado). Acerta <strong>80% (24/30)</strong> para garantires a aprovação.
+                </p>
+            </div>
+            
+            <div class="question-map" id="qMap"></div>
+            <div id="quizContainer" style="margin-bottom: 40px;"></div>
+        </main>
+
+        <!-- VISTA: RESULTADOS -->
+        <main id="viewResult" class="view-section">
+            <div class="result-card">
+                <h2 style="font-weight:900; text-transform:uppercase;">Relatório Final</h2>
+                <div class="stars-container" id="finalStars">⭐⭐⭐</div>
+                <div class="percentage-big" id="finalPercent">0%</div>
+                <p style="font-size:1.2rem; font-weight:700; color:#555;" id="finalScoreText">Acertaste 0 de 30</p>
+                <div id="review-container" style="text-align: left; margin-top: 20px;"></div>
+            </div>
+            <div id="action-buttons"></div>
+        </main>
+
+    </div>
+
+    <!-- RODAPÉ DE NAVEGAÇÃO -->
+    <footer class="quiz-footer" id="quizFooter">
+        <button class="nav-btn btn-prev" id="btnPrev" onclick="navigateQuestion(-1)">Anterior</button>
+        <button class="nav-btn btn-next" id="btnNext" onclick="navigateQuestion(1)">Próxima</button>
+    </footer>
+
+<script>
+    /* --- ESTRUTURA DE DADOS (BASE DE QUESTÕES - NÍVEL IFCE TÉCNICO INTEGRADO) --- */
+    const questionsDatabase = [
+        { level: "Fácil", text: "O que significa a sigla 'SI' utilizada amplamente na ciência e nos cálculos de física?", options: ["Sistema Integrado.", "Sistema Internacional de Unidades.", "Sindicato dos Inventores.", "Sinalização Internacional."], correctIndex: 1, explanation: { correctText: "A sigla vem do francês 'Système International d'unités', sendo o padrão de medição adotado em quase todo o mundo.", otherOptions: ["As outras opções são inventadas."] } },
+        { level: "Fácil", text: "Por qual motivo histórico e científico o Sistema Internacional (SI) foi criado?", options: ["Para obrigar todos a falarem inglês.", "Para padronizar as medições mundiais, facilitando o comércio, a ciência e evitando erros catastróficos em cálculos e projetos.", "Para calcular a idade da Terra.", "Para facilitar apenas o cálculo do peso da água."], correctIndex: 1, explanation: { correctText: "A padronização evita que projetos globais falhem porque um país usa polegadas/pés e o outro usa centímetros/metros.", otherOptions: ["A língua não interfere, mas o sistema de medidas sim."] } },
+        { level: "Médio", text: "Nas aulas de Topografia de um curso de Agropecuária, o professor pede que meças a largura do terreno na unidade base (fundamental) de comprimento do SI. Que unidade é essa?", options: ["Centímetro (cm)", "Quilómetro (km)", "Polegada (in)", "Metro (m)"], correctIndex: 3, explanation: { correctText: "O Metro (m) é a unidade fundamental de comprimento no SI. Todas as outras são derivadas através de prefixos (kilo, centi, etc) ou não pertencem ao SI (polegadas).", otherOptions: ["Km e cm têm prefixos. Polegada é sistema imperial."] } },
+        { level: "Difícil", text: "Uma armadilha clássica: Qual é a ÚNICA unidade base do Sistema Internacional (entre as 7 fundamentais) que já contém um prefixo multiplicador no seu nome original?", options: ["Milissegundo", "Quilograma", "Centímetro", "Megawatt"], correctIndex: 1, explanation: { correctText: "A unidade base de massa do SI não é o grama (g), mas sim o Quilograma (kg). O prefixo 'kilo' já faz parte da unidade base oficial.", otherOptions: ["Milissegundo não é unidade base, o Segundo (s) é.", "Centímetro não é base, Metro (m) é.", "Megawatt é derivada de Potência."] } },
+        { level: "Fácil", text: "Para medir o tempo de queda de um objeto na aula de Cinemática, o relógio deve estar ajustado para a unidade fundamental de tempo do SI, que é:", options: ["O Minuto (min)", "A Hora (h)", "O Segundo (s)", "O Dia (d)"], correctIndex: 2, explanation: { correctText: "O Segundo (s) é a unidade base universal do tempo na física.", otherOptions: ["Horas e minutos são aceites, mas não são a base do SI."] } },
+        { level: "Difícil", text: "Em Termologia, estamos acostumados a usar a escala Celsius (ºC) para a temperatura no dia a dia do Brasil e Portugal. No entanto, o Sistema Internacional (SI) adota outra unidade base para a Temperatura Termodinâmica. Qual é?", options: ["Fahrenheit (ºF)", "Celsius (ºC)", "Joule (J)", "Kelvin (K)"], correctIndex: 3, explanation: { correctText: "O Kelvin (K) é a unidade oficial do SI porque não tem valores negativos (começa no Zero Absoluto, 0 K). E nota: escreve-se Kelvin, e não 'Graus Kelvin'.", otherOptions: ["Celsius e Fahrenheit são escalas relativas."] } },
+        { level: "Médio", text: "No estudo do Eletromagnetismo, a unidade base do SI para medir a Corrente Elétrica (frequentemente designada como 'amperagem' nos aparelhos domésticos) é o:", options: ["Volt (V)", "Watt (W)", "Ampere (A)", "Ohm (Ω)"], correctIndex: 2, explanation: { correctText: "O Ampere (A) mede a corrente (o 'fluxo' de eletrões).", otherOptions: ["Volt (V) é tensão. Watt (W) é potência. Ohm é resistência. São todas derivadas, não bases."] } },
+        { level: "Fácil", text: "As 'Grandezas Derivadas' formam-se combinando as unidades base. O cálculo da ÁREA de um terreno retangular obtém-se multiplicando o comprimento (m) pela largura (m). Logo, a unidade de área no SI é:", options: ["m (metro)", "m² (metro quadrado)", "m³ (metro cúbico)", "hectare (ha)"], correctIndex: 1, explanation: { correctText: "A multiplicação de duas dimensões em metros gera o metro quadrado (m²).", otherOptions: ["m é comprimento linear.", "m³ é volume (três dimensões).", "ha é usado na agricultura, mas não é SI."] } },
+        { level: "Fácil", text: "Seguindo a mesma lógica das grandezas derivadas, o VOLUME de uma piscina (profundidade × largura × comprimento) é medido no SI em:", options: ["Litros (L)", "Metros (m)", "Metros quadrados (m²)", "Metros cúbicos (m³)"], correctIndex: 3, explanation: { correctText: "A multiplicação de três dimensões (m × m × m) dá origem ao metro cúbico (m³).", otherOptions: ["O Litro (L) é aceite, mas a unidade derivada estrita do SI é o m³."] } },
+        { level: "Médio", text: "A Velocidade é definida como a distância percorrida dividida pelo tempo gasto. Sabendo as unidades base do SI para comprimento e tempo, a velocidade no SI mede-se em:", options: ["km/h (quilómetros por hora)", "m/min (metros por minuto)", "m/s (metros por segundo)", "km/s (quilómetros por segundo)"], correctIndex: 2, explanation: { correctText: "Distância em metros (m) a dividir pelo tempo em segundos (s) resulta na velocidade oficial: metros por segundo (m/s).", otherOptions: ["As outras são usadas na prática, mas não são a base do SI."] } },
+        { level: "Fácil", text: "Na linguagem dos prefixos gregos adotados pela ciência, o prefixo 'kilo' (ou quilo), representado pela letra 'k', indica que o valor da unidade base foi multiplicado por:", options: ["100", "1.000", "1.000.000", "0,001"], correctIndex: 1, explanation: { correctText: "O prefixo 'kilo' significa sempre mil. 1 km = 1.000 m. 1 kg = 1.000 g.", otherOptions: ["100 é 'hecto'.", "1.000.000 é 'mega'.", "0,001 é 'mili'."] } },
+        { level: "Fácil", text: "Um autocarro que faz a viagem entre o Campus do IFCE e o centro da cidade percorre uma distância de 15 km. Nas fórmulas de Física, terás de usar esse valor no SI. Quantos metros são 15 km?", options: ["150 m", "1.500 m", "15.000 m", "150.000 m"], correctIndex: 2, explanation: { correctText: "Como 1 km tem 1.000 metros, basta multiplicar: 15 × 1.000 = 15.000 m.", otherOptions: ["Incorreto nos zeros."] } },
+        { level: "Médio", text: "Num ensaio térmico de laboratório, pede-se que registes o tempo total de aquecimento. O aquecedor esteve ligado durante 2 horas. Para usares este tempo numa fórmula do SI, qual será o valor correspondente?", options: ["120 s", "3.600 s", "7.200 s", "200 s"], correctIndex: 2, explanation: { correctText: "Cada hora tem 60 minutos, e cada minuto tem 60 segundos (60×60 = 3600 segundos em 1 hora). Como são 2 horas, 2 × 3600 = 7.200 s.", otherOptions: ["120s são 2 minutos.", "3600s é apenas 1 hora."] } },
+        { level: "Médio", text: "Um camião chega à fazenda experimental com 3 Toneladas (t) de ração. Qual é o valor equivalente de massa no Sistema Internacional (SI)?", options: ["3 kg", "300 kg", "3.000 kg", "30.000 kg"], correctIndex: 2, explanation: { correctText: "A unidade do SI é o Quilograma (kg). Uma tonelada (t) equivale a 1.000 kg. Logo, 3 t = 3.000 kg.", otherOptions: ["Cuidado com os zeros."] } },
+        { level: "Difícil", text: "As regras do IFCE para a escrita são rigorosas. Um aluno escreveu que um bloco pesava '50 kgs' e media '2 mts'. Porque razão ele perdeu os pontos da questão?", options: ["Escreveu os números com algarismos arábicos.", "Faltou sublinhar as unidades.", "Na escrita científica do SI, os símbolos das unidades NUNCA vão para o plural com 's'. O correto é '50 kg' e '2 m'.", "Ele devia ter escrito por extenso, 'metros' e 'quilogramas'."], correctIndex: 2, explanation: { correctText: "É um erro crasso em física pluralizar símbolos. Seja 1 kg ou 1000 kg, o símbolo é invariável: 'kg'. O mesmo vale para metros ('m', e não 'mts').", otherOptions: ["Números não são o problema.", "Não há regra de sublinhado para unidades."] } },
+        { level: "Médio", text: "Ainda sobre as Regras do SI: Qual é a forma 100% correta de escrever um valor numérico seguido da sua unidade (com exceção dos símbolos de ângulos e graus)?", options: ["20m (tudo colado)", "20 m (com um espaço entre o número e o símbolo)", "20-m (com hífen)", "m20 (símbolo antes do número)"], correctIndex: 1, explanation: { correctText: "A regra oficial do SI obriga à existência de um espaço (um carater) entre o valor numérico e o símbolo da unidade.", otherOptions: ["Tudo colado está errado nas normas editoriais científicas."] } },
+        { level: "Médio", text: "Muitas unidades do SI receberam os seus nomes em homenagem a grandes cientistas (Newton, Joule, Watt, Kelvin). Na hora de escrever o símbolo destas unidades, qual é a regra obrigatória?", options: ["Devem ser escritas em itálico.", "Devem ter a primeira letra Maiúscula (N, J, W, K).", "Devem ser sempre escritas em minúsculas para não confundir com fórmulas.", "Devem estar entre parêntesis."], correctIndex: 1, explanation: { correctText: "Se a unidade derivar do nome próprio de uma pessoa, o seu SÍMBOLO deve ser Maiúsculo (ex: N de Isaac Newton). Unidades normais, como o metro (m) ou segundo (s), usam letra minúscula.", otherOptions: ["Apenas os nomes científicos de espécies (biologia) usam itálico obrigatório."] } },
+        { level: "Difícil", text: "Para medir a área de uma grande fazenda, os técnicos em Agropecuária usam a unidade 'hectare' (ha). Um hectare equivale a um quadrado com 100 metros de cada lado (100 m x 100 m). Qual é o equivalente de 1 hectare em metros quadrados (m²) do SI?", options: ["1.000 m²", "10.000 m²", "100.000 m²", "1.000.000 m²"], correctIndex: 1, explanation: { correctText: "Área = base × altura. Logo, 100 m × 100 m = 10.000 m². Memoriza isto: 1 hectare = 10.000 m².", otherOptions: ["Erros na contagem de zeros da multiplicação."] } },
+        { level: "Fácil", text: "O prefixo 'centi' (c), como na palavra centímetro, é frequentemente usado em construção. O que significa este prefixo matematicamente em relação à unidade base?", options: ["Multiplicar por 100.", "Multiplicar por 1.000.", "Dividir por 10 (a décima parte).", "Dividir por 100 (a centésima parte)."], correctIndex: 3, explanation: { correctText: "O prefixo 'centi' vale 10⁻² ou 0,01. Ele indica que a base foi dividida em cem partes iguais. 100 centímetros cabem dentro de 1 metro.", otherOptions: ["Multiplicar por 100 é 'hecto'.", "A décima parte é 'deci'."] } },
+        { level: "Médio", text: "A planta da sala de aula indica que uma mesa tem 150 centímetros (cm) de comprimento. Para resolveres uma equação de física, precisas de usar metros (m). O valor será:", options: ["0,15 m", "1,5 m", "15 m", "15.000 m"], correctIndex: 1, explanation: { correctText: "Para transformar centímetros em metros, divides por 100 (andando a vírgula duas casas para a esquerda). 150 / 100 = 1,5 m.", otherOptions: ["0,15m seriam 15cm."] } },
+        { level: "Médio", text: "Para fazeres um bolo no refeitório do IFCE, precisas de 500 gramas (g) de farinha. No SI, a massa tem de estar em Quilogramas (kg). Como 'quilo' significa 1.000, 500 g equivalem a quantos kg?", options: ["0,05 kg", "0,5 kg", "5 kg", "50 kg"], correctIndex: 1, explanation: { correctText: "Para converter de gramas para quilogramas, divide-se por 1.000. 500 / 1.000 = 0,5 kg (meio quilo).", otherOptions: ["0,05 kg seriam 50 gramas."] } },
+        { level: "Fácil", text: "O prefixo 'mili' (m), comum no uso de medicamentos (miligramas) ou réguas (milímetros), indica que a unidade principal foi dividida por:", options: ["10", "100", "1.000", "1.000.000"], correctIndex: 2, explanation: { correctText: "O prefixo 'mili' (10⁻³) significa a milésima parte. Logo, 1 milímetro é a milésima parte de 1 metro (dividido por mil).", otherOptions: ["Dividir por 1.000.000 é 'micro'."] } },
+        { level: "Médio", text: "O carpinteiro comprou um prego de 20 milímetros (mm). Qual é o tamanho deste prego em metros (m), a unidade oficial do SI?", options: ["0,02 m", "0,2 m", "2 m", "20.000 m"], correctIndex: 0, explanation: { correctText: "Para passar de milímetros para metros, divide-se por 1.000 (andam-se três casas decimais para a esquerda). 20 / 1000 = 0,02 m.", otherOptions: ["0,2m seriam 20cm."] } },
+        { level: "Difícil", text: "Um problema clássico de Física pede-te para analisares o movimento da Terra. Uma rotação completa da Terra demora 1 dia (24 horas). No SI, o tempo deve estar em segundos. Quantos segundos tem exatamente 1 dia?", options: ["3.600 s", "14.400 s", "86.400 s", "1.000.000 s"], correctIndex: 2, explanation: { correctText: "Sabemos que 1 hora = 3.600 segundos. Como 1 dia tem 24 horas, basta multiplicar: 24 × 3.600 = 86.400 segundos.", otherOptions: ["3.600s é uma hora apenas."] } },
+        { level: "Difícil", text: "Na Física Quântica e na Computação usamos os prefixos 'Mega' (M) e 'Micro' (µ). O que significam respetivamente?", options: ["Mega = Multiplica por milhão (10⁶) ; Micro = Divide por milhão (10⁻⁶)", "Mega = Multiplica por mil (10³) ; Micro = Divide por mil (10⁻³)", "Mega = Multiplica por 100 ; Micro = Divide por 100", "Eles referem-se a unidades de peso e não são prefixos matemáticos."], correctIndex: 0, explanation: { correctText: "Mega (M) representa 1 milhão (10⁶), como nos Megabytes. Micro (µ) representa a milionésima parte (10⁻⁶), muito usado em microscopia celular e microchips.", otherOptions: ["Mil e dividir por mil são Kilo e Mili."] } },
+        { level: "Médio", text: "A Força, ensinada na Segunda Lei de Newton (F = m.a), é uma Grandeza Derivada. Ela combina massa, distância e tempo [kg.(m/s²)]. Para não ter de escrever esta fórmula complexa, o SI criou uma unidade especial (em homenagem ao cientista). Qual é a unidade oficial da Força?", options: ["Joule (J)", "Watt (W)", "Newton (N)", "Pascal (Pa)"], correctIndex: 2, explanation: { correctText: "A unidade de Força no SI é o Newton, representado obrigatoriamente pela letra maiúscula N.", otherOptions: ["Joule é Energia.", "Watt é Potência.", "Pascal é Pressão."] } },
+        { level: "Difícil", text: "Regra de ouro nas estradas de física: Se o limite de velocidade de uma via é de 90 km/h, o motorista será multado se a sua velocidade estiver acima de:", options: ["15 m/s", "20 m/s", "25 m/s", "30 m/s"], correctIndex: 2, explanation: { correctText: "Para converteres km/h em m/s, divides o valor por 3,6. 90 / 3,6 = 25 m/s.", otherOptions: ["20 m/s seriam 72 km/h.", "30 m/s seriam 108 km/h."] } },
+        { level: "Médio", text: "Se um engenheiro agronómico disser que uma área de plantio é de '5 km²', deves ter muito cuidado nas conversões. A unidade (km) está ao quadrado, por isso a conversão para m² também deve ser elevada ao quadrado. Quanto é 1 km² em m²?", options: ["1.000 m²", "10.000 m²", "100.000 m²", "1.000.000 m²"], correctIndex: 3, explanation: { correctText: "Sabemos que 1 km = 1.000 m. Ao fazer um quadrado de 1 km por 1 km, temos em metros: 1.000 m × 1.000 m = 1.000.000 m² (Um milhão de metros quadrados).", otherOptions: ["1.000 é linear.", "10.000 m² é o hectare."] } },
+        { level: "Fácil", text: "No Brasil usamos a escala de Temperatura Celsius (ºC), em que a água congela a 0ºC e ferve a 100ºC. No entanto, cientistas que trabalham em fórmulas complexas do Sistema Internacional preferem qual escala, que não possui números negativos?", options: ["Escala Fahrenheit", "Escala Richter", "Escala Kelvin", "Escala Absoluta Centígrada"], correctIndex: 2, explanation: { correctText: "A escala Kelvin (K) inicia-se no 'Zero Absoluto' (-273,15ºC), o ponto teórico onde as moléculas param de vibrar. Como não tem valores negativos, facilita cálculos de energia (onde uma temperatura negativa faria o cálculo 'dar erro').", otherOptions: ["Richter é para terramotos."] } },
+        { level: "Difícil", text: "Para terminar com Hidráulica: A unidade oficial de Volume no SI é o metro cúbico (m³). No entanto, o dia a dia exige o uso do Litro (L). Qual é a equivalência exata entre estas duas medidas?", options: ["1 m³ = 10 Litros", "1 m³ = 100 Litros", "1 m³ = 1.000 Litros", "1 m³ = 10.000 Litros"], correctIndex: 2, explanation: { correctText: "Um cubo que tenha 1 metro de largura, 1 metro de comprimento e 1 metro de profundidade (1 m³) tem capacidade exata para guardar 1.000 Litros de água (1 tonelada de água pura).", otherOptions: ["Incorreto."] } }
+    ];
+
+    /* --- GESTÃO DE ESTADO (STATE) --- */
+    const quizState = {
+        currentIndex: 0,
+        userAnswers: new Array(questionsDatabase.length).fill(null),
+        confettiAnimationId: null
+    };
+
+    /* --- FUNCIONALIDADES DE PESQUISA (TEORIA) --- */
+    function initializeSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const contentGroups = document.querySelectorAll('.content-group');
+        const noResultsMsg = document.getElementById('no-results');
+
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', function(event) {
+            const searchTerm = normalizeText(event.target.value);
+            let totalVisibleElements = 0;
+            
+            contentGroups.forEach(group => {
+                const groupContent = normalizeText(group.textContent);
+                const isMatch = groupContent.includes(searchTerm);
+                
+                group.style.display = isMatch ? 'flex' : 'none';
+                if (isMatch) totalVisibleElements++;
+            });
+            
+            noResultsMsg.style.display = totalVisibleElements === 0 ? 'block' : 'none';
+        });
+    }
+
+    function normalizeText(text) {
+        return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    /* --- CONTROLO DE VISTAS (VIEWS) --- */
+    function changeApplicationView(viewName) {
+        const views = ['viewExplanation', 'viewPractice', 'viewResult'];
+        
+        views.forEach(viewId => document.getElementById(viewId).classList.remove('active'));
+        
+        const quizFooter = document.getElementById('quizFooter');
+        if (quizFooter) quizFooter.style.display = 'none';
+
+        if (viewName === 'explanation') {
+            document.getElementById('viewExplanation').classList.add('active');
+            document.getElementById('btnExp').classList.add('active');
+            document.getElementById('btnPrac').classList.remove('active');
+        } else if (viewName === 'practice') {
+            document.getElementById('viewPractice').classList.add('active');
+            if (quizFooter) quizFooter.style.display = 'flex';
+            document.getElementById('btnExp').classList.remove('active');
+            document.getElementById('btnPrac').classList.add('active');
+            
+            renderCurrentQuestion();
+            renderNavigationMap();
+        } else if (viewName === 'result') {
+            document.getElementById('viewResult').classList.add('active');
+        }
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* --- GERAÇÃO DE INTERFACE DO QUIZ --- */
+    function getDifficultyBadgeClass(level) {
+        const mapping = { 'Fácil': 'dif-facil', 'Médio': 'dif-medio', 'Difícil': 'dif-dificil' };
+        return mapping[level] || 'dif-facil';
+    }
+
+    function buildOptionsHTML(question, selectedAnswerIndex) {
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        return question.options.map((optionText, optionIndex) => {
+            let cssClass = '';
+            
+            if (selectedAnswerIndex !== null) {
+                if (optionIndex === question.correctIndex) cssClass = 'correct';
+                else if (optionIndex === selectedAnswerIndex) cssClass = 'wrong';
+                else cssClass = 'disabled';
+            }
+
+            const isDisabled = selectedAnswerIndex !== null ? 'disabled' : '';
+
+            return `
+                <button class="option-btn ${cssClass}" onclick="handleOptionSelection(${optionIndex})" ${isDisabled}>
+                    <div class="opt-circle">${alphabet[optionIndex]}</div>
+                    <div>${optionText}</div>
+                </button>
+            `;
+        }).join('');
+    }
+
+    function buildFeedbackHTML(question, selectedAnswerIndex) {
+        const isCorrect = selectedAnswerIndex === question.correctIndex;
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        const titleClass = isCorrect ? 'success' : 'error';
+        const titleText = isCorrect ? '✅ Raciocínio Correto!' : '❌ Diagnóstico de Falha!';
+        
+        const distortionsHTML = question.explanation.otherOptions.map((explanationText, idx) => {
+            if (idx === question.correctIndex) return '';
+            return `<div class="feedback-item wrong-opt"><strong>${alphabet[idx]})</strong> ${explanationText}</div>`;
+        }).join('');
+
+        return `
+            <div class="feedback-box show">
+                <div class="feedback-title ${titleClass}" style="color: ${isCorrect ? 'var(--correct-border)' : 'var(--wrong-border)'}">${titleText}</div>
+                <div class="feedback-item correct-opt"><strong>O Facto Científico:</strong> ${question.options[question.correctIndex]}</div>
+                <div style="margin-top:15px;font-size:1rem;color:var(--text-color);margin-bottom:15px;font-weight:600;">${question.explanation.correctText}</div>
+                <div style="margin-top:15px;border-top:2px dashed var(--theme-medium);padding-top:15px;">
+                    <small style="color:var(--theme-dark);"><strong>Análise das Distorções:</strong></small>
+                    ${distortionsHTML}
+                </div>
+            </div>
+        `;
+    }
+
+    function renderCurrentQuestion() {
+        const container = document.getElementById('quizContainer');
+        if (!container) return;
+
+        const question = questionsDatabase[quizState.currentIndex];
+        const selectedAnswerIndex = quizState.userAnswers[quizState.currentIndex];
+        const badgeClass = getDifficultyBadgeClass(question.level);
+        
+        let feedbackHTML = selectedAnswerIndex !== null ? buildFeedbackHTML(question, selectedAnswerIndex) : '';
+
+        container.innerHTML = `
+            <div class="quiz-question-card">
+                <span class="difficulty-badge ${badgeClass}">${question.level}</span>
+                <div style="margin-bottom:25px;">
+                    <span class="quiz-question-counter">QUESTÃO ${quizState.currentIndex + 1} DE ${questionsDatabase.length}</span>
+                    <h2 class="quiz-question-text">${question.text}</h2>
+                </div>
+                <div class="options-list">
+                    ${buildOptionsHTML(question, selectedAnswerIndex)}
+                </div>
+                ${feedbackHTML}
+            </div>
+        `;
+        
+        updateNavigationButtons();
+    }
+
+    /* --- LÓGICA DO QUIZ --- */
+    function handleOptionSelection(selectedIndex) {
+        if (quizState.userAnswers[quizState.currentIndex] !== null) return;
+        
+        quizState.userAnswers[quizState.currentIndex] = selectedIndex;
+        const isCorrect = selectedIndex === questionsDatabase[quizState.currentIndex].correctIndex;
+        
+        if (isCorrect) startSuccessAnimation();
+        else triggerErrorShakeEffect();
+        
+        renderCurrentQuestion();
+        renderNavigationMap();
+    }
+
+    function triggerErrorShakeEffect() {
+        const container = document.getElementById('quizContainer');
+        if (container) { 
+            container.classList.remove('shake-effect'); 
+            void container.offsetWidth; 
+            container.classList.add('shake-effect'); 
+            setTimeout(() => container.classList.remove('shake-effect'), 500); 
+        }
+    }
+
+    /* --- ANIMAÇÕES (CONFETTI) --- */
+    function startSuccessAnimation() {
+        const duration = 1500;
+        const end = Date.now() + duration;
+        
+        stopSuccessAnimation();
+        
+        function animateFrame() {
+            if(window.confetti && typeof confetti === 'function') {
+                const config = { particleCount: 5, spread: 55, colors: ['#14B8A6', '#0F766E', '#EA580C', '#0284C7'] };
+                confetti({ ...config, angle: 60, origin: { x: 0, y: 0.6 } });
+                confetti({ ...config, angle: 120, origin: { x: 1, y: 0.6 } });
+            }
+            if (Date.now() < end) quizState.confettiAnimationId = requestAnimationFrame(animateFrame);
+        }
+        animateFrame();
+    }
+
+    function stopSuccessAnimation() {
+        if (window.confetti && typeof confetti.reset === 'function') confetti.reset(); 
+        if (quizState.confettiAnimationId) {
+            cancelAnimationFrame(quizState.confettiAnimationId);
+            quizState.confettiAnimationId = null;
+        }
+    }
+
+    /* --- NAVEGAÇÃO MAPA --- */
+    function renderNavigationMap() {
+        const mapContainer = document.getElementById('qMap');
+        if (!mapContainer) return;
+        
+        mapContainer.innerHTML = questionsDatabase.map((question, index) => {
+            const isCurrent = index === quizState.currentIndex;
+            const userAnswer = quizState.userAnswers[index];
+            const hasAnswered = userAnswer !== null;
+            const isCorrect = userAnswer === question.correctIndex;
+            
+            let cssClass = 'map-dot';
+            if (isCurrent) cssClass += ' active';
+            if (hasAnswered) cssClass += isCorrect ? ' answered-correct' : ' answered-wrong';
+            
+            return `<div class="${cssClass}" onclick="goToQuestion(${index})">${index + 1}</div>`;
+        }).join('');
+        
+        setTimeout(() => { 
+            const activeDot = mapContainer.querySelector('.map-dot.active'); 
+            if (activeDot) activeDot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); 
+        }, 50);
+    }
+
+    function goToQuestion(targetIndex) { 
+        stopSuccessAnimation();
+        quizState.currentIndex = targetIndex; 
+        renderCurrentQuestion(); 
+        renderNavigationMap(); 
+    }
+    
+    function navigateQuestion(directionOffset) { 
+        const nextIndex = quizState.currentIndex + directionOffset; 
+        if (nextIndex >= 0 && nextIndex < questionsDatabase.length) goToQuestion(nextIndex); 
+    }
+
+    function updateNavigationButtons() {
+        const btnPrev = document.getElementById('btnPrev');
+        const btnNext = document.getElementById('btnNext');
+        
+        if (btnPrev) btnPrev.disabled = (quizState.currentIndex === 0);
+        
+        if (btnNext) {
+            const isLastQuestion = quizState.currentIndex === questionsDatabase.length - 1;
+            if (isLastQuestion) { 
+                btnNext.textContent = "Finalizar Avaliação"; 
+                btnNext.onclick = finishQuiz; 
+            } else { 
+                btnNext.textContent = "Próxima ➡️"; 
+                btnNext.onclick = () => navigateQuestion(1); 
+            }
+        }
+    }
+
+    /* --- CÁLCULO DE RESULTADOS --- */
+    function calculateStars(percent) {
+        if (percent === 100) return "⭐⭐⭐⭐⭐";
+        if (percent >= 80) return "⭐⭐⭐⭐";
+        if (percent >= 60) return "⭐⭐⭐";
+        if (percent >= 40) return "⭐⭐";
+        if (percent > 0) return "⭐";
+        return "🌑"; // zero stars
+    }
+
+    function finishQuiz() {
+        const unansweredCount = quizState.userAnswers.filter(answer => answer === null).length;
+        
+        if (unansweredCount > 0) {
+            const confirmMessage = `Existem ${unansweredCount} questões por responder. Quer terminar mesmo assim (as em branco serão dadas como erradas)?`;
+            if (!confirm(confirmMessage)) return;
+        }
+
+        stopSuccessAnimation();
+
+        const correctAnswersCount = quizState.userAnswers.filter((answer, index) => answer === questionsDatabase[index].correctIndex).length;
+        const totalQuestions = questionsDatabase.length;
+        const percentageScore = Math.round((correctAnswersCount / totalQuestions) * 100);
+        const isApproved = percentageScore >= 80;
+        
+        renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved);
+        changeApplicationView('result');
+    }
+
+    function renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved) {
+        document.getElementById('finalPercent').textContent = `${percentageScore}%`;
+        document.getElementById('finalScoreText').textContent = `Acertaste ${correctAnswersCount} de ${totalQuestions}`;
+        document.getElementById('finalStars').textContent = calculateStars(percentageScore);
+        
+        const reviewContainer = document.getElementById('review-container');
+        const actionButtonsContainer = document.getElementById('action-buttons');
+        
+        let summaryHTML = '';
+
+        if (isApproved) {
+            summaryHTML += `
+                <div class="result-summary-box success">
+                    <strong>🎉 EXCELENTE CIENTISTA!</strong> A tua base no Sistema Internacional e Conversão de Unidades está perfeita para os exames do IFCE.
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REPETIR PARA 100%</button>`;
+        } else {
+            summaryHTML += `
+                <div class="result-summary-box error">
+                    <strong>⚠️ ATENÇÃO!</strong> Foste avaliado abaixo da meta (80%). Revisa as regras matemáticas dos prefixos (kilo, mili) e as grandezas de base (MKS).
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REFAZER AVALIAÇÃO</button>`;
+        }
+        
+        if (correctAnswersCount < totalQuestions) {
+            summaryHTML += '<h4 style="margin-bottom:15px; color:var(--text-color); font-size:1.15rem;">Revisão das Falhas:</h4>';
+            questionsDatabase.forEach((question, index) => {
+                const userAnswerIndex = quizState.userAnswers[index];
+                if (userAnswerIndex !== question.correctIndex) {
+                    const userAnswerText = userAnswerIndex === null ? "Deixaste em branco" : question.options[userAnswerIndex];
+                    const correctAnswerText = question.options[question.correctIndex];
+                    
+                    summaryHTML += `
+                        <div class="error-log-item">
+                            <strong style="color:var(--theme-dark); font-size:1.05rem; display:block; margin-bottom:8px;">Q${index + 1}: ${question.text}</strong>
+                            <span style="color:var(--wrong-border); font-weight: 600; display:block; margin-bottom:5px;">A tua resposta: ${userAnswerText}</span>
+                            <span style="color:var(--correct-border); font-weight: 700; display:block;">A Resposta Exata: ${correctAnswerText}</span>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        reviewContainer.innerHTML = summaryHTML;
+    }
+
+    function resetQuiz() { 
+        quizState.userAnswers = new Array(questionsDatabase.length).fill(null); 
+        quizState.currentIndex = 0; 
+        changeApplicationView('practice'); 
+    }
+    
+    // START APPLICATION
+    initializeSearch();
+    changeApplicationView('explanation');
+</script>
+</body>
+</html>

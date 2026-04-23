@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Física: Introdução e Fundamentos - Promover</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* --- VARIÁVEIS DE COR E TEMA: ENERGIA & COSMOS (Física) --- */
+        :root {
+            --bg-color: #F5F3FF; /* Fundo violeta muito claro */
+            --text-color: #1E1B4B; /* Índigo muito escuro */
+            --border-color: #312E81; /* Contorno escuro índigo */
+            --white: #FFFFFF;
+            
+            --theme-light: #EDE9FE; /* Violeta pastel */
+            --theme-medium: #8B5CF6; /* Violeta vivo / Energia */
+            --theme-dark: #4C1D95; /* Violeta profundo / Espaço */
+            --theme-contrast: #F59E0B; /* Amarelo energia (Contraste) */
+            --theme-accent: #06B6D4; /* Ciano / Eletrões */
+            --theme-text-active: #FFFFFF;
+            
+            --correct-bg: #D1FAE5;
+            --correct-border: #059669;
+            --wrong-bg: #FFE4E6;
+            --wrong-border: #BE123C;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 15px 120px 15px;
+            background-image: linear-gradient(rgba(139, 92, 246, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(139, 92, 246, 0.1) 1px, transparent 1px);
+            background-size: 25px 25px;
+        }
+
+        /* --- ANIMAÇÕES --- */
+        @keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1) rotate(-5deg); color: var(--theme-contrast); } }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+        
+        .pulse-effect { animation: pulse 2s infinite; display: inline-block; }
+        .shake-effect { animation: shake 0.4s ease-in-out; }
+
+        /* --- LAYOUT PRINCIPAL --- */
+        .container { width: 100%; max-width: 650px; display: flex; flex-direction: column; gap: 25px; }
+
+        .logo-header { display: flex; flex-direction: column; align-items: center; padding: 15px 0 25px 0; text-align: center; }
+        .css-logo { font-size: 1.5rem; font-weight: 900; color: var(--theme-text-active); text-transform: uppercase; letter-spacing: -1px; border: 3px solid var(--border-color); padding: 8px 24px; border-radius: 12px; background: var(--theme-dark); box-shadow: 4px 4px 0px var(--theme-contrast); margin-bottom: 15px; transform: rotate(-2deg); }
+        h1 { font-size: 2rem; font-weight: 900; color: var(--text-color); text-transform: uppercase; letter-spacing: -0.5px; line-height: 1.1; }
+        .subtitle { font-size: 1rem; color: var(--white); font-weight: 700; margin-top: 5px; background: var(--theme-contrast); padding: 4px 12px; border-radius: 8px; border: 2px solid var(--border-color); }
+
+        /* --- NAVEGAÇÃO --- */
+        .toggle-container { background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 6px; display: flex; box-shadow: 4px 4px 0px var(--border-color); position: sticky; top: 15px; z-index: 50; }
+        .toggle-btn { flex: 1; border: none; background: none; padding: 12px 0; border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.05rem; color: var(--text-color); cursor: pointer; transition: all 0.2s ease; }
+        .toggle-btn.active { background-color: var(--theme-dark); color: var(--theme-text-active); border: 2px solid var(--border-color); box-shadow: 2px 2px 0px var(--border-color); }
+
+        .view-section { display: none; animation: fadeIn 0.3s ease; flex-direction: column; gap: 35px; }
+        .view-section.active { display: flex; }
+
+        /* --- PESQUISA --- */
+        .search-container { position: relative; width: 100%; }
+        .search-input { width: 100%; padding: 16px 20px 16px 55px; border: 3px solid var(--border-color); border-radius: 12px; background-color: var(--white); font-family: 'Poppins', sans-serif; font-size: 1.05rem; font-weight: 600; color: var(--text-color); box-shadow: 4px 4px 0px var(--border-color); outline: none; transition: all 0.2s ease; }
+        .search-input:focus { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--theme-contrast); border-color: var(--theme-dark); }
+        .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 1.4rem; }
+        #no-results { text-align: center; color: var(--wrong-border); font-weight: 800; display: none; background: var(--wrong-bg); padding: 15px; border: 3px solid var(--wrong-border); border-radius: 8px; }
+
+        /* --- TEORIA --- */
+        .content-group { display: flex; flex-direction: column; position: relative; padding-top: 15px; }
+        .section-badge { display: inline-flex; align-items: center; gap: 10px; background-color: var(--theme-dark); color: var(--white); font-size: 1.1rem; font-weight: 800; padding: 8px 20px; border-radius: 8px; border: 3px solid var(--border-color); box-shadow: 3px 3px 0px var(--theme-contrast); text-transform: uppercase; position: absolute; top: -5px; left: 15px; z-index: 10; transform: rotate(-1.5deg); }
+        .theory-box { display: flex; flex-direction: column; padding: 35px 25px 25px 35px; border-radius: 12px; background-color: var(--white); border: 3px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); font-weight: 500; font-size: 1rem; line-height: 1.7; position: relative; overflow: hidden; gap: 20px; border-left: 14px solid var(--theme-medium); }
+        .theory-box h3 { font-size: 1.35rem; font-weight: 900; color: var(--theme-dark); margin-bottom: 5px; display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px; }
+        .theory-box h4 { font-size: 1.1rem; font-weight: 800; color: var(--text-color); margin-top: 10px; border-bottom: 2px solid var(--theme-light); padding-bottom: 5px; }
+        
+        .inline-example { display: block; width: fit-content; max-width: 100%; margin-top: 6px; margin-bottom: 6px; padding: 6px 14px; background-color: var(--theme-light); border: 2px solid var(--border-color); border-radius: 8px; font-size: 0.85rem; color: var(--text-color); font-weight: 700; letter-spacing: 0.5px; box-shadow: 2px 2px 0px rgba(0,0,0,0.05); }
+        
+        .highlight-box { background-color: #FEF3C7; border: 3px solid var(--border-color); border-left: 8px solid var(--theme-contrast); padding: 18px 20px; border-radius: 8px; font-size: 0.95rem; color: #78350F; font-weight: 600; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); }
+        .highlight-box.cyan { background-color: #ECFEFF; border-left-color: #06B6D4; color: #164E63; }
+
+        /* --- MAPA DAS ÁREAS (CARDS) --- */
+        .kingdoms-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; width: 100%; margin-top: 10px; }
+        .k-card { flex: 1 1 calc(50% - 15px); min-width: 130px; border-radius: 12px; padding: 15px 10px; text-align: center; border: 3px solid; display: flex; flex-direction: column; align-items: center; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); background-color: var(--white); transition: transform 0.2s; }
+        .k-card:hover { transform: translateY(-3px); }
+        .k-card.full-width { flex: 1 1 100%; max-width: 280px; }
+        .k-icon { font-size: 2.8rem; margin-bottom: 8px; line-height: 1; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.15)); }
+        .k-title { font-size: 1.05rem; font-weight: 900; margin-bottom: 4px; text-transform: uppercase; }
+        .k-examples { font-size: 0.85rem; font-weight: 600; color: var(--text-color); margin-bottom: 4px; line-height: 1.2; }
+        .k-traits { font-size: 0.75rem; font-style: italic; font-weight: 700; opacity: 0.9; line-height: 1.2; }
+        
+        .k-mecanica { background-color: #DBEAFE; border-color: #1D4ED8; }
+        .k-mecanica .k-title, .k-mecanica .k-traits { color: #1D4ED8; }
+        
+        .k-termo { background-color: #FFEDD5; border-color: #C2410C; }
+        .k-termo .k-title, .k-termo .k-traits { color: #C2410C; }
+        
+        .k-optica { background-color: #FEF3C7; border-color: #B45309; }
+        .k-optica .k-title, .k-optica .k-traits { color: #B45309; }
+        
+        .k-ondulatoria { background-color: #F3E8FF; border-color: #7E22CE; }
+        .k-ondulatoria .k-title, .k-ondulatoria .k-traits { color: #7E22CE; }
+
+        .k-eletro { background-color: #ECFEFF; border-color: #0891B2; }
+        .k-eletro .k-title, .k-eletro .k-traits { color: #0891B2; }
+
+        /* --- BOTÕES GERAIS --- */
+        .btn-action { width: 100%; padding: 20px; background-color: var(--theme-dark); color: white; border: 3px solid var(--border-color); border-radius: 12px; font-size: 1.15rem; font-weight: 900; cursor: pointer; box-shadow: 6px 6px 0px var(--theme-contrast); transition: all 0.1s; text-transform: uppercase; margin-top: 10px; }
+        .btn-action:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0px var(--theme-contrast); }
+
+        /* --- QUIZ UI --- */
+        .difficulty-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; border: 2px solid var(--border-color); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
+        .dif-facil { background: #D1FAE5; color: #065F46; }
+        .dif-medio { background: #FEF08A; color: #713F12; }
+        .dif-dificil { background: #FECACA; color: #7F1D1D; }
+
+        .question-map { display: flex; gap: 8px; overflow-x: auto; padding: 10px 5px; margin-bottom: 20px; white-space: nowrap; scroll-behavior: smooth; }
+        .question-map::-webkit-scrollbar { display: none; }
+        .map-dot { min-width: 38px; height: 38px; border: 2px solid var(--border-color); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; color: var(--theme-dark); background: white; cursor: pointer; transition: all 0.2s; }
+        .map-dot.active { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); transform: scale(1.15); }
+        .map-dot.answered-correct { background-color: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .map-dot.answered-wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .quiz-question-card { border: 4px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); padding: 30px; border-radius: 16px; background: var(--white); }
+        .quiz-question-counter { font-size: 0.85rem; font-weight: 900; color: var(--theme-dark); letter-spacing: 1px; }
+        .quiz-question-text { font-size: 1.2rem; margin-top: 8px; color: var(--text-color); font-weight: 800; line-height: 1.5; margin-bottom: 25px;}
+
+        .option-btn { display: flex; align-items: center; width: 100%; padding: 18px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.1s ease; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 600; text-align: left; color: var(--text-color); }
+        .option-btn:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px var(--theme-contrast); }
+        .opt-circle { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--border-color); margin-right: 15px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.05rem; flex-shrink: 0; background: var(--theme-light); color: var(--theme-dark); }
+        .option-btn.correct { background-color: var(--correct-bg); border-color: var(--correct-border); box-shadow: 3px 3px 0px var(--correct-border); }
+        .option-btn.correct .opt-circle { background-color: var(--correct-border); color: white; border-color: var(--correct-border); }
+        .option-btn.wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); opacity: 0.9; box-shadow: none; }
+        .option-btn.wrong .opt-circle { background-color: var(--wrong-border); color: white; border-color: var(--wrong-border); }
+        .option-btn.disabled { pointer-events: none; opacity: 0.7; }
+
+        /* --- FEEDBACK DA QUESTÃO --- */
+        .feedback-box { display: block; margin-top: 25px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 25px; animation: slideUp 0.3s ease-out; box-shadow: 5px 5px 0px rgba(0,0,0,0.1); }
+        .feedback-title { font-weight: 900; text-transform: uppercase; font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .feedback-item { margin-bottom: 10px; font-size: 0.95rem; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); line-height: 1.5; font-weight: 500; }
+        .feedback-item.correct-opt { background: var(--correct-bg); border-color: var(--correct-border); color: #064E3B; font-weight: 700; box-shadow: 3px 3px 0px var(--correct-border); }
+        .feedback-item.wrong-opt { background: #F1F5F9; border-color: #94A3B8; color: #475569; border-style: dashed; margin-top: 8px; }
+
+        /* --- RESULTADOS --- */
+        .result-card { background: white; border: 4px solid var(--border-color); border-radius: 16px; padding: 40px 20px; box-shadow: 8px 8px 0px var(--border-color); margin-bottom: 30px; text-align: center; }
+        .stars-container { font-size: 2.5rem; margin: 15px 0; letter-spacing: 5px; }
+        .percentage-big { font-size: 5rem; font-weight: 900; color: var(--theme-dark); line-height: 1; margin: 15px 0; text-shadow: 4px 4px 0px var(--theme-contrast); }
+        
+        .result-summary-box { padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 3px solid; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); }
+        .result-summary-box.success { background: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .result-summary-box.error { background: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .error-log-item { margin-bottom: 15px; padding: 20px; background: var(--bg-color); border-radius: 12px; border: 3px dashed var(--theme-medium); text-align: left;}
+
+        /* --- RODAPÉ DE NAVEGAÇÃO --- */
+        .quiz-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--white); border-top: 3px solid var(--border-color); padding: 15px 20px; display: none; justify-content: center; gap: 20px; z-index: 100; box-shadow: 0px -4px 10px rgba(0,0,0,0.05); }
+        .nav-btn { padding: 15px 30px; border-radius: 12px; font-weight: 900; border: 3px solid var(--border-color); cursor: pointer; box-shadow: 3px 3px 0px var(--border-color); font-family: 'Poppins', sans-serif; text-transform: uppercase; background: white; color: var(--text-color); font-size: 1rem; transition: transform 0.1s; }
+        .nav-btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 0px 0px 0px transparent; }
+        .btn-next { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); border-color: var(--border-color); }
+        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <header class="logo-header">
+            <div class="css-logo"><span class="pulse-effect">⚡</span> PROMOVER</div>
+            <h1>Física / 9º Ano</h1>
+            <p class="subtitle">Introdução e Fundamentos</p>
+        </header>
+
+        <div class="toggle-container">
+            <button class="toggle-btn active" id="btnExp" onclick="changeApplicationView('explanation')">📘 Teoria</button>
+            <button class="toggle-btn" id="btnPrac" onclick="changeApplicationView('practice')">🧠 Prática (30)</button>
+        </div>
+
+        <!-- VISTA: TEORIA -->
+        <main id="viewExplanation" class="view-section active">
+            
+            <div class="search-container">
+                <span class="search-icon" aria-hidden="true">🔍</span>
+                <input type="text" id="searchInput" class="search-input" aria-label="Pesquisar conteúdo" placeholder="Pesquisar conceito... (ex: Mecânica, SI, Notação)">
+            </div>
+            <div id="no-results"><p>😕 Termo não encontrado na teoria.</p></div>
+
+            <section class="content-group">
+                <div class="section-badge">🌌 1. O que é a Física?</div>
+                <article class="theory-box search-target">
+                    <h3>O Manual de Instruções do Universo</h3>
+                    <p>A palavra "Física" vem do grego <em>physis</em>, que significa Natureza. A Física é a ciência exata que estuda a matéria, a energia, o espaço e o tempo, e como estes elementos interagem entre si.</p>
+                    
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li><strong>O Método Científico:</strong> A Física não vive de palpites. Tudo começa com a <strong>Observação</strong> de um fenómeno, criação de uma <strong>Hipótese</strong>, realização de <strong>Experiências</strong> e, finalmente, a formulação de uma <strong>Lei ou Teoria</strong>.</li>
+                        <li><strong>Matemática como Linguagem:</strong> Para descrever a Física de forma exata, usamos números e fórmulas matemáticas. A matemática é a "ferramenta" do físico.</li>
+                    </ul>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">📚 2. As Grandes Áreas</div>
+                <article class="theory-box search-target">
+                    <h3>Como dividimos o estudo?</h3>
+                    <p>A Física Clássica, que vais estudar ao longo do Ensino Médio/Técnico, está dividida em 5 áreas principais:</p>
+                    
+                    <div class="visual-area" style="background: transparent; border: none; padding: 0;">
+                        <div class="kingdoms-grid">
+                            <!-- Mecanica -->
+                            <div class="k-card k-mecanica">
+                                <div class="k-icon">⚙️</div>
+                                <div class="k-title">Mecânica</div>
+                                <div class="k-examples">Movimento, Força, Leis de Newton.</div>
+                            </div>
+                            
+                            <!-- Termologia -->
+                            <div class="k-card k-termo">
+                                <div class="k-icon">🔥</div>
+                                <div class="k-title">Termologia</div>
+                                <div class="k-examples">Calor, Temperatura e Termodinâmica.</div>
+                            </div>
+                            
+                            <!-- Optica -->
+                            <div class="k-card k-optica">
+                                <div class="k-icon">🔭</div>
+                                <div class="k-title">Óptica</div>
+                                <div class="k-examples">Luz, Espelhos, Lentes e Visão.</div>
+                            </div>
+                            
+                            <!-- Ondulatoria -->
+                            <div class="k-card k-ondulatoria">
+                                <div class="k-icon">🌊</div>
+                                <div class="k-title">Ondulatória</div>
+                                <div class="k-examples">Ondas sonoras, acústica e vibrações.</div>
+                            </div>
+
+                            <!-- Eletromagnetismo -->
+                            <div class="k-card k-eletro full-width">
+                                <div class="k-icon">⚡</div>
+                                <div class="k-title">Eletromagnetismo</div>
+                                <div class="k-examples">Cargas elétricas, circuitos, ímanes e motores.</div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">📏 3. A Linguagem Padrão</div>
+                <article class="theory-box search-target">
+                    <h3>Unidades e Grandezas</h3>
+                    <p>Para evitar que cada país usasse medidas diferentes (como polegadas vs. centímetros), os cientistas criaram o <strong>Sistema Internacional de Unidades (SI)</strong>.</p>
+                    
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li><strong>As Três Unidades Base (MKS):</strong><br> - Comprimento: <strong>Metro (m)</strong><br> - Massa: <strong>Quilograma (kg)</strong><br> - Tempo: <strong>Segundo (s)</strong></li>
+                        <li><strong>Grandezas Escalares:</strong> Só precisam do número e da unidade para se entenderem (Ex: Temperatura = 30ºC, Massa = 50 kg).</li>
+                        <li><strong>Grandezas Vetoriais:</strong> Precisam de número, unidade, <strong>direção</strong> (horizontal/vertical) e <strong>sentido</strong> (esquerda/direita). (Ex: Força, Velocidade).</li>
+                    </ul>
+
+                    <div class="highlight-box cyan">
+                        <strong>Dica de Ouro (Conversão de Velocidade):</strong> Na Física, vais estar sempre a saltar entre "km/h" (usado nos carros) e "m/s" (usado no SI).<br><br>
+                        ➡️ De <strong>km/h para m/s</strong>: Divide por <strong>3,6</strong>.<br>
+                        ⬅️ De <strong>m/s para km/h</strong>: Multiplica por <strong>3,6</strong>.
+                    </div>
+                </article>
+            </section>
+
+            <button class="btn-action" onclick="changeApplicationView('practice')">
+                Iniciar a Avaliação (30 Questões) ➜
+            </button>
+        </main>
+
+        <!-- VISTA: PRÁTICA (QUIZ) -->
+        <main id="viewPractice" class="view-section">
+            <div style="margin-bottom: 20px; background-color: var(--white); padding: 15px; border-radius: 12px; border: 3px solid var(--border-color); box-shadow: 4px 4px 0px var(--border-color);">
+                <h2 style="color:var(--theme-dark); font-weight:900; margin-bottom: 5px;">A Prova de Fogo - IFCE</h2>
+                <p style="color: var(--theme-contrast); font-size: 0.95rem; font-weight:600;">
+                    30 questões de Introdução à Física (formato Ensino Técnico Integrado). Acerta <strong>80% (24/30)</strong> para garantires a aprovação.
+                </p>
+            </div>
+            
+            <div class="question-map" id="qMap"></div>
+            <div id="quizContainer" style="margin-bottom: 40px;"></div>
+        </main>
+
+        <!-- VISTA: RESULTADOS -->
+        <main id="viewResult" class="view-section">
+            <div class="result-card">
+                <h2 style="font-weight:900; text-transform:uppercase;">Relatório Final</h2>
+                <div class="stars-container" id="finalStars">⭐⭐⭐</div>
+                <div class="percentage-big" id="finalPercent">0%</div>
+                <p style="font-size:1.2rem; font-weight:700; color:#555;" id="finalScoreText">Acertaste 0 de 30</p>
+                <div id="review-container" style="text-align: left; margin-top: 20px;"></div>
+            </div>
+            <div id="action-buttons"></div>
+        </main>
+
+    </div>
+
+    <!-- RODAPÉ DE NAVEGAÇÃO -->
+    <footer class="quiz-footer" id="quizFooter">
+        <button class="nav-btn btn-prev" id="btnPrev" onclick="navigateQuestion(-1)">Anterior</button>
+        <button class="nav-btn btn-next" id="btnNext" onclick="navigateQuestion(1)">Próxima</button>
+    </footer>
+
+<script>
+    /* --- ESTRUTURA DE DADOS (BASE DE QUESTÕES - NÍVEL IFCE TÉCNICO INTEGRADO) --- */
+    const questionsDatabase = [
+        { level: "Fácil", text: "A Física é uma das ciências mais antigas e fundamentais. O que a Física procura estudar essencialmente?", options: ["A composição química do DNA das células.", "A evolução dos seres vivos e a anatomia animal.", "A matéria, a energia, o espaço, o tempo e as leis da natureza que regem as suas interações.", "Os processos políticos e a economia mundial."], correctIndex: 2, explanation: { correctText: "A Física é a ciência exata que procura compreender as leis do universo: como a matéria se move e como as forças e a energia atuam no espaço-tempo.", otherOptions: ["Isso é Biologia Celular.", "Isso é Zoologia/Evolução.", "Isso é Sociologia/Economia."] } },
+        { level: "Fácil", text: "As leis de Newton, o estudo das velocidades de um carro e o cálculo da força para empurrar um bloco fazem parte de qual grande área da Física?", options: ["Mecânica", "Óptica", "Eletromagnetismo", "Termologia"], correctIndex: 0, explanation: { correctText: "A Mecânica é a área da física que estuda o movimento (Cinemática) e as forças que o causam (Dinâmica).", otherOptions: ["Óptica estuda a luz.", "Eletromagnetismo estuda cargas e ímanes.", "Termologia estuda calor."] } },
+        { level: "Médio", text: "Se um engenheiro precisar de construir um espelho refletor gigantesco para um telescópio astronómico, em qual área da Física Clássica ele deverá basear os seus estudos?", options: ["Acústica", "Termodinâmica", "Óptica", "Mecânica Quântica"], correctIndex: 2, explanation: { correctText: "A Óptica é o ramo da física que analisa os fenómenos relacionados com a luz, incluindo refração, lentes e espelhos.", otherOptions: ["Acústica estuda o som.", "Termodinâmica estuda o calor e trabalho.", "Mecânica Quântica estuda as partículas a nível subatómico."] } },
+        { level: "Fácil", text: "Para evitar confusões de medidas entre cientistas de diferentes países, instituiu-se o Sistema Internacional de Unidades (SI). Qual é a unidade padrão (base) do SI para medir TEMPO?", options: ["Hora (h)", "Minuto (min)", "Segundo (s)", "Milissegundo (ms)"], correctIndex: 2, explanation: { correctText: "Apesar de usarmos horas e minutos no dia a dia, a unidade oficial do SI para os cálculos físicos é o Segundo (s).", otherOptions: ["Hora e minuto são múltiplos do segundo, não a base.", "Milissegundo é um submúltiplo."] } },
+        { level: "Médio", text: "Uma armadilha muito comum em provas: no Sistema Internacional (SI), a unidade padrão para medir a MASSA de um corpo é o:", options: ["Grama (g)", "Miligrama (mg)", "Tonelada (t)", "Quilograma (kg)"], correctIndex: 3, explanation: { correctText: "O Quilograma (kg) é a ÚNICA unidade base do SI que já inclui um prefixo ('kilo'). O grama é frequentemente confundido como base, mas no SI a base é o kg.", otherOptions: ["Grama é usado no sistema CGS (centímetro, grama, segundo), mas não é a base do SI atual."] } },
+        { level: "Fácil", text: "Para realizar um projeto de construção no IFCE, os alunos precisam de medir a distância entre o portão principal e o bloco de laboratórios. No Sistema Internacional (SI), a unidade padrão de COMPRIMENTO é o:", options: ["Quilómetro (km)", "Metro (m)", "Centímetro (cm)", "Milha (mi)"], correctIndex: 1, explanation: { correctText: "O Metro (m) é a unidade fundamental de comprimento no SI. As outras (km, cm) são derivados (múltiplos e submúltiplos).", otherOptions: ["Milha é do sistema imperial britânico/americano."] } },
+        { level: "Médio", text: "Algumas grandezas físicas são formadas pela junção de duas ou mais unidades base do SI, sendo chamadas de 'Grandezas Derivadas'. A Velocidade, por exemplo, deriva do Comprimento e do Tempo. Qual a sua unidade no SI?", options: ["Quilómetros por hora (km/h)", "Metros por segundo (m/s)", "Centímetros por minuto (cm/min)", "Metros quadrados (m²)"], correctIndex: 1, explanation: { correctText: "Se o comprimento é em Metros (m) e o tempo é em Segundos (s), a velocidade padrão do SI tem de ser dada em Metros por Segundo (m/s).", otherOptions: ["Km/h é de uso prático nas estradas, mas não é a oficial do SI.", "m² é unidade de Área."] } },
+        { level: "Fácil", text: "Na Física, usamos prefixos para não escrevermos muitos zeros. O prefixo 'quilo' (k) como em 'quilograma' ou 'quilómetro' significa que devemos multiplicar o valor base por:", options: ["100", "1.000", "1.000.000", "0,001"], correctIndex: 1, explanation: { correctText: "O prefixo 'quilo' (k) vale 10³ ou 1.000. Assim, 1 km = 1.000 metros e 1 kg = 1.000 gramas.", otherOptions: ["100 é 'hecto'.", "1.000.000 é 'mega'.", "0,001 é 'mili'."] } },
+        { level: "Médio", text: "O prefixo 'mili' (m), comum na medição de pequenas distâncias (milímetro) ou volumes em química (mililitro), corresponde a dividir o valor principal por:", options: ["10", "100", "1.000", "1.000.000"], correctIndex: 2, explanation: { correctText: "O prefixo 'mili' significa a milésima parte (10⁻³). Logo, 1 milímetro (mm) é 1 metro dividido por 1.000 (0,001 m).", otherOptions: ["Dividir por 10 é 'deci'.", "Dividir por 100 é 'centi'.", "Dividir por um milhão é 'micro'."] } },
+        { level: "Difícil", text: "Numa experiência de Termologia, um aluno repara que a água ferve mais rápido quando a tampa da panela está fechada. Seguindo o Método Científico, qual é o próximo passo obrigatório após ele fazer esta 'Observação' inicial?", options: ["Criar uma lei da física imediata.", "Formular uma Pergunta/Problema e elaborar uma Hipótese.", "Publicar um artigo científico provando o facto.", "Ignorar a observação, pois foi um acaso."], correctIndex: 1, explanation: { correctText: "O Método Científico segue uma ordem lógica: Observação -> Problematização -> Hipótese (tentativa de explicação) -> Experiência controlada -> Conclusão.", otherOptions: ["Não se cria leis sem experimentar exaustivamente.", "Não se pode publicar sem testes."] } },
+        { level: "Médio", text: "Para escrever a velocidade da luz no vácuo (aproximadamente 300.000.000 m/s) de forma simples, usamos a Notação Científica. Qual é a forma correta de escrever este valor?", options: ["3 x 10⁶ m/s", "30 x 10⁷ m/s", "3 x 10⁸ m/s", "0,3 x 10⁹ m/s"], correctIndex: 2, explanation: { correctText: "Na notação científica, o número principal tem de ficar entre 1 e 9,99. Colocamos a vírgula depois do 3 e andamos 8 casas decimais para a direita (logo, 10⁸). 3 x 10⁸ m/s.", otherOptions: ["A regra da notação científica exige que o coeficiente base fique entre 1 e 10 (excluindo o 10)."] } },
+        { level: "Difícil", text: "O raio do átomo de hidrogénio é cerca de 0,00000000005 metros. Escrito na Notação Científica rigorosa, este valor corresponde a:", options: ["5 x 10¹¹ m", "5 x 10⁻¹¹ m", "0,5 x 10⁻¹⁰ m", "50 x 10⁻¹² m"], correctIndex: 1, explanation: { correctText: "Para que o número vire '5', a vírgula precisa andar 11 casas para a DIREITA. Como o número é muito pequeno (decimal), o expoente será negativo: 5 x 10⁻¹¹ m.", otherOptions: ["Expoente positivo é para números grandes (macroscópicos).", "A base da notação científica deve estar entre 1 e 9,99."] } },
+        { level: "Médio", text: "Uma grandeza ESCALAR é aquela que fica perfeitamente compreendida apenas com o número (módulo) e a unidade de medida. Qual das grandezas abaixo é estritamente ESCALAR?", options: ["Velocidade", "Força", "Temperatura", "Aceleração"], correctIndex: 2, explanation: { correctText: "Se eu disser 'Hoje estão 30ºC', tu entendes perfeitamente. A temperatura é Escalar. Não faz sentido dizer '30ºC para a direita' ou '30ºC para cima'.", otherOptions: ["Velocidade, Força e Aceleração precisam de direção e sentido (são Vetoriais)."] } },
+        { level: "Médio", text: "Uma grandeza VETORIAL necessita de três coisas para fazer sentido: Módulo (número), Direção (ex: horizontal) e Sentido (ex: para a direita). Qual das opções representa uma grandeza Vetorial?", options: ["A massa de um saco de cimento (50 kg).", "O tempo de duração de uma aula (50 minutos).", "A força feita para empurrar um carro enguiçado (500 N).", "A energia gasta numa corrida (2000 Joules)."], correctIndex: 2, explanation: { correctText: "A Força é Vetorial. Se eu digo 'faz força no carro', tens de perguntar: 'Em que direção? A empurrar ou a puxar (sentido)?'.", otherOptions: ["Massa, Tempo e Energia são grandezas Escalares."] } },
+        { level: "Difícil", text: "Massa e Peso são coisas diferentes na Física, embora no dia a dia as pessoas os confundam. A tua MASSA (medida em kg) é escalar e não muda, quer estejas na Terra ou na Lua. E o PESO?", options: ["Também é escalar e medido em kg.", "É uma Força (vetorial), medido em Newtons (N), e muda dependendo da gravidade do planeta.", "É o mesmo que massa, apenas um nome diferente.", "O peso só existe na água."], correctIndex: 1, explanation: { correctText: "O Peso é a força de atração gravitacional (P = massa × gravidade). Como a gravidade da Lua é menor, tu pesas menos lá, mas a quantidade de matéria (massa) do teu corpo continua exatamente a mesma.", otherOptions: ["Incorreto."] } },
+        { level: "Fácil", text: "Regra fundamental no IFCE: Um autocarro que faz a linha intermunicipal viaja a 72 km/h. Para resolver um problema de cinemática no SI, precisas converter essa velocidade para m/s. Qual é o valor?", options: ["15 m/s", "20 m/s", "36 m/s", "72.000 m/s"], correctIndex: 1, explanation: { correctText: "Regra de ouro: de km/h para m/s, DIVIDE-SE por 3,6. Portanto, 72 / 3,6 = 20 m/s.", otherOptions: ["Isso seria 54 km/h.", "Incorreto.", "Isso seria se a unidade pedida fosse m/h (metros por hora), o que é falso."] } },
+        { level: "Médio", text: "Se um atleta olímpico corre a uma velocidade média impressionante de 10 m/s, qual seria a sua velocidade se ele estivesse a conduzir um carro a essa mesma rapidez (em km/h)?", options: ["10 km/h", "20 km/h", "36 km/h", "100 km/h"], correctIndex: 2, explanation: { correctText: "Regra de ouro: de m/s para km/h, MULTIPLICA-SE por 3,6. Portanto, 10 × 3,6 = 36 km/h.", otherOptions: ["Incorreto.", "Incorreto.", "Incorreto."] } },
+        { level: "Difícil", text: "No laboratório de Hidráulica, uma bomba de água possui um reservatório de 1 metro cúbico (1 m³). Sabendo que a conversão de volume é vital, 1 m³ corresponde exatamente a quantos Litros de água?", options: ["10 Litros", "100 Litros", "1.000 Litros", "10.000 Litros"], correctIndex: 2, explanation: { correctText: "Memoriza isto para os exames: 1 metro cúbico (1 m³) tem exatamente 1.000 Litros (o tamanho daquelas caixas d'água azuis de telhado). O equivalente a 1 litro é apenas 1 decímetro cúbico (1 dm³).", otherOptions: ["Incorreto.", "Incorreto.", "Incorreto."] } },
+        { level: "Médio", text: "Para revestir uma sala do IFCE, é preciso medir a área do piso. Se um pequeno quadrado de cerâmica tem 1 m de lado, a sua área é 1 m². Contudo, quantos centímetros quadrados (cm²) cabem lá dentro?", options: ["100 cm²", "1.000 cm²", "10.000 cm²", "100.000 cm²"], correctIndex: 2, explanation: { correctText: "Como Área é lado x lado: 1 m = 100 cm. A área em cm² será (100 cm) × (100 cm) = 10.000 cm².", otherOptions: ["100 cm é apenas 1 metro linear, não a área ao quadrado.", "Incorreto."] } },
+        { level: "Fácil", text: "Um camião transporta 2 Toneladas (t) de ração para o campus de Agronomia. No Sistema Internacional (SI), para os cálculos de física, que valor de MASSA deve o aluno usar na fórmula?", options: ["2 kg", "200 kg", "2.000 kg", "20.000 kg"], correctIndex: 2, explanation: { correctText: "1 Tonelada (t) corresponde exatamente a 1.000 kg. Logo, 2 Toneladas = 2.000 kg. Esta é a unidade que entra nas fórmulas de força e energia.", otherOptions: ["Incorreto.", "Incorreto."] } },
+        { level: "Médio", text: "Num ensaio térmico, um material é aquecido durante 2 horas. Para colocar este tempo na fórmula oficial (no SI), o aluno terá de convertê-lo para segundos. Quantos segundos tem 2 horas?", options: ["120 s", "7.200 s", "3.600 s", "2.000 s"], correctIndex: 1, explanation: { correctText: "1 hora tem 60 minutos. 1 minuto tem 60 segundos. Logo, 1 hora tem (60 × 60) = 3.600 segundos. Duas horas terão o dobro: 7.200 segundos.", otherOptions: ["120s são 2 minutos.", "3.600s é 1 hora.", "Incorreto."] } },
+        { level: "Fácil", text: "Para iniciar o estudo do Movimento (Cinemática), o primeiro conceito é o de REFERENCIAL. O que diz o conceito de Referencial na física?", options: ["As leis da física só funcionam se estivermos parados.", "O estado de repouso ou de movimento de um objeto depende de quem (ou do quê) o está a observar.", "A velocidade máxima no universo é o referencial de luz.", "Tudo o que se move em linha reta é referencial nulo."], correctIndex: 1, explanation: { correctText: "Não existe 'movimento absoluto'. Tu estás sentado a ler isto (parado em relação à cadeira), mas estás a mover-te a milhares de km/h em relação ao Sol (porque a Terra gira). O referencial muda tudo!", otherOptions: ["Incorreto."] } },
+        { level: "Médio", text: "Imagina que estás sentado num comboio em movimento, e um colega teu está sentado na cadeira ao teu lado. Em relação ao teu colega, tu estás em (I) ________. Em relação a uma paragem de autocarro na estrada, tu estás em (II) ________.", options: ["(I) Movimento ; (II) Repouso", "(I) Repouso ; (II) Repouso", "(I) Repouso ; (II) Movimento", "(I) Movimento ; (II) Movimento"], correctIndex: 2, explanation: { correctText: "Como a distância entre ti e o colega NÃO muda no comboio, estás em Repouso em relação a ele. Como a distância entre ti e a paragem fora do comboio MUDA, estás em Movimento em relação a ela.", otherOptions: ["Incorreto."] } },
+        { level: "Difícil", text: "A Trajetória é a linha geométrica desenhada por um corpo em movimento. Se um avião voa em linha reta e larga uma caixa de mantimentos, qual é a trajetória da caixa VISTA PELO PILOTO do avião (que a deitou abaixo)?", options: ["Uma linha reta horizontal para a frente.", "Uma linha reta vertical para baixo.", "Uma curva parabólica perfeita.", "Um arco de círculo para trás."], correctIndex: 1, explanation: { correctText: "Como o piloto vai à mesma velocidade horizontal da caixa, ele só a vê afastar-se para o chão (devido à gravidade). Logo, o piloto vê a caixa a cair em linha Reta Vertical. (Quem está na terra, veria a caixa a fazer uma Parábola).", otherOptions: ["Um observador no solo veria a curva parabólica devido à inércia horizontal da caixa e à gravidade puxando para baixo."] } },
+        { level: "Difícil", text: "Conceito crítico para a prova: Um atleta dá 4 voltas completas (fechadas) numa pista de corrida de 400 metros circulares, parando exatamente na mesma linha onde começou (partida = chegada). Qual foi a DISTÂNCIA PERCORRIDA e qual foi o DESLOCAMENTO VETORIAL do atleta, respetivamente?", options: ["1600 m ; 1600 m", "1600 m ; 0 m", "400 m ; 0 m", "0 m ; 1600 m"], correctIndex: 1, explanation: { correctText: "A 'Distância' é a soma dos passos reais (4 × 400m = 1600m). O 'Deslocamento' é uma seta que liga o ponto inicial ao final. Como ele parou no mesmo lugar onde começou, ele não se 'deslocou' do ponto A (Deslocamento = 0).", otherOptions: ["Distância e Deslocamento só são iguais em linhas retas num único sentido."] } },
+        { level: "Médio", text: "Qual das sequências abaixo apresenta corretamente a ORDEM LÓGICA DE GRANDEZAS (do mais pequeno ao mais distante na escala do universo físico)?", options: ["Galáxia > Sistema Solar > Terra > Molécula > Átomo", "Átomo > Molécula > Terra > Sistema Solar > Galáxia", "Molécula > Átomo > Terra > Galáxia > Sistema Solar", "Terra > Átomo > Molécula > Sistema Solar > Galáxia"], correctIndex: 1, explanation: { correctText: "A Física estuda do infinitamente pequeno ao infinitamente grande. O átomo é menor que a molécula, que compõe a Terra, que orbita no Sistema Solar, que fica dentro da nossa Galáxia (Via Láctea).", otherOptions: ["A primeira opção lista do maior para o menor.", "A segunda inverte molécula/átomo e sistema solar/galáxia."] } },
+        { level: "Médio", text: "Em medições de laboratório, se a temperatura da água subir 10 graus, escrevemos 'A variação de temperatura foi de 10ºC'. Na física, o símbolo matemático universal (uma letra grega em forma de triângulo) que significa 'Variação' (Diferença entre o Final e o Inicial) é o:", options: ["Alfa (α)", "Ômega (Ω)", "Delta Maiúsculo (Δ)", "Pi (π)"], correctIndex: 2, explanation: { correctText: "O Delta (Δ) é muito usado na cinemática. Exemplo: Δt (Variação de tempo = Tempo final menos Tempo inicial) e ΔS (Deslocamento = Posição final menos Posição inicial).", otherOptions: ["Alfa é ângulo/raio.", "Ómega é resistência elétrica.", "Pi é geometria (3,14)."] } },
+        { level: "Fácil", text: "Se no estudo do eletromagnetismo leres que um fio de cobre mede 150 centímetros (cm), para aplicares as fórmulas básicas do SI, deves transformá-lo para metros (m). O prefixo 'centi' significa a centésima parte. Qual será o valor em metros?", options: ["0,15 m", "1,5 m", "15 m", "1500 m"], correctIndex: 1, explanation: { correctText: "Um metro tem 100 centímetros. Logo, divides os centímetros por 100 para voltar a metros. 150 / 100 = 1,5 metros.", otherOptions: ["Incorreto."] } },
+        { level: "Difícil", text: "O que é 'Ordem de Grandeza' num cálculo físico do Ensino Médio/Técnico?", options: ["É descobrir o número exato, com todas as casas decimais de precisão.", "É descobrir a potência de 10 mais próxima do valor real, para termos uma noção rápida da escala ou tamanho do problema.", "É a regra que proíbe usar números maiores que 10.", "É o estudo da gravidade."], correctIndex: 1, explanation: { correctText: "A ordem de grandeza serve para estimativas rápidas. Exemplo: não preciso saber o número exato de grãos de areia numa praia, mas sei que a 'Ordem de Grandeza' será altíssima (talvez na escala de 10²⁰), e não dezenas (10¹).", otherOptions: ["Isso é algarismos significativos e medição de precisão.", "Incorreto."] } },
+        { level: "Fácil", text: "Concluindo: No primeiro ano do Ensino Médio do IFCE (e nos exames de acesso), o foco inicial dos estudos será na CINEMÁTICA. O que a Cinemática estuda especificamente?", options: ["As forças de gravitação universal de Newton.", "O aquecimento das máquinas a vapor.", "A descrição matemática do Movimento dos corpos (como calcular velocidades, posições e tempos), sem se preocupar com as Forças que os empurraram.", "A natureza da luz dos espelhos retrovisores."], correctIndex: 2, explanation: { correctText: "A Cinemática (do grego kinema = movimento, de onde vem a palavra Cinema) foca na geometria do movimento (Tempo, Espaço, Velocidade, Aceleração). A Dinâmica virá depois para analisar as Forças (causas do movimento).", otherOptions: ["Forças de gravitação e empurrão pertencem à Dinâmica (outra parte da Mecânica)."] } }
+    ];
+
+    /* --- GESTÃO DE ESTADO (STATE) --- */
+    const quizState = {
+        currentIndex: 0,
+        userAnswers: new Array(questionsDatabase.length).fill(null),
+        confettiAnimationId: null
+    };
+
+    /* --- FUNCIONALIDADES DE PESQUISA (TEORIA) --- */
+    function initializeSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const contentGroups = document.querySelectorAll('.content-group');
+        const noResultsMsg = document.getElementById('no-results');
+
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', function(event) {
+            const searchTerm = normalizeText(event.target.value);
+            let totalVisibleElements = 0;
+            
+            contentGroups.forEach(group => {
+                const groupContent = normalizeText(group.textContent);
+                const isMatch = groupContent.includes(searchTerm);
+                
+                group.style.display = isMatch ? 'flex' : 'none';
+                if (isMatch) totalVisibleElements++;
+            });
+            
+            noResultsMsg.style.display = totalVisibleElements === 0 ? 'block' : 'none';
+        });
+    }
+
+    function normalizeText(text) {
+        return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    /* --- CONTROLO DE VISTAS (VIEWS) --- */
+    function changeApplicationView(viewName) {
+        const views = ['viewExplanation', 'viewPractice', 'viewResult'];
+        
+        views.forEach(viewId => document.getElementById(viewId).classList.remove('active'));
+        
+        const quizFooter = document.getElementById('quizFooter');
+        if (quizFooter) quizFooter.style.display = 'none';
+
+        if (viewName === 'explanation') {
+            document.getElementById('viewExplanation').classList.add('active');
+            document.getElementById('btnExp').classList.add('active');
+            document.getElementById('btnPrac').classList.remove('active');
+        } else if (viewName === 'practice') {
+            document.getElementById('viewPractice').classList.add('active');
+            if (quizFooter) quizFooter.style.display = 'flex';
+            document.getElementById('btnExp').classList.remove('active');
+            document.getElementById('btnPrac').classList.add('active');
+            
+            renderCurrentQuestion();
+            renderNavigationMap();
+        } else if (viewName === 'result') {
+            document.getElementById('viewResult').classList.add('active');
+        }
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* --- GERAÇÃO DE INTERFACE DO QUIZ --- */
+    function getDifficultyBadgeClass(level) {
+        const mapping = { 'Fácil': 'dif-facil', 'Médio': 'dif-medio', 'Difícil': 'dif-dificil' };
+        return mapping[level] || 'dif-facil';
+    }
+
+    function buildOptionsHTML(question, selectedAnswerIndex) {
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        return question.options.map((optionText, optionIndex) => {
+            let cssClass = '';
+            
+            if (selectedAnswerIndex !== null) {
+                if (optionIndex === question.correctIndex) cssClass = 'correct';
+                else if (optionIndex === selectedAnswerIndex) cssClass = 'wrong';
+                else cssClass = 'disabled';
+            }
+
+            const isDisabled = selectedAnswerIndex !== null ? 'disabled' : '';
+
+            return `
+                <button class="option-btn ${cssClass}" onclick="handleOptionSelection(${optionIndex})" ${isDisabled}>
+                    <div class="opt-circle">${alphabet[optionIndex]}</div>
+                    <div>${optionText}</div>
+                </button>
+            `;
+        }).join('');
+    }
+
+    function buildFeedbackHTML(question, selectedAnswerIndex) {
+        const isCorrect = selectedAnswerIndex === question.correctIndex;
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        const titleClass = isCorrect ? 'success' : 'error';
+        const titleText = isCorrect ? '✅ Raciocínio Correto!' : '❌ Diagnóstico de Falha!';
+        
+        const distortionsHTML = question.explanation.otherOptions.map((explanationText, idx) => {
+            if (idx === question.correctIndex) return '';
+            return `<div class="feedback-item wrong-opt"><strong>${alphabet[idx]})</strong> ${explanationText}</div>`;
+        }).join('');
+
+        return `
+            <div class="feedback-box show">
+                <div class="feedback-title ${titleClass}" style="color: ${isCorrect ? 'var(--correct-border)' : 'var(--wrong-border)'}">${titleText}</div>
+                <div class="feedback-item correct-opt"><strong>O Facto Científico:</strong> ${question.options[question.correctIndex]}</div>
+                <div style="margin-top:15px;font-size:1rem;color:var(--text-color);margin-bottom:15px;font-weight:600;">${question.explanation.correctText}</div>
+                <div style="margin-top:15px;border-top:2px dashed var(--theme-medium);padding-top:15px;">
+                    <small style="color:var(--theme-dark);"><strong>Análise das Distorções:</strong></small>
+                    ${distortionsHTML}
+                </div>
+            </div>
+        `;
+    }
+
+    function renderCurrentQuestion() {
+        const container = document.getElementById('quizContainer');
+        if (!container) return;
+
+        const question = questionsDatabase[quizState.currentIndex];
+        const selectedAnswerIndex = quizState.userAnswers[quizState.currentIndex];
+        const badgeClass = getDifficultyBadgeClass(question.level);
+        
+        let feedbackHTML = selectedAnswerIndex !== null ? buildFeedbackHTML(question, selectedAnswerIndex) : '';
+
+        container.innerHTML = `
+            <div class="quiz-question-card">
+                <span class="difficulty-badge ${badgeClass}">${question.level}</span>
+                <div style="margin-bottom:25px;">
+                    <span class="quiz-question-counter">QUESTÃO ${quizState.currentIndex + 1} DE ${questionsDatabase.length}</span>
+                    <h2 class="quiz-question-text">${question.text}</h2>
+                </div>
+                <div class="options-list">
+                    ${buildOptionsHTML(question, selectedAnswerIndex)}
+                </div>
+                ${feedbackHTML}
+            </div>
+        `;
+        
+        updateNavigationButtons();
+    }
+
+    /* --- LÓGICA DO QUIZ --- */
+    function handleOptionSelection(selectedIndex) {
+        if (quizState.userAnswers[quizState.currentIndex] !== null) return;
+        
+        quizState.userAnswers[quizState.currentIndex] = selectedIndex;
+        const isCorrect = selectedIndex === questionsDatabase[quizState.currentIndex].correctIndex;
+        
+        if (isCorrect) startSuccessAnimation();
+        else triggerErrorShakeEffect();
+        
+        renderCurrentQuestion();
+        renderNavigationMap();
+    }
+
+    function triggerErrorShakeEffect() {
+        const container = document.getElementById('quizContainer');
+        if (container) { 
+            container.classList.remove('shake-effect'); 
+            void container.offsetWidth; 
+            container.classList.add('shake-effect'); 
+            setTimeout(() => container.classList.remove('shake-effect'), 500); 
+        }
+    }
+
+    /* --- ANIMAÇÕES (CONFETTI) --- */
+    function startSuccessAnimation() {
+        const duration = 1500;
+        const end = Date.now() + duration;
+        
+        stopSuccessAnimation();
+        
+        function animateFrame() {
+            if(window.confetti && typeof confetti === 'function') {
+                const config = { particleCount: 5, spread: 55, colors: ['#8B5CF6', '#F59E0B', '#06B6D4', '#4C1D95'] };
+                confetti({ ...config, angle: 60, origin: { x: 0, y: 0.6 } });
+                confetti({ ...config, angle: 120, origin: { x: 1, y: 0.6 } });
+            }
+            if (Date.now() < end) quizState.confettiAnimationId = requestAnimationFrame(animateFrame);
+        }
+        animateFrame();
+    }
+
+    function stopSuccessAnimation() {
+        if (window.confetti && typeof confetti.reset === 'function') confetti.reset(); 
+        if (quizState.confettiAnimationId) {
+            cancelAnimationFrame(quizState.confettiAnimationId);
+            quizState.confettiAnimationId = null;
+        }
+    }
+
+    /* --- NAVEGAÇÃO MAPA --- */
+    function renderNavigationMap() {
+        const mapContainer = document.getElementById('qMap');
+        if (!mapContainer) return;
+        
+        mapContainer.innerHTML = questionsDatabase.map((question, index) => {
+            const isCurrent = index === quizState.currentIndex;
+            const userAnswer = quizState.userAnswers[index];
+            const hasAnswered = userAnswer !== null;
+            const isCorrect = userAnswer === question.correctIndex;
+            
+            let cssClass = 'map-dot';
+            if (isCurrent) cssClass += ' active';
+            if (hasAnswered) cssClass += isCorrect ? ' answered-correct' : ' answered-wrong';
+            
+            return `<div class="${cssClass}" onclick="goToQuestion(${index})">${index + 1}</div>`;
+        }).join('');
+        
+        setTimeout(() => { 
+            const activeDot = mapContainer.querySelector('.map-dot.active'); 
+            if (activeDot) activeDot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); 
+        }, 50);
+    }
+
+    function goToQuestion(targetIndex) { 
+        stopSuccessAnimation();
+        quizState.currentIndex = targetIndex; 
+        renderCurrentQuestion(); 
+        renderNavigationMap(); 
+    }
+    
+    function navigateQuestion(directionOffset) { 
+        const nextIndex = quizState.currentIndex + directionOffset; 
+        if (nextIndex >= 0 && nextIndex < questionsDatabase.length) goToQuestion(nextIndex); 
+    }
+
+    function updateNavigationButtons() {
+        const btnPrev = document.getElementById('btnPrev');
+        const btnNext = document.getElementById('btnNext');
+        
+        if (btnPrev) btnPrev.disabled = (quizState.currentIndex === 0);
+        
+        if (btnNext) {
+            const isLastQuestion = quizState.currentIndex === questionsDatabase.length - 1;
+            if (isLastQuestion) { 
+                btnNext.textContent = "Finalizar Avaliação"; 
+                btnNext.onclick = finishQuiz; 
+            } else { 
+                btnNext.textContent = "Próxima ➡️"; 
+                btnNext.onclick = () => navigateQuestion(1); 
+            }
+        }
+    }
+
+    /* --- CÁLCULO DE RESULTADOS --- */
+    function calculateStars(percent) {
+        if (percent === 100) return "⭐⭐⭐⭐⭐";
+        if (percent >= 80) return "⭐⭐⭐⭐";
+        if (percent >= 60) return "⭐⭐⭐";
+        if (percent >= 40) return "⭐⭐";
+        if (percent > 0) return "⭐";
+        return "🌑"; // zero stars
+    }
+
+    function finishQuiz() {
+        const unansweredCount = quizState.userAnswers.filter(answer => answer === null).length;
+        
+        if (unansweredCount > 0) {
+            const confirmMessage = `Existem ${unansweredCount} questões por responder. Quer terminar mesmo assim (as em branco serão dadas como erradas)?`;
+            if (!confirm(confirmMessage)) return;
+        }
+
+        stopSuccessAnimation();
+
+        const correctAnswersCount = quizState.userAnswers.filter((answer, index) => answer === questionsDatabase[index].correctIndex).length;
+        const totalQuestions = questionsDatabase.length;
+        const percentageScore = Math.round((correctAnswersCount / totalQuestions) * 100);
+        const isApproved = percentageScore >= 80;
+        
+        renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved);
+        changeApplicationView('result');
+    }
+
+    function renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved) {
+        document.getElementById('finalPercent').textContent = `${percentageScore}%`;
+        document.getElementById('finalScoreText').textContent = `Acertaste ${correctAnswersCount} de ${totalQuestions}`;
+        document.getElementById('finalStars').textContent = calculateStars(percentageScore);
+        
+        const reviewContainer = document.getElementById('review-container');
+        const actionButtonsContainer = document.getElementById('action-buttons');
+        
+        let summaryHTML = '';
+
+        if (isApproved) {
+            summaryHTML += `
+                <div class="result-summary-box success">
+                    <strong>🎉 EXCELENTE CIENTISTA!</strong> A tua base em Física e conhecimentos do Sistema Internacional estão perfeitos para avançar para a Cinemática.
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REPETIR PARA 100%</button>`;
+        } else {
+            summaryHTML += `
+                <div class="result-summary-box error">
+                    <strong>⚠️ ATENÇÃO!</strong> Foste avaliado abaixo da meta (80%). Revisa as conversões do Sistema Internacional e as regras da Notação Científica.
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REFAZER AVALIAÇÃO</button>`;
+        }
+        
+        if (correctAnswersCount < totalQuestions) {
+            summaryHTML += '<h4 style="margin-bottom:15px; color:var(--text-color); font-size:1.15rem;">Revisão das Falhas:</h4>';
+            questionsDatabase.forEach((question, index) => {
+                const userAnswerIndex = quizState.userAnswers[index];
+                if (userAnswerIndex !== question.correctIndex) {
+                    const userAnswerText = userAnswerIndex === null ? "Deixaste em branco" : question.options[userAnswerIndex];
+                    const correctAnswerText = question.options[question.correctIndex];
+                    
+                    summaryHTML += `
+                        <div class="error-log-item">
+                            <strong style="color:var(--theme-dark); font-size:1.05rem; display:block; margin-bottom:8px;">Q${index + 1}: ${question.text}</strong>
+                            <span style="color:var(--wrong-border); font-weight: 600; display:block; margin-bottom:5px;">A tua resposta: ${userAnswerText}</span>
+                            <span style="color:var(--correct-border); font-weight: 700; display:block;">A Resposta Exata: ${correctAnswerText}</span>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        reviewContainer.innerHTML = summaryHTML;
+    }
+
+    function resetQuiz() { 
+        quizState.userAnswers = new Array(questionsDatabase.length).fill(null); 
+        quizState.currentIndex = 0; 
+        changeApplicationView('practice'); 
+    }
+    
+    // START APPLICATION
+    initializeSearch();
+    changeApplicationView('explanation');
+</script>
+</body>
+</html>

@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Física: Velocidade Média - Promover</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* --- VARIÁVEIS DE COR E TEMA: CRONO & CIANO (Física Exata) --- */
+        :root {
+            --bg-color: #ECFEFF; /* Ciano muito claro */
+            --text-color: #083344; /* Ciano quase preto */
+            --border-color: #164E63; /* Contorno escuro azul-petróleo */
+            --white: #FFFFFF;
+            
+            --theme-light: #CFFAFE; /* Ciano pastel */
+            --theme-medium: #06B6D4; /* Ciano vivo */
+            --theme-dark: #0891B2; /* Azul-petróleo profundo */
+            --theme-contrast: #F59E0B; /* Âmbar (Atenção/Alerta) */
+            --theme-accent: #EF4444; /* Vermelho (Travagem/Erro) */
+            --theme-text-active: #FFFFFF;
+            
+            --correct-bg: #D1FAE5;
+            --correct-border: #059669;
+            --wrong-bg: #FFE4E6;
+            --wrong-border: #BE123C;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 15px 120px 15px;
+            background-image: linear-gradient(rgba(6, 182, 212, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(6, 182, 212, 0.1) 1px, transparent 1px);
+            background-size: 25px 25px;
+        }
+
+        /* --- ANIMAÇÕES --- */
+        @keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1) rotate(-5deg); color: var(--theme-contrast); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+        .pulse-effect { animation: pulse 2s infinite; display: inline-block; }
+        .shake-effect { animation: shake 0.4s ease-in-out; }
+
+        /* --- LAYOUT PRINCIPAL --- */
+        .container { width: 100%; max-width: 650px; display: flex; flex-direction: column; gap: 25px; }
+        .logo-header { display: flex; flex-direction: column; align-items: center; padding: 15px 0 25px 0; text-align: center; }
+        .css-logo { font-size: 1.5rem; font-weight: 900; color: var(--theme-text-active); text-transform: uppercase; letter-spacing: -1px; border: 3px solid var(--border-color); padding: 8px 24px; border-radius: 12px; background: var(--theme-dark); box-shadow: 4px 4px 0px var(--theme-contrast); margin-bottom: 15px; transform: rotate(-2deg); }
+        h1 { font-size: 2rem; font-weight: 900; color: var(--text-color); text-transform: uppercase; letter-spacing: -0.5px; line-height: 1.1; }
+        .subtitle { font-size: 1rem; color: var(--white); font-weight: 700; margin-top: 5px; background: var(--theme-contrast); padding: 4px 12px; border-radius: 8px; border: 2px solid var(--border-color); }
+
+        /* --- NAVEGAÇÃO --- */
+        .toggle-container { background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 6px; display: flex; box-shadow: 4px 4px 0px var(--border-color); position: sticky; top: 15px; z-index: 50; }
+        .toggle-btn { flex: 1; border: none; background: none; padding: 12px 0; border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.05rem; color: var(--text-color); cursor: pointer; transition: all 0.2s ease; }
+        .toggle-btn.active { background-color: var(--theme-dark); color: var(--theme-text-active); border: 2px solid var(--border-color); box-shadow: 2px 2px 0px var(--border-color); }
+
+        .view-section { display: none; animation: fadeIn 0.3s ease; flex-direction: column; gap: 35px; }
+        .view-section.active { display: flex; }
+
+        /* --- PESQUISA --- */
+        .search-container { position: relative; width: 100%; }
+        .search-input { width: 100%; padding: 16px 20px 16px 55px; border: 3px solid var(--border-color); border-radius: 12px; background-color: var(--white); font-family: 'Poppins', sans-serif; font-size: 1.05rem; font-weight: 600; color: var(--text-color); box-shadow: 4px 4px 0px var(--border-color); outline: none; transition: all 0.2s ease; }
+        .search-input:focus { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--theme-contrast); border-color: var(--theme-dark); }
+        .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 1.4rem; }
+        #no-results { text-align: center; color: var(--wrong-border); font-weight: 800; display: none; background: var(--wrong-bg); padding: 15px; border: 3px solid var(--wrong-border); border-radius: 8px; }
+
+        /* --- TEORIA --- */
+        .content-group { display: flex; flex-direction: column; position: relative; padding-top: 15px; }
+        .section-badge { display: inline-flex; align-items: center; gap: 10px; background-color: var(--theme-dark); color: var(--white); font-size: 1.1rem; font-weight: 800; padding: 8px 20px; border-radius: 8px; border: 3px solid var(--border-color); box-shadow: 3px 3px 0px var(--theme-contrast); text-transform: uppercase; position: absolute; top: -5px; left: 15px; z-index: 10; transform: rotate(-1.5deg); }
+        .theory-box { display: flex; flex-direction: column; padding: 35px 25px 25px 35px; border-radius: 12px; background-color: var(--white); border: 3px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); font-weight: 500; font-size: 1rem; line-height: 1.7; position: relative; overflow: hidden; gap: 20px; border-left: 14px solid var(--theme-medium); }
+        .theory-box h3 { font-size: 1.35rem; font-weight: 900; color: var(--theme-dark); margin-bottom: 5px; display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px; }
+        .theory-box h4 { font-size: 1.1rem; font-weight: 800; color: var(--text-color); margin-top: 10px; border-bottom: 2px solid var(--theme-light); padding-bottom: 5px; }
+        
+        .inline-example { display: block; width: fit-content; max-width: 100%; margin-top: 6px; margin-bottom: 6px; padding: 6px 14px; background-color: var(--theme-light); border: 2px solid var(--border-color); border-radius: 8px; font-size: 1.2rem; color: var(--text-color); font-weight: 800; letter-spacing: 0.5px; box-shadow: 2px 2px 0px rgba(0,0,0,0.05); text-align: center; }
+        .visual-area { background: var(--bg-color); border: 3px dashed var(--theme-medium); border-radius: 12px; padding: 25px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; width: 100%; }
+        
+        .highlight-box { background-color: #FEF3C7; border: 3px solid var(--border-color); border-left: 8px solid var(--theme-contrast); padding: 18px 20px; border-radius: 8px; font-size: 0.95rem; color: #78350F; font-weight: 600; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); }
+        .highlight-box.red { background-color: #FEE2E2; border-left-color: #EF4444; color: #7F1D1D; }
+
+        /* --- CARDS DE CÁLCULO --- */
+        .c-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; width: 100%; margin-top: 10px; }
+        .c-card { flex: 1 1 calc(50% - 15px); min-width: 130px; border-radius: 12px; padding: 15px 10px; text-align: center; border: 3px solid var(--border-color); display: flex; flex-direction: column; align-items: center; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); background-color: var(--white); transition: transform 0.2s; }
+        .c-card:hover { transform: translateY(-3px); }
+        .c-icon { font-size: 2.8rem; margin-bottom: 8px; line-height: 1; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.15)); }
+        .c-title { font-size: 1.05rem; font-weight: 900; margin-bottom: 4px; text-transform: uppercase; color: var(--theme-dark); }
+        .c-desc { font-size: 0.85rem; font-weight: 600; color: var(--text-color); margin-bottom: 4px; line-height: 1.3; }
+
+        /* --- BOTÕES GERAIS --- */
+        .btn-action { width: 100%; padding: 20px; background-color: var(--theme-dark); color: white; border: 3px solid var(--border-color); border-radius: 12px; font-size: 1.15rem; font-weight: 900; cursor: pointer; box-shadow: 6px 6px 0px var(--theme-contrast); transition: all 0.1s; text-transform: uppercase; margin-top: 10px; }
+        .btn-action:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0px var(--theme-contrast); }
+
+        /* --- QUIZ UI --- */
+        .difficulty-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; border: 2px solid var(--border-color); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
+        .dif-facil { background: #D1FAE5; color: #065F46; }
+        .dif-medio { background: #FEF08A; color: #713F12; }
+        .dif-dificil { background: #FECACA; color: #7F1D1D; }
+
+        .question-map { display: flex; gap: 8px; overflow-x: auto; padding: 10px 5px; margin-bottom: 20px; white-space: nowrap; scroll-behavior: smooth; }
+        .question-map::-webkit-scrollbar { display: none; }
+        .map-dot { min-width: 38px; height: 38px; border: 2px solid var(--border-color); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; color: var(--theme-dark); background: white; cursor: pointer; transition: all 0.2s; }
+        .map-dot.active { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); transform: scale(1.15); }
+        .map-dot.answered-correct { background-color: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .map-dot.answered-wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .quiz-question-card { border: 4px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); padding: 30px; border-radius: 16px; background: var(--white); }
+        .quiz-question-counter { font-size: 0.85rem; font-weight: 900; color: var(--theme-dark); letter-spacing: 1px; }
+        .quiz-question-text { font-size: 1.2rem; margin-top: 8px; color: var(--text-color); font-weight: 800; line-height: 1.5; margin-bottom: 25px;}
+
+        .option-btn { display: flex; align-items: center; width: 100%; padding: 18px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.1s ease; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 600; text-align: left; color: var(--text-color); }
+        .option-btn:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px var(--theme-contrast); }
+        .opt-circle { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--border-color); margin-right: 15px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.05rem; flex-shrink: 0; background: var(--theme-light); color: var(--theme-dark); }
+        .option-btn.correct { background-color: var(--correct-bg); border-color: var(--correct-border); box-shadow: 3px 3px 0px var(--correct-border); }
+        .option-btn.correct .opt-circle { background-color: var(--correct-border); color: white; border-color: var(--correct-border); }
+        .option-btn.wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); opacity: 0.9; box-shadow: none; }
+        .option-btn.wrong .opt-circle { background-color: var(--wrong-border); color: white; border-color: var(--wrong-border); }
+        .option-btn.disabled { pointer-events: none; opacity: 0.7; }
+
+        /* --- FEEDBACK DA QUESTÃO --- */
+        .feedback-box { display: block; margin-top: 25px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 25px; animation: slideUp 0.3s ease-out; box-shadow: 5px 5px 0px rgba(0,0,0,0.1); }
+        .feedback-title { font-weight: 900; text-transform: uppercase; font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .feedback-item { margin-bottom: 10px; font-size: 0.95rem; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); line-height: 1.5; font-weight: 500; }
+        .feedback-item.correct-opt { background: var(--correct-bg); border-color: var(--correct-border); color: #064E3B; font-weight: 700; box-shadow: 3px 3px 0px var(--correct-border); }
+        .feedback-item.wrong-opt { background: #F1F5F9; border-color: #94A3B8; color: #475569; border-style: dashed; margin-top: 8px; }
+
+        /* --- RESULTADOS --- */
+        .result-card { background: white; border: 4px solid var(--border-color); border-radius: 16px; padding: 40px 20px; box-shadow: 8px 8px 0px var(--border-color); margin-bottom: 30px; text-align: center; }
+        .stars-container { font-size: 2.5rem; margin: 15px 0; letter-spacing: 5px; }
+        .percentage-big { font-size: 5rem; font-weight: 900; color: var(--theme-dark); line-height: 1; margin: 15px 0; text-shadow: 4px 4px 0px var(--theme-contrast); }
+        
+        .result-summary-box { padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 3px solid; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); }
+        .result-summary-box.success { background: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .result-summary-box.error { background: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .error-log-item { margin-bottom: 15px; padding: 20px; background: var(--bg-color); border-radius: 12px; border: 3px dashed var(--theme-medium); text-align: left;}
+
+        /* --- RODAPÉ DE NAVEGAÇÃO --- */
+        .quiz-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--white); border-top: 3px solid var(--border-color); padding: 15px 20px; display: none; justify-content: center; gap: 20px; z-index: 100; box-shadow: 0px -4px 10px rgba(0,0,0,0.05); }
+        .nav-btn { padding: 15px 30px; border-radius: 12px; font-weight: 900; border: 3px solid var(--border-color); cursor: pointer; box-shadow: 3px 3px 0px var(--border-color); font-family: 'Poppins', sans-serif; text-transform: uppercase; background: white; color: var(--text-color); font-size: 1rem; transition: transform 0.1s; }
+        .nav-btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 0px 0px 0px transparent; }
+        .btn-next { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); border-color: var(--border-color); }
+        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <header class="logo-header">
+            <div class="css-logo"><span class="pulse-effect">⏱️</span> PROMOVER</div>
+            <h1>Física / 9º Ano</h1>
+            <p class="subtitle">Cinemática: Velocidade Média</p>
+        </header>
+
+        <div class="toggle-container">
+            <button class="toggle-btn active" id="btnExp" onclick="changeApplicationView('explanation')">📘 Teoria</button>
+            <button class="toggle-btn" id="btnPrac" onclick="changeApplicationView('practice')">🧠 Prática (30)</button>
+        </div>
+
+        <!-- VISTA: TEORIA -->
+        <main id="viewExplanation" class="view-section active">
+            
+            <div class="search-container">
+                <span class="search-icon" aria-hidden="true">🔍</span>
+                <input type="text" id="searchInput" class="search-input" aria-label="Pesquisar conteúdo" placeholder="Pesquisar conceito... (ex: Vm, Ponte, Conversão)">
+            </div>
+            <div id="no-results"><p>😕 Termo não encontrado na teoria.</p></div>
+
+            <section class="content-group">
+                <div class="section-badge">🏎️ 1. O Conceito Fundamental</div>
+                <article class="theory-box search-target">
+                    <h3>O que é a Velocidade Média?</h3>
+                    <p>A Velocidade Escalar Média (<strong>Vm</strong>) indica o quão rápido um corpo muda de posição ao longo do tempo. É como se imaginasses que um carro fez a viagem toda a uma velocidade constante, ignorando as travagens e as paragens.</p>
+                    
+                    <div class="inline-example">Vm = ΔS / Δt</div>
+                    
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li><strong>ΔS (Delta S):</strong> O deslocamento total. (Posição Final - Posição Inicial).</li>
+                        <li><strong>Δt (Delta t):</strong> O tempo TOTAL gasto no relógio. <strong>ATENÇÃO:</strong> Tens de incluir o tempo em que o veículo esteve parado nas estações de serviço ou no trânsito!</li>
+                    </ul>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">🔄 2. A Regra de Ouro (3,6)</div>
+                <article class="theory-box search-target">
+                    <h3>As Conversões Obrigatórias</h3>
+                    <p>Nos exames do IFCE, o texto dá a velocidade em <strong>km/h</strong> (carros), mas as distâncias estão em <strong>metros (m)</strong> ou o tempo em <strong>segundos (s)</strong>. Nunca podes misturar unidades!</p>
+                    
+                    <div class="visual-area" style="background: transparent; border: none; padding: 0;">
+                        <div class="c-grid">
+                            <div class="c-card">
+                                <div class="c-icon">➗</div>
+                                <div class="c-title">De km/h para m/s</div>
+                                <div class="c-desc">DIVIDE por 3,6.<br><em>Ex: 72 km/h ÷ 3,6 = 20 m/s</em></div>
+                            </div>
+                            <div class="c-card">
+                                <div class="c-icon">✖️</div>
+                                <div class="c-title">De m/s para km/h</div>
+                                <div class="c-desc">MULTIPLICA por 3,6.<br><em>Ex: 10 m/s × 3,6 = 36 km/h</em></div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">🚆 3. O Problema do Comboio</div>
+                <article class="theory-box search-target">
+                    <h3>Corpo Extenso vs Ponte</h3>
+                    <p>Quando um corpo grande (um comboio ou camião) tem de atravessar uma ponte ou túnel, o seu próprio tamanho interfere no cálculo. Ele só termina de atravessar quando o <strong>último vagão</strong> sair da ponte.</p>
+                    
+                    <div class="highlight-box">
+                        <strong>O Truque:</strong> O deslocamento total (ΔS) será sempre a SOMA do tamanho do túnel/ponte com o tamanho do próprio comboio.<br>
+                        <em>ΔS = L_ponte + L_comboio</em>
+                    </div>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">⚠️ 4. A Armadilha das Metades</div>
+                <article class="theory-box search-target">
+                    <h3>Não faças a Média Simples!</h3>
+                    <p>O erro número 1 dos alunos: Um carro faz metade da viagem a 40 km/h e a outra metade a 60 km/h. O aluno soma (40+60) e divide por dois, dizendo que a Vm = 50 km/h. <strong>ISSO ESTÁ ERRADO!</strong></p>
+                    
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li>O carro passa <strong>mais tempo</strong> a andar a 40 km/h (pois vai mais devagar) do que a 60 km/h.</li>
+                        <li>A Velocidade Média puxa sempre mais para a velocidade menor, pois o corpo gasta mais tempo nela. (Neste exemplo, a Vm real seria 48 km/h).</li>
+                    </ul>
+
+                    <div class="highlight-box red">
+                        <strong>Fórmula Secreta:</strong> Se a distância for dividida em DUAS metades IGUAIS, usa esta fórmula mágica:<br>
+                        <strong>Vm = (2 × V1 × V2) / (V1 + V2)</strong>
+                    </div>
+                </article>
+            </section>
+
+            <button class="btn-action" onclick="changeApplicationView('practice')">
+                Iniciar a Avaliação (30 Questões) ➜
+            </button>
+        </main>
+
+        <!-- VISTA: PRÁTICA (QUIZ) -->
+        <main id="viewPractice" class="view-section">
+            <div style="margin-bottom: 20px; background-color: var(--white); padding: 15px; border-radius: 12px; border: 3px solid var(--border-color); box-shadow: 4px 4px 0px var(--border-color);">
+                <h2 style="color:var(--theme-dark); font-weight:900; margin-bottom: 5px;">A Prova de Fogo - IFCE</h2>
+                <p style="color: var(--theme-contrast); font-size: 0.95rem; font-weight:600;">
+                    30 questões de cálculo de velocidade. Atenção máxima às conversões (km/h para m/s). Acerta <strong>80% (24/30)</strong>.
+                </p>
+            </div>
+            
+            <div class="question-map" id="qMap"></div>
+            <div id="quizContainer" style="margin-bottom: 40px;"></div>
+        </main>
+
+        <!-- VISTA: RESULTADOS -->
+        <main id="viewResult" class="view-section">
+            <div class="result-card">
+                <h2 style="font-weight:900; text-transform:uppercase;">Relatório Final</h2>
+                <div class="stars-container" id="finalStars">⭐⭐⭐</div>
+                <div class="percentage-big" id="finalPercent">0%</div>
+                <p style="font-size:1.2rem; font-weight:700; color:#555;" id="finalScoreText">Acertaste 0 de 30</p>
+                <div id="review-container" style="text-align: left; margin-top: 20px;"></div>
+            </div>
+            <div id="action-buttons"></div>
+        </main>
+
+    </div>
+
+    <!-- RODAPÉ DE NAVEGAÇÃO -->
+    <footer class="quiz-footer" id="quizFooter">
+        <button class="nav-btn btn-prev" id="btnPrev" onclick="navigateQuestion(-1)">Anterior</button>
+        <button class="nav-btn btn-next" id="btnNext" onclick="navigateQuestion(1)">Próxima</button>
+    </footer>
+
+<script>
+    /* --- ESTRUTURA DE DADOS (BASE DE QUESTÕES - NÍVEL IFCE TÉCNICO INTEGRADO) --- */
+    const questionsDatabase = [
+        { level: "Fácil", text: "Qual é a fórmula base que define a Velocidade Escalar Média (Vm) na cinemática clássica?", options: ["Vm = Massa / Tempo", "Vm = Tempo / Deslocamento", "Vm = Deslocamento (ΔS) / Tempo Total (Δt)", "Vm = Aceleração × Tempo"], correctIndex: 2, explanation: { correctText: "A Velocidade Média é exatamente a razão (divisão) entre o espaço percorrido (ΔS) e o intervalo de tempo gasto (Δt).", otherOptions: ["As outras são invenções ou fórmulas de aceleração."] } },
+        { level: "Fácil", text: "No Sistema Internacional de Unidades (SI), qual é a unidade oficial e obrigatória para a Velocidade Média?", options: ["Quilómetros por hora (km/h)", "Metros por segundo (m/s)", "Centímetros por minuto (cm/min)", "Nó náutico"], correctIndex: 1, explanation: { correctText: "Como o Comprimento é medido em Metros (m) e o Tempo em Segundos (s), a velocidade base do SI tem de ser metros por segundo (m/s).", otherOptions: ["km/h é do sistema prático rodoviário."] } },
+        { level: "Fácil", text: "Uma conversão que tens de saber de cor: para converter uma velocidade dada em km/h para m/s, o que deves fazer matematicamente?", options: ["Multiplicar o valor por 3,6.", "Dividir o valor por 3,6.", "Multiplicar por 10.", "Dividir por 1000."], correctIndex: 1, explanation: { correctText: "De km/h para m/s divide-se por 3,6. O motivo é que 1 km = 1000 m e 1 h = 3600 s. (1000 / 3600 = 1 / 3,6).", otherOptions: ["Multiplicar por 3,6 é de m/s para km/h."] } },
+        { level: "Médio", text: "Um carro move-se numa rodovia com a velocidade de 72 km/h. Qual é a sua velocidade expressa no Sistema Internacional (m/s)?", options: ["10 m/s", "15 m/s", "20 m/s", "25 m/s"], correctIndex: 2, explanation: { correctText: "Basta dividir por 3,6. 72 ÷ 3,6 = 20 m/s.", otherOptions: ["10 m/s = 36 km/h", "15 m/s = 54 km/h", "25 m/s = 90 km/h"] } },
+        { level: "Médio", text: "Durante os testes de atletismo do IFCE, um estudante atinge a incrível velocidade de 10 m/s numa corrida. Se um autocarro estivesse ao seu lado na estrada com a mesma rapidez, qual seria o valor no velocímetro do autocarro (em km/h)?", options: ["10 km/h", "20 km/h", "36 km/h", "72 km/h"], correctIndex: 2, explanation: { correctText: "Para passar de m/s para km/h, multiplica-se por 3,6. Logo, 10 × 3,6 = 36 km/h.", otherOptions: ["Incorreto."] } },
+        { level: "Fácil", text: "Uma família viaja para Fortaleza e percorre 300 km numa rodovia limpa, gastando exatamente 3 horas na viagem. Qual foi a Velocidade Média do carro?", options: ["30 km/h", "90 km/h", "100 km/h", "300 km/h"], correctIndex: 2, explanation: { correctText: "Vm = ΔS / Δt. Vm = 300 km / 3 h = 100 km/h.", otherOptions: ["Cálculo de divisão direta."] } },
+        { level: "Médio", text: "Um autocarro inicia uma viagem às 08:00h da manhã e chega ao destino final às 12:00h (meio-dia). O hodômetro (contador) indicava que percorreu 320 km no total. Qual foi a Velocidade Média do autocarro em km/h?", options: ["60 km/h", "80 km/h", "100 km/h", "120 km/h"], correctIndex: 1, explanation: { correctText: "Primeiro descobre o tempo: das 08h às 12h são 4 horas de viagem (Δt = 4). O espaço foi 320 km. Vm = 320 / 4 = 80 km/h.", otherOptions: ["Incorreto."] } },
+        { level: "Médio", text: "Um drone foi programado para voar numa linha reta horizontal a uma velocidade constante de 15 m/s. Se ele mantiver esse ritmo durante 40 segundos, que distância (em metros) ele terá percorrido?", options: ["55 m", "150 m", "300 m", "600 m"], correctIndex: 3, explanation: { correctText: "Se Vm = ΔS / Δt, então ΔS = Vm × Δt. Logo, 15 m/s × 40 s = 600 metros.", otherOptions: ["Erros de multiplicação simples."] } },
+        { level: "Difícil", text: "Um comboio de mercadorias com 200 metros de comprimento (corpo extenso) viaja a uma velocidade de 20 m/s. Ele vai atravessar um túnel escuro que tem 400 metros de comprimento. Quanto tempo o comboio demorará a atravessar TOTALMENTE o túnel?", options: ["10 s", "20 s", "30 s", "40 s"], correctIndex: 2, explanation: { correctText: "Atenção: A passagem completa obriga a somar a ponte e o comboio (ΔS total = 400 + 200 = 600 m). Usando Δt = ΔS / Vm -> Δt = 600 / 20 = 30 segundos.", otherOptions: ["20s seria apenas o túnel.", "10s seria apenas o comboio."] } },
+        { level: "Difícil", text: "Atenção às rasteiras! Um camião tem 30 metros de comprimento e move-se a 10 m/s. Para passar por completo sobre uma pequena ponte, ele demorou exatamente 5 segundos. Qual é o comprimento desta ponte?", options: ["10 m", "20 m", "50 m", "150 m"], correctIndex: 1, explanation: { correctText: "O espaço percorrido em 5s a 10 m/s é: ΔS = 10 × 5 = 50 metros totais. Se a distância total é 50m, e sabemos que ΔS = Ponte + Camião, então: 50 = Ponte + 30. A Ponte tem 20 metros.", otherOptions: ["Incorreto."] } },
+        { level: "Difícil", text: "A Armadilha Clássica: Um carro faz uma viagem de cidade. A primeira metade da viagem é feita a 40 km/h (numa serra). A segunda metade do percurso é feita a 60 km/h (numa reta). Qual é a Velocidade Média de TODA a viagem?", options: ["48 km/h", "50 km/h", "52 km/h", "100 km/h"], correctIndex: 0, explanation: { correctText: "NUNCA faças a média aritmética simples (40+60)/2. O carro passa mais tempo a 40km/h do que a 60km/h. Usa a fórmula secreta para metades de distâncias iguais: Vm = (2 × V1 × V2) / (V1 + V2) = (2 × 40 × 60) / (100) = 4800 / 100 = 48 km/h.", otherOptions: ["50 km/h é o erro mais comum no mundo."] } },
+        { level: "Difícil", text: "Um ciclista pedala 10 km num terreno muito duro, a uma velocidade média de 10 km/h. Na viagem de REGRESSO (os mesmos 10 km), como é uma descida, a sua velocidade é de 40 km/h. Qual a velocidade média na ida e volta completas?", options: ["16 km/h", "25 km/h", "30 km/h", "50 km/h"], correctIndex: 0, explanation: { correctText: "Distâncias iguais = usa o truque. Vm = (2 × 10 × 40) / (10 + 40). Vm = 800 / 50 = 16 km/h. (O tempo gasto a subir estrangula a média!).", otherOptions: ["25 km/h é a média errada (10+40)/2."] } },
+        { level: "Médio", text: "O Velocímetro de um carro de Fórmula 1 mostra instantaneamente 300 km/h. Isso significa que a sua Velocidade Média na corrida inteira será de 300 km/h?", options: ["Sim, a velocidade média é sempre igual à máxima.", "Sim, os carros de F1 não abrandam.", "Não, o velocímetro marca a Velocidade Instantânea. A média incluirá paragens e travagens nas curvas.", "Não, o velocímetro mede aceleração escalar."], correctIndex: 2, explanation: { correctText: "O velocímetro mostra a Rapidez/Velocidade INSTANTÂNEA num segundo exato. A Vm abrange o pacote completo da viagem (onde ele reduz para 80km/h numa curva ou faz pit-stop).", otherOptions: ["Incorreto."] } },
+        { level: "Fácil", text: "Um carro sai do quilómetro 40 (S₀ = 40 km) de uma rodovia às 10:00h. Ele chega ao quilómetro 220 (S = 220 km) às 12:00h (meio-dia). Qual foi a velocidade média desenvolvida?", options: ["40 km/h", "90 km/h", "110 km/h", "220 km/h"], correctIndex: 1, explanation: { correctText: "Cálculo: ΔS = 220 - 40 = 180 km percorridos. Δt = 12h - 10h = 2 horas. Vm = 180 / 2 = 90 km/h.", otherOptions: ["Dividir 220 por 2 (110) estaria errado, ignorando o S₀ inicial."] } },
+        { level: "Médio", text: "Problema com Pausas: Um carro precisa percorrer 200 km. Ele faz os primeiros 100 km em 1 hora. Depois para durante 1 HORA para almoçar. Por fim, corre e faz os últimos 100 km noutra hora. Qual a Vm da viagem total?", options: ["100 km/h", "66,6 km/h", "200 km/h", "50 km/h"], correctIndex: 1, explanation: { correctText: "Na fórmula da Vm o relógio NUNCA para! Distância Total = 200 km. Tempo Total = 1h (andou) + 1h (parou) + 1h (andou) = 3 horas. Vm = 200 / 3 = 66,6... km/h.", otherOptions: ["Se ignorasses o almoço, seria 200/2 = 100 km/h. Errado!"] } },
+        { level: "Médio", text: "Na Cinemática, se um veículo tem a sua Velocidade com sinal NEGATIVO (V < 0), o que isto significa rigorosamente a nível de referencial?", options: ["Ele está a travar (reduzindo a velocidade).", "Ele engatou a marcha-atrás no carro.", "Ele move-se num Movimento Retrógrado, ou seja, no sentido contrário à orientação que as placas da estrada marcam.", "Ele está abaixo do nível do mar."], correctIndex: 2, explanation: { correctText: "Na física, V<0 não é andar devagar nem necessariamente de marcha-atrás. É andar contra a direção escolhida como positiva (ex: do km 300 para o km 10).", otherOptions: ["Travar = aceleração negativa (movimento retardado)."] } },
+        { level: "Fácil", text: "Um corpo realiza um Movimento Uniforme (MU). Qual é a principal característica deste tipo específico de movimento no universo da física?", options: ["A aceleração é muito alta.", "A velocidade do corpo muda de 10 em 10 segundos.", "A velocidade é sempre CONSTANTE (nunca se altera, nem para mais nem para menos).", "Ele anda sempre em círculos."], correctIndex: 2, explanation: { correctText: "Movimento Uniforme significa que a velocidade não sofre qualquer variação (aceleração = 0). O ponteiro do velocímetro fica 'congelado'.", otherOptions: ["Incorreto."] } },
+        { level: "Médio", text: "Se um carro viaja em Movimento Uniforme (MU) a 5 m/s, qual será o seu deslocamento (distância em metros) percorrido ao fim de 1 minuto (60 segundos)?", options: ["5 m", "60 m", "120 m", "300 m"], correctIndex: 3, explanation: { correctText: "Como V = ΔS / t, então ΔS = V × t. Multiplicando a velocidade (5) pelo tempo em segundos (60), temos 5 × 60 = 300 metros.", otherOptions: ["Cuidado com unidades soltas."] } },
+        { level: "Médio", text: "Dois automóveis, A e B, encontram-se numa longa estrada plana. O Carro A viaja a 80 km/h. O Carro B viaja a 100 km/h, mas na MESMA faixa e no MESMO sentido de A. Em relação ao motorista do Carro A, o Carro B aproxima-se a que velocidade relativa?", options: ["20 km/h", "80 km/h", "100 km/h", "180 km/h"], correctIndex: 0, explanation: { correctText: "Velocidade Relativa no MESMO sentido: Subtraem-se as velocidades. 100 - 80 = 20 km/h. Para o motorista de A, parece que B está lentamente a ultrapassá-lo a apenas 20 km/h.", otherOptions: ["180 km/h seria num choque frontal."] } },
+        { level: "Difícil", text: "O pesadelo do choque frontal: Um automóvel (A) está a 90 km/h e, numa ultrapassagem arriscada, vê um camião (B) a vir no sentido OPOSTO a 70 km/h. O impacto frontal terá a força equivalente à de uma colisão contra um muro a que velocidade?", options: ["20 km/h", "70 km/h", "90 km/h", "160 km/h"], correctIndex: 3, explanation: { correctText: "Velocidade Relativa em SENTIDOS OPOSTOS: as velocidades somam-se porque a distância entre eles encurta brutalmente. 90 + 70 = 160 km/h. Por isso os choques frontais são tão letais.", otherOptions: ["Subtração é só no mesmo sentido."] } },
+        { level: "Difícil", text: "Problema do Ladrão e do Polícia: Um ladrão foge a pé a 4 m/s. Um polícia, 50 metros atrás dele, começa a correr a 6 m/s para apanhá-lo. Quanto tempo o polícia demorará a alcançar o ladrão?", options: ["5 s", "10 s", "25 s", "50 s"], correctIndex: 2, explanation: { correctText: "Velocidade Relativa: V_relativa = 6 - 4 = 2 m/s (o polícia ganha 2 metros por segundo). A distância inicial é 50m. Tempo de encontro = Distância / V_relativa => t = 50 / 2 = 25 segundos.", otherOptions: ["10s e 50s são erros matemáticos no raciocínio."] } },
+        { level: "Fácil", text: "A velocidade da luz no vácuo é de assombrosos 300.000 km/s. Já a velocidade do som no ar é de apenas 340 m/s (0,34 km/s). O que nos permite concluir isto durante uma tempestade?", options: ["Que o raio (luz) atinge o solo antes da tempestade começar.", "Que vemos o relâmpago quase instantaneamente, mas o som do trovão demora alguns segundos a chegar aos nossos ouvidos.", "Que a luz e o som andam sempre juntos.", "Que o trovão anula a luz."], correctIndex: 1, explanation: { correctText: "Como a diferença de velocidades é gigantesca, a luz vence a corrida e chega ao teu olho instantaneamente. O som, sendo lento, demorará (cerca de 3 segundos por quilómetro) até bater no teu tímpano.", otherOptions: ["Incorreto."] } },
+        { level: "Médio", text: "Um navio de guerra emite um pulso de SONAR (uma onda sonora) para medir a profundidade do oceano. O pulso de som vai até ao fundo, bate e o ECO volta ao navio 4 segundos depois. Sabendo que a velocidade do som na água é de 1500 m/s, qual a profundidade do mar?", options: ["1500 m", "3000 m", "6000 m", "12000 m"], correctIndex: 1, explanation: { correctText: "O pulso demorou 4s na viagem TOTAL (ir e voltar). Logo, para bater no fundo demorou apenas 2 segundos (ida). Profundidade = 1500 m/s × 2s = 3000 metros.", otherOptions: ["6000m ignora que o tempo é de ida e volta (o dobro da distância real)."] } },
+        { level: "Difícil", text: "Um comboio A tem 100m de comprimento e velocidade de 15m/s. Um comboio B tem 150m e viaja noutra linha, na mesma direção e MESMO sentido, mas a 10m/s. O comboio A vai ultrapassar o B. Qual é a Distância Total (ΔS) que a ponta do comboio A precisa vencer para realizar toda a ultrapassagem livre?", options: ["100 m", "150 m", "250 m", "5 m/s"], correctIndex: 2, explanation: { correctText: "Para uma ultrapassagem total (de traseira a traseira), o corpo mais rápido tem de ultrapassar a sua própria extensão E a extensão do outro veículo. ΔS = L_A + L_B = 100 + 150 = 250 metros.", otherOptions: ["5 m/s é a velocidade relativa, não a distância."] } },
+        { level: "Médio", text: "Para saber a que distância um relâmpago caiu, uma pessoa conta os segundos entre o clarão (luz) e o barulho (trovão). Ela conta exatos 3 segundos. Se o som viaja a cerca de 340 m/s, a que distância caiu o raio?", options: ["Cerca de 1.000 metros (1 km).", "Cerca de 340 metros.", "Exatos 3 km.", "A 3.000.000 km."], correctIndex: 0, explanation: { correctText: "ΔS = V × t => ΔS = 340 m/s × 3 s = 1.020 metros. (Regra de bolso do escoteiro: cada 3 segundos de eco representam 1 quilómetro de distância do relâmpago).", otherOptions: ["Incorreto."] } },
+        { level: "Médio", text: "Um atleta treina numa reta de 100 metros. Ele vai e volta três vezes sem parar. Qual é o seu DESLOCAMENTO (vetorial) e a sua DISTÂNCIA PERCORRIDA (escalar) no final do treino (sendo que ele acabou no mesmo local onde começou)?", options: ["Deslocamento: 600m / Distância: 600m", "Deslocamento: Zero / Distância: 300m", "Deslocamento: Zero / Distância: 600m", "Deslocamento: 300m / Distância: Zero"], correctIndex: 2, explanation: { correctText: "Cada ida e volta são 200m. 3 idas e voltas = 600m de Distância Escalar 'no contador de passos'. Como ele começou e terminou na origem, a flecha do Deslocamento é um mero ponto (Zero metros).", otherOptions: ["Vetores em ciclos fechados são nulos."] } },
+        { level: "Difícil", text: "Cálculo de Prova: Uma mota viaja a uma velocidade constante de 108 km/h. O piloto repara num obstáculo e, em apenas 2 segundos, o obstáculo é atingido. A que distância (em metros) estava a mota do obstáculo no momento em que ele o viu?", options: ["216 m", "108 m", "60 m", "30 m"], correctIndex: 2, explanation: { correctText: "Primeiro: as unidades não batem! Converte 108 km/h para m/s dividindo por 3,6 = 30 m/s. Depois, a distância ΔS = V × t = 30 × 2 = 60 metros.", otherOptions: ["216m seria 108 x 2 (ignorar a conversão é fatal em exames)."] } },
+        { level: "Fácil", text: "A expressão 'movimento uniforme' na física exige obrigatoriamente que o corpo cumpra uma condição na estrada. Que condição é essa?", options: ["O veículo tem de estar sempre numa curva.", "O veículo tem de variar a sua velocidade de forma ritmada.", "O veículo percorre distâncias rigorosamente IGUAIS em intervalos de tempos IGUAIS.", "O veículo está sujeito a uma grande aceleração."], correctIndex: 2, explanation: { correctText: "No Movimento Uniforme a velocidade é congelada (constante). Se o carro anda 20 metros no 1º segundo, andará exatos 20 metros no 2º segundo, e assim infinitamente.", otherOptions: ["Não há aceleração no MU."] } },
+        { level: "Médio", text: "A equação horária do espaço para o Movimento Uniforme é S = S₀ + V.t (A famosa fórmula do 'Sorvete'). Se a equação de um carro for S = 10 - 5t (no SI), o que podemos afirmar sobre ele?", options: ["Saiu do km 10, e tem um movimento Progressivo.", "Saiu do km 0, com velocidade de 10 m/s.", "Saiu da posição inicial 10 m, e tem um movimento Retrógrado (velocidade negativa).", "Acelera a -5 m/s²."], correctIndex: 2, explanation: { correctText: "Na fórmula S = S₀ + V.t, S₀ é o número sozinho (10m) e V é o número ligado ao tempo (-5 m/s). A velocidade de -5 indica um movimento Retrógrado (contra a placa).", otherOptions: ["Aceleração em MU é sempre zero."] } },
+        { level: "Médio", text: "Para concluíres com precisão: Qual das grandezas a seguir referidas ao Movimento necessita obrigatoriamente de ter um 'Módulo', uma 'Direção' e um 'Sentido' para ser descrita corretamente no caderno do aluno?", options: ["O Tempo de Viagem (Δt).", "A Posição Inicial do Carro (S₀).", "A Distância Percorrida Total (d).", "O Deslocamento (ΔS)."], correctIndex: 3, explanation: { correctText: "O Deslocamento (junto com a Velocidade Vetorial e Forças) é uma grandeza estritamente VETORIAL, necessitando de uma seta geométrica (Módulo, Direção, Sentido) no desenho para ser resolvida.", otherOptions: ["As outras 3 são escalares puras (número e unidade bastam)."] } }
+    ];
+
+    /* --- GESTÃO DE ESTADO (STATE) --- */
+    const quizState = {
+        currentIndex: 0,
+        userAnswers: new Array(questionsDatabase.length).fill(null),
+        confettiAnimationId: null
+    };
+
+    /* --- FUNCIONALIDADES DE PESQUISA (TEORIA) --- */
+    function initializeSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const contentGroups = document.querySelectorAll('.content-group');
+        const noResultsMsg = document.getElementById('no-results');
+
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', function(event) {
+            const searchTerm = normalizeText(event.target.value);
+            let totalVisibleElements = 0;
+            
+            contentGroups.forEach(group => {
+                const groupContent = normalizeText(group.textContent);
+                const isMatch = groupContent.includes(searchTerm);
+                
+                group.style.display = isMatch ? 'flex' : 'none';
+                if (isMatch) totalVisibleElements++;
+            });
+            
+            noResultsMsg.style.display = totalVisibleElements === 0 ? 'block' : 'none';
+        });
+    }
+
+    function normalizeText(text) {
+        return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    /* --- CONTROLO DE VISTAS (VIEWS) --- */
+    function changeApplicationView(viewName) {
+        const views = ['viewExplanation', 'viewPractice', 'viewResult'];
+        
+        views.forEach(viewId => document.getElementById(viewId).classList.remove('active'));
+        
+        const quizFooter = document.getElementById('quizFooter');
+        if (quizFooter) quizFooter.style.display = 'none';
+
+        if (viewName === 'explanation') {
+            document.getElementById('viewExplanation').classList.add('active');
+            document.getElementById('btnExp').classList.add('active');
+            document.getElementById('btnPrac').classList.remove('active');
+        } else if (viewName === 'practice') {
+            document.getElementById('viewPractice').classList.add('active');
+            if (quizFooter) quizFooter.style.display = 'flex';
+            document.getElementById('btnExp').classList.remove('active');
+            document.getElementById('btnPrac').classList.add('active');
+            
+            renderCurrentQuestion();
+            renderNavigationMap();
+        } else if (viewName === 'result') {
+            document.getElementById('viewResult').classList.add('active');
+        }
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* --- GERAÇÃO INTERFACE DO QUIZ --- */
+    function getDifficultyBadgeClass(level) {
+        const mapping = { 'Fácil': 'dif-facil', 'Médio': 'dif-medio', 'Difícil': 'dif-dificil' };
+        return mapping[level] || 'dif-facil';
+    }
+
+    function buildOptionsHTML(question, selectedAnswerIndex) {
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        return question.options.map((optionText, optionIndex) => {
+            let cssClass = '';
+            
+            if (selectedAnswerIndex !== null) {
+                if (optionIndex === question.correctIndex) cssClass = 'correct';
+                else if (optionIndex === selectedAnswerIndex) cssClass = 'wrong';
+                else cssClass = 'disabled';
+            }
+
+            const isDisabled = selectedAnswerIndex !== null ? 'disabled' : '';
+
+            return `
+                <button class="option-btn ${cssClass}" onclick="handleOptionSelection(${optionIndex})" ${isDisabled}>
+                    <div class="opt-circle">${alphabet[optionIndex]}</div>
+                    <div>${optionText}</div>
+                </button>
+            `;
+        }).join('');
+    }
+
+    function buildFeedbackHTML(question, selectedAnswerIndex) {
+        const isCorrect = selectedAnswerIndex === question.correctIndex;
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        const titleClass = isCorrect ? 'success' : 'error';
+        const titleText = isCorrect ? '✅ Raciocínio Correto!' : '❌ Diagnóstico de Falha!';
+        
+        const distortionsHTML = question.explanation.otherOptions.map((explanationText, idx) => {
+            if (idx === question.correctIndex) return '';
+            return `<div class="feedback-item wrong-opt"><strong>${alphabet[idx]})</strong> ${explanationText}</div>`;
+        }).join('');
+
+        return `
+            <div class="feedback-box show">
+                <div class="feedback-title ${titleClass}" style="color: ${isCorrect ? 'var(--correct-border)' : 'var(--wrong-border)'}">${titleText}</div>
+                <div class="feedback-item correct-opt"><strong>O Facto Numérico:</strong> ${question.options[question.correctIndex]}</div>
+                <div style="margin-top:15px;font-size:1rem;color:var(--text-color);margin-bottom:15px;font-weight:600;">${question.explanation.correctText}</div>
+                <div style="margin-top:15px;border-top:2px dashed var(--theme-dark);padding-top:15px;">
+                    <small style="color:var(--text-color);"><strong>Análise das Distorções:</strong></small>
+                    ${distortionsHTML}
+                </div>
+            </div>
+        `;
+    }
+
+    function renderCurrentQuestion() {
+        const container = document.getElementById('quizContainer');
+        if (!container) return;
+
+        const question = questionsDatabase[quizState.currentIndex];
+        const selectedAnswerIndex = quizState.userAnswers[quizState.currentIndex];
+        const badgeClass = getDifficultyBadgeClass(question.level);
+        
+        let feedbackHTML = selectedAnswerIndex !== null ? buildFeedbackHTML(question, selectedAnswerIndex) : '';
+
+        container.innerHTML = `
+            <div class="quiz-question-card">
+                <span class="difficulty-badge ${badgeClass}">${question.level}</span>
+                <div style="margin-bottom:25px;">
+                    <span class="quiz-question-counter">QUESTÃO ${quizState.currentIndex + 1} DE ${questionsDatabase.length}</span>
+                    <h2 class="quiz-question-text">${question.text}</h2>
+                </div>
+                <div class="options-list">
+                    ${buildOptionsHTML(question, selectedAnswerIndex)}
+                </div>
+                ${feedbackHTML}
+            </div>
+        `;
+        
+        updateNavigationButtons();
+    }
+
+    /* --- LÓGICA DO QUIZ --- */
+    function handleOptionSelection(selectedIndex) {
+        if (quizState.userAnswers[quizState.currentIndex] !== null) return;
+        
+        quizState.userAnswers[quizState.currentIndex] = selectedIndex;
+        const isCorrect = selectedIndex === questionsDatabase[quizState.currentIndex].correctIndex;
+        
+        if (isCorrect) startSuccessAnimation();
+        else triggerErrorShakeEffect();
+        
+        renderCurrentQuestion();
+        renderNavigationMap();
+    }
+
+    function triggerErrorShakeEffect() {
+        const container = document.getElementById('quizContainer');
+        if (container) { 
+            container.classList.remove('shake-effect'); 
+            void container.offsetWidth; 
+            container.classList.add('shake-effect'); 
+            setTimeout(() => container.classList.remove('shake-effect'), 500); 
+        }
+    }
+
+    /* --- ANIMAÇÕES (CONFETTI) --- */
+    function startSuccessAnimation() {
+        const duration = 1500;
+        const end = Date.now() + duration;
+        
+        stopSuccessAnimation();
+        
+        function animateFrame() {
+            if(window.confetti && typeof confetti === 'function') {
+                const config = { particleCount: 5, spread: 55, colors: ['#06B6D4', '#0891B2', '#F59E0B', '#EF4444'] };
+                confetti({ ...config, angle: 60, origin: { x: 0, y: 0.6 } });
+                confetti({ ...config, angle: 120, origin: { x: 1, y: 0.6 } });
+            }
+            if (Date.now() < end) quizState.confettiAnimationId = requestAnimationFrame(animateFrame);
+        }
+        animateFrame();
+    }
+
+    function stopSuccessAnimation() {
+        if (window.confetti && typeof confetti.reset === 'function') confetti.reset(); 
+        if (quizState.confettiAnimationId) {
+            cancelAnimationFrame(quizState.confettiAnimationId);
+            quizState.confettiAnimationId = null;
+        }
+    }
+
+    /* --- NAVEGAÇÃO MAPA --- */
+    function renderNavigationMap() {
+        const mapContainer = document.getElementById('qMap');
+        if (!mapContainer) return;
+        
+        mapContainer.innerHTML = questionsDatabase.map((question, index) => {
+            const isCurrent = index === quizState.currentIndex;
+            const userAnswer = quizState.userAnswers[index];
+            const hasAnswered = userAnswer !== null;
+            const isCorrect = userAnswer === question.correctIndex;
+            
+            let cssClass = 'map-dot';
+            if (isCurrent) cssClass += ' active';
+            if (hasAnswered) cssClass += isCorrect ? ' answered-correct' : ' answered-wrong';
+            
+            return `<div class="${cssClass}" onclick="goToQuestion(${index})">${index + 1}</div>`;
+        }).join('');
+        
+        setTimeout(() => { 
+            const activeDot = mapContainer.querySelector('.map-dot.active'); 
+            if (activeDot) activeDot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); 
+        }, 50);
+    }
+
+    function goToQuestion(targetIndex) { 
+        stopSuccessAnimation();
+        quizState.currentIndex = targetIndex; 
+        renderCurrentQuestion(); 
+        renderNavigationMap(); 
+    }
+    
+    function navigateQuestion(directionOffset) { 
+        const nextIndex = quizState.currentIndex + directionOffset; 
+        if (nextIndex >= 0 && nextIndex < questionsDatabase.length) goToQuestion(nextIndex); 
+    }
+
+    function updateNavigationButtons() {
+        const btnPrev = document.getElementById('btnPrev');
+        const btnNext = document.getElementById('btnNext');
+        
+        if (btnPrev) btnPrev.disabled = (quizState.currentIndex === 0);
+        
+        if (btnNext) {
+            const isLastQuestion = quizState.currentIndex === questionsDatabase.length - 1;
+            if (isLastQuestion) { 
+                btnNext.textContent = "Finalizar Avaliação"; 
+                btnNext.onclick = finishQuiz; 
+            } else { 
+                btnNext.textContent = "Próxima ➡️"; 
+                btnNext.onclick = () => navigateQuestion(1); 
+            }
+        }
+    }
+
+    /* --- CÁLCULO DE RESULTADOS --- */
+    function calculateStars(percent) {
+        if (percent === 100) return "⭐⭐⭐⭐⭐";
+        if (percent >= 80) return "⭐⭐⭐⭐";
+        if (percent >= 60) return "⭐⭐⭐";
+        if (percent >= 40) return "⭐⭐";
+        if (percent > 0) return "⭐";
+        return "🌑"; // zero stars
+    }
+
+    function finishQuiz() {
+        const unansweredCount = quizState.userAnswers.filter(answer => answer === null).length;
+        
+        if (unansweredCount > 0) {
+            const confirmMessage = `Existem ${unansweredCount} questões por responder. Quer terminar mesmo assim (as em branco serão dadas como erradas)?`;
+            if (!confirm(confirmMessage)) return;
+        }
+
+        stopSuccessAnimation();
+
+        const correctAnswersCount = quizState.userAnswers.filter((answer, index) => answer === questionsDatabase[index].correctIndex).length;
+        const totalQuestions = questionsDatabase.length;
+        const percentageScore = Math.round((correctAnswersCount / totalQuestions) * 100);
+        const isApproved = percentageScore >= 80;
+        
+        renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved);
+        changeApplicationView('result');
+    }
+
+    function renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved) {
+        document.getElementById('finalPercent').textContent = `${percentageScore}%`;
+        document.getElementById('finalScoreText').textContent = `Acertaste ${correctAnswersCount} de ${totalQuestions}`;
+        document.getElementById('finalStars').textContent = calculateStars(percentageScore);
+        
+        const reviewContainer = document.getElementById('review-container');
+        const actionButtonsContainer = document.getElementById('action-buttons');
+        
+        let summaryHTML = '';
+
+        if (isApproved) {
+            summaryHTML += `
+                <div class="result-summary-box success">
+                    <strong>🎉 CÁLCULO PRECISO!</strong> A tua base na Cinemática Média (as conversões e os corpos extensos) está formidável e alinhada com o IFCE.
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REPETIR PARA 100%</button>`;
+        } else {
+            summaryHTML += `
+                <div class="result-summary-box error">
+                    <strong>⚠️ ATENÇÃO NA MATEMÁTICA!</strong> Foste avaliado abaixo da meta (80%). Revisa a regra da conversão de km/h para m/s e como evitar a armadilha das metades.
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REFAZER AVALIAÇÃO</button>`;
+        }
+        
+        if (correctAnswersCount < totalQuestions) {
+            summaryHTML += '<h4 style="margin-bottom:15px; color:var(--text-color); font-size:1.15rem;">Revisão das Falhas Numéricas:</h4>';
+            questionsDatabase.forEach((question, index) => {
+                const userAnswerIndex = quizState.userAnswers[index];
+                if (userAnswerIndex !== question.correctIndex) {
+                    const userAnswerText = userAnswerIndex === null ? "Deixaste em branco" : question.options[userAnswerIndex];
+                    const correctAnswerText = question.options[question.correctIndex];
+                    
+                    summaryHTML += `
+                        <div class="error-log-item">
+                            <strong style="color:var(--theme-dark); font-size:1.05rem; display:block; margin-bottom:8px;">Q${index + 1}: ${question.text}</strong>
+                            <span style="color:var(--wrong-border); font-weight: 600; display:block; margin-bottom:5px;">A tua matemática: ${userAnswerText}</span>
+                            <span style="color:var(--correct-border); font-weight: 700; display:block;">O Resultado Exato: ${correctAnswerText}</span>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        reviewContainer.innerHTML = summaryHTML;
+    }
+
+    function resetQuiz() { 
+        quizState.userAnswers = new Array(questionsDatabase.length).fill(null); 
+        quizState.currentIndex = 0; 
+        changeApplicationView('practice'); 
+    }
+    
+    // START APPLICATION
+    initializeSearch();
+    changeApplicationView('explanation');
+</script>
+</body>
+</html>

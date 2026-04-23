@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Física: Movimento Retilíneo Uniforme (MRU) - Promover</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* --- VARIÁVEIS DE COR E TEMA: LINHA RETA & GRÁFICOS (Física) --- */
+        :root {
+            --bg-color: #F0F9FF; /* Azul muito claro */
+            --text-color: #0F172A; /* Slate quase preto */
+            --border-color: #1E3A8A; /* Contorno escuro Azul Real */
+            --white: #FFFFFF;
+            
+            --theme-light: #DBEAFE; /* Azul pastel */
+            --theme-medium: #3B82F6; /* Azul vivo */
+            --theme-dark: #1D4ED8; /* Azul profundo */
+            --theme-contrast: #F97316; /* Laranja (Gráficos/Atenção) */
+            --theme-accent: #10B981; /* Verde (Progressivo) */
+            --theme-text-active: #FFFFFF;
+            
+            --correct-bg: #D1FAE5;
+            --correct-border: #059669;
+            --wrong-bg: #FFE4E6;
+            --wrong-border: #BE123C;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 15px 120px 15px;
+            background-image: linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+            background-size: 25px 25px;
+        }
+
+        /* --- ANIMAÇÕES --- */
+        @keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1) rotate(-5deg); color: var(--theme-contrast); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+        .pulse-effect { animation: pulse 2s infinite; display: inline-block; }
+        .shake-effect { animation: shake 0.4s ease-in-out; }
+
+        /* --- LAYOUT PRINCIPAL --- */
+        .container { width: 100%; max-width: 650px; display: flex; flex-direction: column; gap: 25px; }
+        .logo-header { display: flex; flex-direction: column; align-items: center; padding: 15px 0 25px 0; text-align: center; }
+        .css-logo { font-size: 1.5rem; font-weight: 900; color: var(--theme-text-active); text-transform: uppercase; letter-spacing: -1px; border: 3px solid var(--border-color); padding: 8px 24px; border-radius: 12px; background: var(--theme-dark); box-shadow: 4px 4px 0px var(--theme-contrast); margin-bottom: 15px; transform: rotate(-2deg); }
+        h1 { font-size: 2rem; font-weight: 900; color: var(--text-color); text-transform: uppercase; letter-spacing: -0.5px; line-height: 1.1; }
+        .subtitle { font-size: 1rem; color: var(--white); font-weight: 700; margin-top: 5px; background: var(--theme-contrast); padding: 4px 12px; border-radius: 8px; border: 2px solid var(--border-color); }
+
+        /* --- NAVEGAÇÃO --- */
+        .toggle-container { background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 6px; display: flex; box-shadow: 4px 4px 0px var(--border-color); position: sticky; top: 15px; z-index: 50; }
+        .toggle-btn { flex: 1; border: none; background: none; padding: 12px 0; border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.05rem; color: var(--text-color); cursor: pointer; transition: all 0.2s ease; }
+        .toggle-btn.active { background-color: var(--theme-dark); color: var(--theme-text-active); border: 2px solid var(--border-color); box-shadow: 2px 2px 0px var(--border-color); }
+
+        .view-section { display: none; animation: fadeIn 0.3s ease; flex-direction: column; gap: 35px; }
+        .view-section.active { display: flex; }
+
+        /* --- PESQUISA --- */
+        .search-container { position: relative; width: 100%; }
+        .search-input { width: 100%; padding: 16px 20px 16px 55px; border: 3px solid var(--border-color); border-radius: 12px; background-color: var(--white); font-family: 'Poppins', sans-serif; font-size: 1.05rem; font-weight: 600; color: var(--text-color); box-shadow: 4px 4px 0px var(--border-color); outline: none; transition: all 0.2s ease; }
+        .search-input:focus { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--theme-contrast); border-color: var(--theme-dark); }
+        .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 1.4rem; }
+        #no-results { text-align: center; color: var(--wrong-border); font-weight: 800; display: none; background: var(--wrong-bg); padding: 15px; border: 3px solid var(--wrong-border); border-radius: 8px; }
+
+        /* --- TEORIA --- */
+        .content-group { display: flex; flex-direction: column; position: relative; padding-top: 15px; }
+        .section-badge { display: inline-flex; align-items: center; gap: 10px; background-color: var(--theme-dark); color: var(--white); font-size: 1.1rem; font-weight: 800; padding: 8px 20px; border-radius: 8px; border: 3px solid var(--border-color); box-shadow: 3px 3px 0px var(--theme-contrast); text-transform: uppercase; position: absolute; top: -5px; left: 15px; z-index: 10; transform: rotate(-1.5deg); }
+        .theory-box { display: flex; flex-direction: column; padding: 35px 25px 25px 35px; border-radius: 12px; background-color: var(--white); border: 3px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); font-weight: 500; font-size: 1rem; line-height: 1.7; position: relative; overflow: hidden; gap: 20px; border-left: 14px solid var(--theme-medium); }
+        .theory-box h3 { font-size: 1.35rem; font-weight: 900; color: var(--theme-dark); margin-bottom: 5px; display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px; }
+        .theory-box h4 { font-size: 1.1rem; font-weight: 800; color: var(--text-color); margin-top: 10px; border-bottom: 2px solid var(--theme-light); padding-bottom: 5px; }
+        
+        .inline-example { display: block; width: fit-content; max-width: 100%; margin-top: 6px; margin-bottom: 6px; padding: 12px 20px; background-color: var(--theme-light); border: 2px solid var(--border-color); border-radius: 8px; font-size: 1.3rem; color: var(--theme-dark); font-weight: 900; letter-spacing: 1px; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); text-align: center; }
+        .visual-area { background: var(--bg-color); border: 3px dashed var(--theme-medium); border-radius: 12px; padding: 25px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; width: 100%; }
+        
+        .highlight-box { background-color: #FEF3C7; border: 3px solid var(--border-color); border-left: 8px solid var(--theme-contrast); padding: 18px 20px; border-radius: 8px; font-size: 0.95rem; color: #78350F; font-weight: 600; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); }
+        .highlight-box.red { background-color: #FEE2E2; border-left-color: #EF4444; color: #7F1D1D; }
+
+        /* --- CARDS DE GRÁFICOS --- */
+        .g-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; width: 100%; margin-top: 10px; }
+        .g-card { flex: 1 1 calc(50% - 15px); min-width: 130px; border-radius: 12px; padding: 15px 10px; text-align: center; border: 3px solid var(--border-color); display: flex; flex-direction: column; align-items: center; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); background-color: var(--white); transition: transform 0.2s; }
+        .g-card:hover { transform: translateY(-3px); }
+        .g-icon { font-size: 2.8rem; margin-bottom: 8px; line-height: 1; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.15)); }
+        .g-title { font-size: 1.05rem; font-weight: 900; margin-bottom: 4px; text-transform: uppercase; color: var(--theme-dark); }
+        .g-desc { font-size: 0.85rem; font-weight: 600; color: var(--text-color); margin-bottom: 4px; line-height: 1.3; }
+
+        /* --- BOTÕES GERAIS --- */
+        .btn-action { width: 100%; padding: 20px; background-color: var(--theme-dark); color: white; border: 3px solid var(--border-color); border-radius: 12px; font-size: 1.15rem; font-weight: 900; cursor: pointer; box-shadow: 6px 6px 0px var(--theme-contrast); transition: all 0.1s; text-transform: uppercase; margin-top: 10px; }
+        .btn-action:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0px var(--theme-contrast); }
+
+        /* --- QUIZ UI --- */
+        .difficulty-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; border: 2px solid var(--border-color); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
+        .dif-facil { background: #D1FAE5; color: #065F46; }
+        .dif-medio { background: #FEF08A; color: #713F12; }
+        .dif-dificil { background: #FECACA; color: #7F1D1D; }
+
+        .question-map { display: flex; gap: 8px; overflow-x: auto; padding: 10px 5px; margin-bottom: 20px; white-space: nowrap; scroll-behavior: smooth; }
+        .question-map::-webkit-scrollbar { display: none; }
+        .map-dot { min-width: 38px; height: 38px; border: 2px solid var(--border-color); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; color: var(--theme-dark); background: white; cursor: pointer; transition: all 0.2s; }
+        .map-dot.active { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); transform: scale(1.15); }
+        .map-dot.answered-correct { background-color: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .map-dot.answered-wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .quiz-question-card { border: 4px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); padding: 30px; border-radius: 16px; background: var(--white); }
+        .quiz-question-counter { font-size: 0.85rem; font-weight: 900; color: var(--theme-dark); letter-spacing: 1px; }
+        .quiz-question-text { font-size: 1.2rem; margin-top: 8px; color: var(--text-color); font-weight: 800; line-height: 1.5; margin-bottom: 25px;}
+
+        .option-btn { display: flex; align-items: center; width: 100%; padding: 18px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.1s ease; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 600; text-align: left; color: var(--text-color); }
+        .option-btn:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px var(--theme-contrast); }
+        .opt-circle { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--border-color); margin-right: 15px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.05rem; flex-shrink: 0; background: var(--theme-light); color: var(--theme-dark); }
+        .option-btn.correct { background-color: var(--correct-bg); border-color: var(--correct-border); box-shadow: 3px 3px 0px var(--correct-border); }
+        .option-btn.correct .opt-circle { background-color: var(--correct-border); color: white; border-color: var(--correct-border); }
+        .option-btn.wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); opacity: 0.9; box-shadow: none; }
+        .option-btn.wrong .opt-circle { background-color: var(--wrong-border); color: white; border-color: var(--wrong-border); }
+        .option-btn.disabled { pointer-events: none; opacity: 0.7; }
+
+        /* --- FEEDBACK DA QUESTÃO --- */
+        .feedback-box { display: block; margin-top: 25px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 25px; animation: slideUp 0.3s ease-out; box-shadow: 5px 5px 0px rgba(0,0,0,0.1); }
+        .feedback-title { font-weight: 900; text-transform: uppercase; font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .feedback-item { margin-bottom: 10px; font-size: 0.95rem; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); line-height: 1.5; font-weight: 500; }
+        .feedback-item.correct-opt { background: var(--correct-bg); border-color: var(--correct-border); color: #064E3B; font-weight: 700; box-shadow: 3px 3px 0px var(--correct-border); }
+        .feedback-item.wrong-opt { background: #F1F5F9; border-color: #94A3B8; color: #475569; border-style: dashed; margin-top: 8px; }
+
+        /* --- RESULTADOS --- */
+        .result-card { background: white; border: 4px solid var(--border-color); border-radius: 16px; padding: 40px 20px; box-shadow: 8px 8px 0px var(--border-color); margin-bottom: 30px; text-align: center; }
+        .stars-container { font-size: 2.5rem; margin: 15px 0; letter-spacing: 5px; }
+        .percentage-big { font-size: 5rem; font-weight: 900; color: var(--theme-dark); line-height: 1; margin: 15px 0; text-shadow: 4px 4px 0px var(--theme-contrast); }
+        
+        .result-summary-box { padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 3px solid; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); }
+        .result-summary-box.success { background: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .result-summary-box.error { background: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .error-log-item { margin-bottom: 15px; padding: 20px; background: var(--bg-color); border-radius: 12px; border: 3px dashed var(--theme-medium); text-align: left;}
+
+        /* --- RODAPÉ DE NAVEGAÇÃO --- */
+        .quiz-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--white); border-top: 3px solid var(--border-color); padding: 15px 20px; display: none; justify-content: center; gap: 20px; z-index: 100; box-shadow: 0px -4px 10px rgba(0,0,0,0.05); }
+        .nav-btn { padding: 15px 30px; border-radius: 12px; font-weight: 900; border: 3px solid var(--border-color); cursor: pointer; box-shadow: 3px 3px 0px var(--border-color); font-family: 'Poppins', sans-serif; text-transform: uppercase; background: white; color: var(--text-color); font-size: 1rem; transition: transform 0.1s; }
+        .nav-btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 0px 0px 0px transparent; }
+        .btn-next { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); border-color: var(--border-color); }
+        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <header class="logo-header">
+            <div class="css-logo"><span class="pulse-effect">📏</span> PROMOVER</div>
+            <h1>Física / 9º Ano</h1>
+            <p class="subtitle">Movimento Retilíneo Uniforme (MRU)</p>
+        </header>
+
+        <div class="toggle-container">
+            <button class="toggle-btn active" id="btnExp" onclick="changeApplicationView('explanation')">📘 Teoria</button>
+            <button class="toggle-btn" id="btnPrac" onclick="changeApplicationView('practice')">🧠 Prática (30)</button>
+        </div>
+
+        <!-- VISTA: TEORIA -->
+        <main id="viewExplanation" class="view-section active">
+            
+            <div class="search-container">
+                <span class="search-icon" aria-hidden="true">🔍</span>
+                <input type="text" id="searchInput" class="search-input" aria-label="Pesquisar conteúdo" placeholder="Pesquisar conceito... (ex: Sorvete, Constante, Gráfico)">
+            </div>
+            <div id="no-results"><p>😕 Termo não encontrado na teoria do MRU.</p></div>
+
+            <section class="content-group">
+                <div class="section-badge">🧊 1. O Movimento Perfeito</div>
+                <article class="theory-box search-target">
+                    <h3>O que é o MRU?</h3>
+                    <p>O Movimento Retilíneo Uniforme (<strong>MRU</strong>) é o movimento mais simples e previsível do universo. Para que um corpo esteja em MRU, ele precisa de cumprir duas regras absolutas:</p>
+                    
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li><strong>Trajetória Retilínea:</strong> Move-se obrigatoriamente numa linha reta (sem curvas).</li>
+                        <li><strong>Velocidade Constante:</strong> A velocidade nunca muda. O ponteiro do velocímetro fica "congelado". Se a velocidade não muda, significa que a <strong>Aceleração é ZERO (a = 0)</strong>.</li>
+                    </ul>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">🍦 2. A Fórmula do Sorvete</div>
+                <article class="theory-box search-target">
+                    <h3>Função Horária da Posição</h3>
+                    <p>Como a velocidade nunca muda, podemos prever exatamente onde o carro vai estar em qualquer segundo do futuro. Usamos a famosa "Fórmula do Sorvete":</p>
+                    
+                    <div class="inline-example">S = S₀ + v · t</div>
+                    
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li><strong>S:</strong> Posição Final (Onde o carro vai estar).</li>
+                        <li><strong>S₀ (S zero):</strong> Posição Inicial (De onde o carro partiu).</li>
+                        <li><strong>v:</strong> Velocidade Constante (O ritmo da viagem).</li>
+                        <li><strong>t:</strong> Tempo (Os segundos que passaram no relógio).</li>
+                    </ul>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">📈 3. A Leitura dos Gráficos</div>
+                <article class="theory-box search-target">
+                    <h3>S x t  e  V x t</h3>
+                    <p>No IFCE, não basta saber a fórmula, é preciso saber ler os gráficos do MRU!</p>
+                    
+                    <div class="visual-area" style="background: transparent; border: none; padding: 0;">
+                        <div class="g-grid">
+                            <div class="g-card">
+                                <div class="g-icon">📈</div>
+                                <div class="g-title">Gráfico S x t<br>(Posição por Tempo)</div>
+                                <div class="g-desc">É sempre uma <strong>Reta Inclinada</strong>. Se a reta sobe, o movimento é Progressivo (+). Se desce, é Retrógrado (-).</div>
+                            </div>
+                            <div class="g-card">
+                                <div class="g-icon">➖</div>
+                                <div class="g-title">Gráfico V x t<br>(Velocidade por Tempo)</div>
+                                <div class="g-desc">É sempre uma <strong>Reta Horizontal</strong> (porque a velocidade não sobe nem desce). A <strong>ÁREA</strong> debaixo da reta = Deslocamento (ΔS).</div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">⚔️ 4. Encontro de Móveis</div>
+                <article class="theory-box search-target">
+                    <h3>Quando eles colidem?</h3>
+                    <p>Problema clássico: "O carro A saiu do km 10. O carro B saiu do km 100 na contramão. Quando se encontram?"</p>
+                    
+                    <div class="highlight-box">
+                        <strong>O Truque do Encontro:</strong> Monta a Equação do Sorvete para o Carro A. Monta para o Carro B. No momento do encontro, eles ocupam o mesmo espaço físico, logo, basta igualar as equações: <strong>S_A = S_B</strong>. E resolve para achar o tempo (t)!
+                    </div>
+                </article>
+            </section>
+
+            <button class="btn-action" onclick="changeApplicationView('practice')">
+                Iniciar a Avaliação (30 Questões) ➜
+            </button>
+        </main>
+
+        <!-- VISTA: PRÁTICA (QUIZ) -->
+        <main id="viewPractice" class="view-section">
+            <div style="margin-bottom: 20px; background-color: var(--white); padding: 15px; border-radius: 12px; border: 3px solid var(--border-color); box-shadow: 4px 4px 0px var(--border-color);">
+                <h2 style="color:var(--theme-dark); font-weight:900; margin-bottom: 5px;">A Prova de Fogo - IFCE</h2>
+                <p style="color: var(--theme-contrast); font-size: 0.95rem; font-weight:600;">
+                    30 questões de MRU, gráficos e equações horárias. Acerta <strong>80% (24/30)</strong>. Tem papel e caneta à mão!
+                </p>
+            </div>
+            
+            <div class="question-map" id="qMap"></div>
+            <div id="quizContainer" style="margin-bottom: 40px;"></div>
+        </main>
+
+        <!-- VISTA: RESULTADOS -->
+        <main id="viewResult" class="view-section">
+            <div class="result-card">
+                <h2 style="font-weight:900; text-transform:uppercase;">Relatório Final</h2>
+                <div class="stars-container" id="finalStars">⭐⭐⭐</div>
+                <div class="percentage-big" id="finalPercent">0%</div>
+                <p style="font-size:1.2rem; font-weight:700; color:#555;" id="finalScoreText">Acertaste 0 de 30</p>
+                <div id="review-container" style="text-align: left; margin-top: 20px;"></div>
+            </div>
+            <div id="action-buttons"></div>
+        </main>
+
+    </div>
+
+    <!-- RODAPÉ DE NAVEGAÇÃO -->
+    <footer class="quiz-footer" id="quizFooter">
+        <button class="nav-btn btn-prev" id="btnPrev" onclick="navigateQuestion(-1)">Anterior</button>
+        <button class="nav-btn btn-next" id="btnNext" onclick="navigateQuestion(1)">Próxima</button>
+    </footer>
+
+<script>
+    /* --- ESTRUTURA DE DADOS (BASE DE QUESTÕES - NÍVEL IFCE TÉCNICO INTEGRADO) --- */
+    const questionsDatabase = [
+        { level: "Fácil", text: "Para que o movimento de um objeto seja classificado RIGOROSAMENTE como Movimento Retilíneo Uniforme (MRU), quais as duas condições que ele deve cumprir?", options: ["Trajetória circular e velocidade variável.", "Trajetória retilínea e aceleração constante diferente de zero.", "Trajetória retilínea e velocidade constante (aceleração nula).", "Trajetória em ziguezague e velocidade constante."], correctIndex: 2, explanation: { correctText: "No MRU, o móvel anda em linha reta (Retilíneo) e a velocidade nunca aumenta nem diminui (Uniforme). Logo, não existe aceleração (a = 0).", otherOptions: ["As outras opções descrevem outros tipos de movimento (MUV ou MCU)."] } },
+        { level: "Fácil", text: "A função horária das posições do MRU é dada por S = S₀ + v.t. O que representam os valores de S₀ e v nesta fórmula matemática?", options: ["S₀ é a posição inicial e v é a aceleração.", "S₀ é a posição inicial e v é a velocidade escalar constante.", "S₀ é a velocidade inicial e v é a posição.", "S₀ é o tempo inicial e v é a variação de espaço."], correctIndex: 1, explanation: { correctText: "Na fórmula do 'Sorvete', o número sozinho (S₀) indica de que quilómetro ou metro o móvel partiu, e a letra v indica a velocidade (que multiplicada pelo tempo dá a distância avançada).", otherOptions: ["Aceleração no MRU é zero."] } },
+        { level: "Médio", text: "Um corpo move-se numa autoestrada seguindo a equação horária S = 20 + 5.t (no Sistema Internacional). Qual é a sua posição de partida (inicial) e a sua velocidade?", options: ["Posição inicial: 5 m ; Velocidade: 20 m/s", "Posição inicial: 20 m ; Velocidade: 5 m/s", "Posição inicial: 0 m ; Velocidade: 25 m/s", "Posição inicial: 20 m ; Velocidade: -5 m/s"], correctIndex: 1, explanation: { correctText: "Comparando S = 20 + 5.t com S = S₀ + v.t, vemos diretamente que S₀ = 20 metros e v = 5 m/s.", otherOptions: ["Cuidado para não inverter a ordem dos números."] } },
+        { level: "Médio", text: "Ainda sobre a equação S = 20 + 5.t (SI). Em que posição exata (quilómetro ou metro) este carro estará quando o cronómetro marcar exatos 10 segundos?", options: ["35 m", "50 m", "70 m", "200 m"], correctIndex: 2, explanation: { correctText: "Basta substituir o 't' pelo número 10 na equação. Fica: S = 20 + 5 × (10). Multiplicação primeiro: 5 × 10 = 50. Soma: 20 + 50 = 70 metros.", otherOptions: ["Incorreto na matemática básica."] } },
+        { level: "Fácil", text: "Um ciclista tem a sua posição descrita pela equação S = -10 + 2.t (SI). A partir de que posição o ciclista iniciou o seu movimento no eixo de referência?", options: ["Posição zero (Origem).", "Posição +10 metros.", "Posição -10 metros (atrás da origem do referencial).", "Posição 2 metros."], correctIndex: 2, explanation: { correctText: "O termo S₀ é o valor independente da variável t. Neste caso, S₀ = -10 m. O ciclista partiu de um ponto situado 10 metros ANTES da marca do zero.", otherOptions: ["O sinal negativo faz parte do valor."] } },
+        { level: "Médio", text: "Dada a equação horária S = 100 - 20.t (SI). Qual das opções abaixo classifica corretamente este tipo de movimento?", options: ["Movimento Progressivo, porque ele partiu do km 100.", "Movimento Retardado, porque ele está a travar.", "Movimento Retrógrado, porque a velocidade é negativa (-20 m/s), ou seja, ele move-se contra a orientação da via.", "Movimento Acelerado."], correctIndex: 2, explanation: { correctText: "Olha sempre para o sinal da Velocidade (o número colado ao t). Como v = -20 m/s, o móvel anda 'de marcha-atrás' em relação às placas da estrada. É um movimento Retrógrado.", otherOptions: ["Progressivo seria se v fosse positiva."] } },
+        { level: "Difícil", text: "Um carro obedece à equação S = 50 - 10.t (no SI). A pergunta de exame é: Em que instante de tempo (t) este carro passará EXATAMENTE pela origem dos espaços (pela placa do km zero, S = 0)?", options: ["10 segundos", "5 segundos", "0 segundos", "50 segundos"], correctIndex: 1, explanation: { correctText: "Passar pela origem significa que a posição final S é igual a 0. Substitui S por 0 na fórmula: 0 = 50 - 10t => 10t = 50 => t = 50 / 10 = 5 segundos.", otherOptions: ["Erro ao montar a equação."] } },
+        { level: "Médio", text: "Se um carro parte do km 20 (S₀ = 20 km) e viaja com uma velocidade constante de 80 km/h a favor da trajetória, qual é a equação horária que descreve o seu movimento?", options: ["S = 80 + 20.t", "S = 20 - 80.t", "S = 20 + 80.t", "S = 80 - 20.t"], correctIndex: 2, explanation: { correctText: "Usando S = S₀ + v.t, substituímos S₀ por 20 e v por 80. Como ele vai a favor da trajetória, a velocidade é positiva (+80). Logo: S = 20 + 80.t.", otherOptions: ["S = 80 + 20t seria sair do km 80 a 20km/h."] } },
+        { level: "Fácil", text: "Num gráfico de Posição por Tempo (S x t) no MRU, a linha desenhada no gráfico é sempre:", options: ["Uma curva parabólica perfeita.", "Uma linha reta horizontal paralela ao eixo do tempo.", "Uma linha reta oblíqua (inclinada).", "Um círculo."], correctIndex: 2, explanation: { correctText: "No MRU, o espaço aumenta de forma proporcional e constante com o tempo, o que gera o desenho de uma linha reta inclinada a subir ou a descer (função do 1º grau).", otherOptions: ["A linha reta horizontal é no gráfico de Velocidade (V x t)."] } },
+        { level: "Médio", text: "Lendo o gráfico: Observas um gráfico S x t (Posição por Tempo) em que a linha reta começa na posição S = 40m e vai DESCENDO até cruzar o eixo do tempo (zero). O que isto significa?", options: ["Que o objeto está parado.", "Que o movimento é Uniformemente Acelerado.", "Que o movimento é Retrógrado, pois a posição está a diminuir ao longo do tempo.", "Que o objeto explodiu ao chegar a zero."], correctIndex: 2, explanation: { correctText: "Se a linha da posição desce, significa que o carro estava no km 40, depois foi para o 30, 20... Ele está a voltar contra a pista. A velocidade é negativa (Movimento Retrógrado).", otherOptions: ["Parado seria uma linha reta horizontal no S x t."] } },
+        { level: "Fácil", text: "Num gráfico de Velocidade por Tempo (V x t) de um Movimento Retilíneo Uniforme, que tipo de linha será observada?", options: ["Uma reta inclinada para cima.", "Uma reta inclinada para baixo.", "Uma curva exponencial.", "Uma reta horizontal paralela ao eixo do tempo."], correctIndex: 3, explanation: { correctText: "A palavra 'Uniforme' significa que a velocidade nunca muda. Se o carro vai a 50 km/h no 1º segundo, vai a 50 km/h no 10º segundo. O gráfico é uma linha plana horizontal (constante).", otherOptions: ["As outras descrevem aceleração (MUV)."] } },
+        { level: "Difícil", text: "Regra de Ouro dos Gráficos: Tens um gráfico V x t (Velocidade x Tempo) com a reta no valor 10 m/s constante durante 5 segundos. Se calculares a ÁREA geométrica do retângulo formado sob essa linha, o que descobres?", options: ["A aceleração do corpo.", "O deslocamento total do corpo (ΔS).", "A massa do corpo.", "A posição inicial do corpo (S₀)."], correctIndex: 1, explanation: { correctText: "A área sob o gráfico V x t é NUMERICAMENTE IGUAL ao Deslocamento (ΔS). A área do retângulo é Base × Altura (5 s × 10 m/s = 50 m de deslocamento).", otherOptions: ["Aceleração seria o declive do gráfico V x t, que neste caso é zero."] } },
+        { level: "Difícil", text: "Encontro de Móveis (1): O Carro A tem a equação Sa = 10 + 5.t. O Carro B tem a equação Sb = 50 - 3.t. Em que instante (t) eles se encontram na estrada?", options: ["t = 5 s", "t = 10 s", "t = 8 s", "t = 2 s"], correctIndex: 0, explanation: { correctText: "No momento do encontro, eles ocupam o mesmo espaço: Sa = Sb. Então: 10 + 5t = 50 - 3t. Passa o 3t para a esquerda a somar e o 10 para a direita a subtrair: 5t + 3t = 50 - 10 => 8t = 40 => t = 40 / 8 = 5 segundos.", otherOptions: ["Incorreto na álgebra básica."] } },
+        { level: "Difícil", text: "No problema anterior, eles encontram-se no instante t = 5 s (Sa = 10 + 5.t). Em que POSIÇÃO exata da estrada (qual quilómetro ou metro) ocorreu esse encontro frontal?", options: ["35 m", "15 m", "50 m", "25 m"], correctIndex: 0, explanation: { correctText: "Pega no tempo de encontro (t = 5) e substitui numa das equações. Sa = 10 + 5 × (5) => Sa = 10 + 25 = 35 metros. (Se usasses a Sb, daria igual: 50 - 3×5 = 35m).", otherOptions: ["Erro no cálculo."] } },
+        { level: "Médio", text: "Problema do Polícia e Ladrão: O ladrão corre com a equação Sl = 100 + 4.t. O polícia vem atrás, na mesma direção, com a equação Sp = 0 + 6.t. Em quanto tempo o polícia alcança o ladrão?", options: ["10 s", "25 s", "50 s", "Nunca o alcança."], correctIndex: 2, explanation: { correctText: "Encontro: Sp = Sl => 6t = 100 + 4t. Passa o 4t para lá a subtrair: 6t - 4t = 100 => 2t = 100 => t = 50 segundos.", otherOptions: ["Incorreto."] } },
+        { level: "Fácil", text: "Nas equações horárias S = S₀ + v.t, se a velocidade v for igual a ZERO (v = 0), a equação fica apenas S = S₀. O que isto significa fisicamente?", options: ["O móvel está a mover-se à velocidade da luz.", "O móvel está em Repouso (parado sempre na posição inicial).", "O móvel está em queda livre.", "O movimento é uniformemente acelerado."], correctIndex: 1, explanation: { correctText: "Se v = 0, ele não avança nem recua ao longo do tempo. A sua posição final será sempre igual à inicial. Ele está simplesmente estacionado (em repouso).", otherOptions: ["Incorreto."] } },
+        { level: "Médio", text: "Se um gráfico de Posição (S) pelo Tempo (t) apresentar duas retas de carros diferentes: a Reta A é muito íngreme (subida acentuada) e a Reta B é pouco inclinada (quase deitada). O que podemos deduzir das velocidades?", options: ["A velocidade de B é maior que a de A.", "A velocidade de A é maior que a de B.", "Eles têm a mesma velocidade.", "A aceleração de A é maior."], correctIndex: 1, explanation: { correctText: "No gráfico S x t, a 'inclinação' da reta representa a Velocidade. Quanto mais íngreme (vertical) a reta for, maior é a distância percorrida em menos tempo, logo, a Velocidade de A é MAIOR.", otherOptions: ["Não há aceleração (MRU)."] } },
+        { level: "Difícil", text: "Dois autocarros do IFCE vão para a mesma excursão. O autocarro A parte do km 0 às 08:00 com velocidade de 60 km/h. O autocarro B sai do MESMO km 0, mas UMA HORA DEPOIS (às 09:00), com velocidade de 80 km/h. Em que hora o autocarro B ultrapassa o autocarro A?", options: ["10:00 h", "11:00 h", "12:00 h", "13:00 h"], correctIndex: 2, explanation: { correctText: "Às 09:00, o autocarro A já andou 1h a 60km/h, logo está no km 60. Equações a partir das 09:00: Sa = 60 + 60t e Sb = 0 + 80t. Encontro: 80t = 60 + 60t => 20t = 60 => t = 3 horas. Como o cronómetro começou às 09:00, 9h + 3h = 12:00h.", otherOptions: ["Questão clássica de velocidade relativa e desfasamento de tempo."] } },
+        { level: "Médio", text: "Na equação horária S = 10.t (repara que não há S₀ visível), qual é a posição inicial do móvel e que tipo de movimento ele faz?", options: ["S₀ = 10m ; Movimento retrógrado.", "S₀ = 0m (saiu da origem) ; Movimento progressivo (v = 10).", "S₀ = 1m ; Movimento acelerado.", "Ele não tem posição."], correctIndex: 1, explanation: { correctText: "Quando o número solto não aparece na fórmula, significa que ele é zero (S₀ = 0). O móvel partiu da placa do km zero. Como o 10 que multiplica o t é positivo, o movimento é progressivo.", otherOptions: ["Incorreto."] } },
+        { level: "Difícil", text: "O som de um trovão propaga-se a uma velocidade constante de aproximadamente 340 m/s (MRU). Se ouvires um trovão 5 segundos APÓS veres o clarão do relâmpago, a que distância, em metros, caiu o raio?", options: ["340 m", "680 m", "1700 m", "5000 m"], correctIndex: 2, explanation: { correctText: "Como é um MRU, S = S₀ + v.t. Assumindo a origem em ti (S₀=0), a distância é S = 340 × 5 = 1700 metros. O raio caiu a 1,7 km de distância.", otherOptions: ["Basta multiplicar 340 por 5."] } },
+        { level: "Fácil", text: "Em problemas de Cinemática, um 'Ponto Material' difere de um 'Corpo Extenso' porque:", options: ["Não possui massa na realidade.", "As suas dimensões (tamanho, comprimento) são tão pequenas em relação ao trajeto que não afetam os cálculos.", "É feito de matéria negra.", "É sempre esférico."], correctIndex: 1, explanation: { correctText: "Um carro numa viagem de 500 km é um Ponto Material (os seus 4m de chapa não mudam as contas). Mas se o problema for ele passar numa ponte de 10m, ele torna-se um Corpo Extenso (o seu tamanho importa!).", otherOptions: ["Incorreto."] } },
+        { level: "Médio", text: "Um corpo extenso (um camião de 20 metros) viaja a 15 m/s e quer atravessar completamente um túnel de 40 metros. O 'Deslocamento Total (ΔS)' a usar na fórmula (t = ΔS / v) para calcular a travessia será de:", options: ["40 m", "20 m", "60 m", "15 m"], correctIndex: 2, explanation: { correctText: "Regra fundamental para Corpos Extensos em pontes/túneis: o Deslocamento necessário é a SOMA do tamanho do túnel com o tamanho do veículo. ΔS = 40 + 20 = 60 metros.", otherOptions: ["Se usasses 40m, a traseira do camião ainda estaria dentro do túnel."] } },
+        { level: "Médio", text: "Seja a equação horária S = -50 + 10.t (no SI). O que acontecerá ao corpo no instante t = 5 segundos?", options: ["Ele vai parar de se mover.", "Ele passará pela posição S = 50m.", "Ele passará exatamente pela origem dos espaços (S = 0m).", "A sua velocidade vai diminuir para zero."], correctIndex: 2, explanation: { correctText: "Substituindo t por 5: S = -50 + 10(5) => S = -50 + 50 => S = 0. Ele partiu de trás do marco zero (km -50) e no quinto segundo ele cruza a placa do km zero.", otherOptions: ["A velocidade em MRU nunca muda."] } },
+        { level: "Difícil", text: "Dois ciclistas movem-se na mesma pista em sentidos OPOSTOS (vão chocar/encontrar-se). O ciclista A obedece à equação Sa = 0 + 5.t. O ciclista B obedece a Sb = 100 - 5.t. Em que instante (t) ocorre o encontro?", options: ["5 s", "10 s", "20 s", "50 s"], correctIndex: 1, explanation: { correctText: "Igualamos as posições: Sa = Sb => 5t = 100 - 5t. Passa o -5t a somar: 5t + 5t = 100 => 10t = 100 => t = 100 / 10 = 10 segundos.", otherOptions: ["Incorreto na álgebra."] } },
+        { level: "Fácil", text: "Na representação gráfica, a VELOCIDADE de um MRU nunca muda. Se um móvel viaja a 20 m/s para sempre, como seria o desenho do seu gráfico de Velocidade vs. Tempo (V x t)?", options: ["Uma curva em subida.", "Uma reta inclinada a descer até ao zero.", "Uma reta deitada, estritamente horizontal, fixada no eixo Y no valor 20.", "Um círculo perfeito."], correctIndex: 2, explanation: { correctText: "O valor da velocidade (eixo Y) é sempre 20, não importa quanto tempo (eixo X) passe. Isto desenha uma linha reta horizontal e constante.", otherOptions: ["Inclinado ou curvo indica mudança de velocidade (aceleração)."] } },
+        { level: "Difícil", text: "Na Física, porque dizemos que a Velocidade é RELATIVA?", options: ["Porque ela obedece à teoria de Einstein do E=mc².", "Porque o valor da velocidade de um objeto depende de qual REFERENCIAL estamos a usar para medir.", "Porque só a aceleração é absoluta.", "Porque os radares falham sempre."], correctIndex: 1, explanation: { correctText: "Imagina um comboio a 100 km/h. O passageiro dentro está a 0 km/h em relação à cadeira, a 100 km/h em relação à terra fora, e a 200 km/h em relação a um comboio que venha no sentido contrário! Tudo depende do Referencial.", otherOptions: ["Incorreto."] } },
+        { level: "Médio", text: "Um veículo parte da posição inicial S₀ = 30 km às 14h. Às 16h, ele encontra-se na posição S = 150 km. O movimento é MRU. Qual a equação horária da posição deste veículo?", options: ["S = 30 + 60.t", "S = 150 - 30.t", "S = 30 + 120.t", "S = 150 + 60.t"], correctIndex: 0, explanation: { correctText: "1º Passo: Achar a velocidade. ΔS = 150 - 30 = 120 km. Δt = 16h - 14h = 2h. V = 120/2 = 60 km/h. 2º Passo: Montar o Sorvete. S₀ é 30. Logo: S = 30 + 60.t.", otherOptions: ["Incorreto. A velocidade é 60 e sai de 30."] } },
+        { level: "Médio", text: "No estudo dos gráficos S x t (Espaço x Tempo), a Reta cruza o EIXO VERTICAL (eixo do S, posição) num determinado ponto. O valor numérico desse ponto onde a reta 'nasce' representa fisicamente o quê?", options: ["O tempo final (t).", "A velocidade máxima.", "A Posição Inicial (S₀) de onde o corpo partiu quando o tempo era zero.", "A aceleração do sistema."], correctIndex: 2, explanation: { correctText: "Quando t = 0 (no início do cronómetro), o valor no eixo das posições indica o local exato onde o móvel começou a viagem (o seu S₀).", otherOptions: ["Incorreto."] } },
+        { level: "Fácil", text: "No Movimento Retilíneo Uniforme, a Aceleração (a grandeza que faz a velocidade aumentar ou travar) tem que valor rigoroso?", options: ["É sempre positiva (+10 m/s²).", "É sempre igual à velocidade.", "É rigorosamente ZERO (Nula).", "Depende do peso do carro."], correctIndex: 2, explanation: { correctText: "A palavra 'Uniforme' dita a regra: a velocidade não pode variar. Se a velocidade não sofre variação, não existe aceleração (a = 0).", otherOptions: ["Se houvesse aceleração, o movimento passaria a ser Variado (MRUV)."] } },
+        { level: "Difícil", text: "Para terminar: Duas pessoas (A e B) correm numa pista plana. No gráfico de Posição x Tempo, as duas retas (a reta do corredor A e a reta do corredor B) CRUZAM-SE. O que representa fisicamente o ponto onde as duas linhas se intercetam?", options: ["Representa que um corredor tropeçou no outro e caíram.", "Representa que ambos pararam de correr.", "Representa o INSTANTE e a POSIÇÃO EXATA em que o corredor de trás alcançou/ultrapassou o da frente.", "Representa que as velocidades se anularam."], correctIndex: 2, explanation: { correctText: "O cruzamento das linhas no gráfico S x t significa que, naquele mesmo segundo de tempo, os dois estavam na mesma marca quilométrica da estrada. É a ultrapassagem (Encontro de Móveis).", otherOptions: ["Eles não param, apenas passam um pelo outro na pista."] } }
+    ];
+
+    /* --- GESTÃO DE ESTADO (STATE) --- */
+    const quizState = {
+        currentIndex: 0,
+        userAnswers: new Array(questionsDatabase.length).fill(null),
+        confettiAnimationId: null
+    };
+
+    /* --- FUNCIONALIDADES DE PESQUISA (TEORIA) --- */
+    function initializeSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const contentGroups = document.querySelectorAll('.content-group');
+        const noResultsMsg = document.getElementById('no-results');
+
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', function(event) {
+            const searchTerm = normalizeText(event.target.value);
+            let totalVisibleElements = 0;
+            
+            contentGroups.forEach(group => {
+                const groupContent = normalizeText(group.textContent);
+                const isMatch = groupContent.includes(searchTerm);
+                
+                group.style.display = isMatch ? 'flex' : 'none';
+                if (isMatch) totalVisibleElements++;
+            });
+            
+            noResultsMsg.style.display = totalVisibleElements === 0 ? 'block' : 'none';
+        });
+    }
+
+    function normalizeText(text) {
+        return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    /* --- CONTROLO DE VISTAS (VIEWS) --- */
+    function changeApplicationView(viewName) {
+        const views = ['viewExplanation', 'viewPractice', 'viewResult'];
+        
+        views.forEach(viewId => document.getElementById(viewId).classList.remove('active'));
+        
+        const quizFooter = document.getElementById('quizFooter');
+        if (quizFooter) quizFooter.style.display = 'none';
+
+        if (viewName === 'explanation') {
+            document.getElementById('viewExplanation').classList.add('active');
+            document.getElementById('btnExp').classList.add('active');
+            document.getElementById('btnPrac').classList.remove('active');
+        } else if (viewName === 'practice') {
+            document.getElementById('viewPractice').classList.add('active');
+            if (quizFooter) quizFooter.style.display = 'flex';
+            document.getElementById('btnExp').classList.remove('active');
+            document.getElementById('btnPrac').classList.add('active');
+            
+            renderCurrentQuestion();
+            renderNavigationMap();
+        } else if (viewName === 'result') {
+            document.getElementById('viewResult').classList.add('active');
+        }
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* --- GERAÇÃO INTERFACE DO QUIZ --- */
+    function getDifficultyBadgeClass(level) {
+        const mapping = { 'Fácil': 'dif-facil', 'Médio': 'dif-medio', 'Difícil': 'dif-dificil' };
+        return mapping[level] || 'dif-facil';
+    }
+
+    function buildOptionsHTML(question, selectedAnswerIndex) {
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        return question.options.map((optionText, optionIndex) => {
+            let cssClass = '';
+            
+            if (selectedAnswerIndex !== null) {
+                if (optionIndex === question.correctIndex) cssClass = 'correct';
+                else if (optionIndex === selectedAnswerIndex) cssClass = 'wrong';
+                else cssClass = 'disabled';
+            }
+
+            const isDisabled = selectedAnswerIndex !== null ? 'disabled' : '';
+
+            return `
+                <button class="option-btn ${cssClass}" onclick="handleOptionSelection(${optionIndex})" ${isDisabled}>
+                    <div class="opt-circle">${alphabet[optionIndex]}</div>
+                    <div>${optionText}</div>
+                </button>
+            `;
+        }).join('');
+    }
+
+    function buildFeedbackHTML(question, selectedAnswerIndex) {
+        const isCorrect = selectedAnswerIndex === question.correctIndex;
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        const titleClass = isCorrect ? 'success' : 'error';
+        const titleText = isCorrect ? '✅ Raciocínio Correto!' : '❌ Diagnóstico de Falha!';
+        
+        const distortionsHTML = question.explanation.otherOptions.map((explanationText, idx) => {
+            if (idx === question.correctIndex) return '';
+            return `<div class="feedback-item wrong-opt"><strong>${alphabet[idx]})</strong> ${explanationText}</div>`;
+        }).join('');
+
+        return `
+            <div class="feedback-box show">
+                <div class="feedback-title ${titleClass}" style="color: ${isCorrect ? 'var(--correct-border)' : 'var(--wrong-border)'}">${titleText}</div>
+                <div class="feedback-item correct-opt"><strong>O Facto Numérico:</strong> ${question.options[question.correctIndex]}</div>
+                <div style="margin-top:15px;font-size:1rem;color:var(--text-color);margin-bottom:15px;font-weight:600;">${question.explanation.correctText}</div>
+                <div style="margin-top:15px;border-top:2px dashed var(--theme-dark);padding-top:15px;">
+                    <small style="color:var(--text-color);"><strong>Análise das Distorções:</strong></small>
+                    ${distortionsHTML}
+                </div>
+            </div>
+        `;
+    }
+
+    function renderCurrentQuestion() {
+        const container = document.getElementById('quizContainer');
+        if (!container) return;
+
+        const question = questionsDatabase[quizState.currentIndex];
+        const selectedAnswerIndex = quizState.userAnswers[quizState.currentIndex];
+        const badgeClass = getDifficultyBadgeClass(question.level);
+        
+        let feedbackHTML = selectedAnswerIndex !== null ? buildFeedbackHTML(question, selectedAnswerIndex) : '';
+
+        container.innerHTML = `
+            <div class="quiz-question-card">
+                <span class="difficulty-badge ${badgeClass}">${question.level}</span>
+                <div style="margin-bottom:25px;">
+                    <span class="quiz-question-counter">QUESTÃO ${quizState.currentIndex + 1} DE ${questionsDatabase.length}</span>
+                    <h2 class="quiz-question-text">${question.text}</h2>
+                </div>
+                <div class="options-list">
+                    ${buildOptionsHTML(question, selectedAnswerIndex)}
+                </div>
+                ${feedbackHTML}
+            </div>
+        `;
+        
+        updateNavigationButtons();
+    }
+
+    /* --- LÓGICA DO QUIZ --- */
+    function handleOptionSelection(selectedIndex) {
+        if (quizState.userAnswers[quizState.currentIndex] !== null) return;
+        
+        quizState.userAnswers[quizState.currentIndex] = selectedIndex;
+        const isCorrect = selectedIndex === questionsDatabase[quizState.currentIndex].correctIndex;
+        
+        if (isCorrect) startSuccessAnimation();
+        else triggerErrorShakeEffect();
+        
+        renderCurrentQuestion();
+        renderNavigationMap();
+    }
+
+    function triggerErrorShakeEffect() {
+        const container = document.getElementById('quizContainer');
+        if (container) { 
+            container.classList.remove('shake-effect'); 
+            void container.offsetWidth; 
+            container.classList.add('shake-effect'); 
+            setTimeout(() => container.classList.remove('shake-effect'), 500); 
+        }
+    }
+
+    /* --- ANIMAÇÕES (CONFETTI) --- */
+    function startSuccessAnimation() {
+        const duration = 1500;
+        const end = Date.now() + duration;
+        
+        stopSuccessAnimation();
+        
+        function animateFrame() {
+            if(window.confetti && typeof confetti === 'function') {
+                const config = { particleCount: 5, spread: 55, colors: ['#3B82F6', '#1D4ED8', '#F97316', '#10B981'] };
+                confetti({ ...config, angle: 60, origin: { x: 0, y: 0.6 } });
+                confetti({ ...config, angle: 120, origin: { x: 1, y: 0.6 } });
+            }
+            if (Date.now() < end) quizState.confettiAnimationId = requestAnimationFrame(animateFrame);
+        }
+        animateFrame();
+    }
+
+    function stopSuccessAnimation() {
+        if (window.confetti && typeof confetti.reset === 'function') confetti.reset(); 
+        if (quizState.confettiAnimationId) {
+            cancelAnimationFrame(quizState.confettiAnimationId);
+            quizState.confettiAnimationId = null;
+        }
+    }
+
+    /* --- NAVEGAÇÃO MAPA --- */
+    function renderNavigationMap() {
+        const mapContainer = document.getElementById('qMap');
+        if (!mapContainer) return;
+        
+        mapContainer.innerHTML = questionsDatabase.map((question, index) => {
+            const isCurrent = index === quizState.currentIndex;
+            const userAnswer = quizState.userAnswers[index];
+            const hasAnswered = userAnswer !== null;
+            const isCorrect = userAnswer === question.correctIndex;
+            
+            let cssClass = 'map-dot';
+            if (isCurrent) cssClass += ' active';
+            if (hasAnswered) cssClass += isCorrect ? ' answered-correct' : ' answered-wrong';
+            
+            return `<div class="${cssClass}" onclick="goToQuestion(${index})">${index + 1}</div>`;
+        }).join('');
+        
+        setTimeout(() => { 
+            const activeDot = mapContainer.querySelector('.map-dot.active'); 
+            if (activeDot) activeDot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); 
+        }, 50);
+    }
+
+    function goToQuestion(targetIndex) { 
+        stopSuccessAnimation();
+        quizState.currentIndex = targetIndex; 
+        renderCurrentQuestion(); 
+        renderNavigationMap(); 
+    }
+    
+    function navigateQuestion(directionOffset) { 
+        const nextIndex = quizState.currentIndex + directionOffset; 
+        if (nextIndex >= 0 && nextIndex < questionsDatabase.length) goToQuestion(nextIndex); 
+    }
+
+    function updateNavigationButtons() {
+        const btnPrev = document.getElementById('btnPrev');
+        const btnNext = document.getElementById('btnNext');
+        
+        if (btnPrev) btnPrev.disabled = (quizState.currentIndex === 0);
+        
+        if (btnNext) {
+            const isLastQuestion = quizState.currentIndex === questionsDatabase.length - 1;
+            if (isLastQuestion) { 
+                btnNext.textContent = "Finalizar Avaliação"; 
+                btnNext.onclick = finishQuiz; 
+            } else { 
+                btnNext.textContent = "Próxima ➡️"; 
+                btnNext.onclick = () => navigateQuestion(1); 
+            }
+        }
+    }
+
+    /* --- CÁLCULO DE RESULTADOS --- */
+    function calculateStars(percent) {
+        if (percent === 100) return "⭐⭐⭐⭐⭐";
+        if (percent >= 80) return "⭐⭐⭐⭐";
+        if (percent >= 60) return "⭐⭐⭐";
+        if (percent >= 40) return "⭐⭐";
+        if (percent > 0) return "⭐";
+        return "🌑"; // zero stars
+    }
+
+    function finishQuiz() {
+        const unansweredCount = quizState.userAnswers.filter(answer => answer === null).length;
+        
+        if (unansweredCount > 0) {
+            const confirmMessage = `Existem ${unansweredCount} questões por responder. Quer terminar mesmo assim (as em branco serão dadas como erradas)?`;
+            if (!confirm(confirmMessage)) return;
+        }
+
+        stopSuccessAnimation();
+
+        const correctAnswersCount = quizState.userAnswers.filter((answer, index) => answer === questionsDatabase[index].correctIndex).length;
+        const totalQuestions = questionsDatabase.length;
+        const percentageScore = Math.round((correctAnswersCount / totalQuestions) * 100);
+        const isApproved = percentageScore >= 80;
+        
+        renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved);
+        changeApplicationView('result');
+    }
+
+    function renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved) {
+        document.getElementById('finalPercent').textContent = `${percentageScore}%`;
+        document.getElementById('finalScoreText').textContent = `Acertaste ${correctAnswersCount} de ${totalQuestions}`;
+        document.getElementById('finalStars').textContent = calculateStars(percentageScore);
+        
+        const reviewContainer = document.getElementById('review-container');
+        const actionButtonsContainer = document.getElementById('action-buttons');
+        
+        let summaryHTML = '';
+
+        if (isApproved) {
+            summaryHTML += `
+                <div class="result-summary-box success">
+                    <strong>🎉 CÁLCULO PRECISO!</strong> A tua base nas Funções Horárias e Gráficos do MRU está formidável e alinhada com os problemas do IFCE.
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REPETIR PARA 100%</button>`;
+        } else {
+            summaryHTML += `
+                <div class="result-summary-box error">
+                    <strong>⚠️ ATENÇÃO NA ÁLGEBRA!</strong> Foste avaliado abaixo da meta (80%). Revisa como igualar equações para calcular o tempo de encontro e as leituras de gráficos S x t.
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REFAZER AVALIAÇÃO</button>`;
+        }
+        
+        if (correctAnswersCount < totalQuestions) {
+            summaryHTML += '<h4 style="margin-bottom:15px; color:var(--text-color); font-size:1.15rem;">Revisão das Falhas Numéricas:</h4>';
+            questionsDatabase.forEach((question, index) => {
+                const userAnswerIndex = quizState.userAnswers[index];
+                if (userAnswerIndex !== question.correctIndex) {
+                    const userAnswerText = userAnswerIndex === null ? "Deixaste em branco" : question.options[userAnswerIndex];
+                    const correctAnswerText = question.options[question.correctIndex];
+                    
+                    summaryHTML += `
+                        <div class="error-log-item">
+                            <strong style="color:var(--theme-dark); font-size:1.05rem; display:block; margin-bottom:8px;">Q${index + 1}: ${question.text}</strong>
+                            <span style="color:var(--wrong-border); font-weight: 600; display:block; margin-bottom:5px;">A tua matemática: ${userAnswerText}</span>
+                            <span style="color:var(--correct-border); font-weight: 700; display:block;">O Resultado Exato: ${correctAnswerText}</span>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        reviewContainer.innerHTML = summaryHTML;
+    }
+
+    function resetQuiz() { 
+        quizState.userAnswers = new Array(questionsDatabase.length).fill(null); 
+        quizState.currentIndex = 0; 
+        changeApplicationView('practice'); 
+    }
+    
+    // START APPLICATION
+    initializeSearch();
+    changeApplicationView('explanation');
+</script>
+</body>
+</html>

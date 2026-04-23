@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Física: Grandezas Físicas e Vetores - Promover</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* --- VARIÁVEIS DE COR E TEMA: VETOR & ESPAÇO (Física Geométrica) --- */
+        :root {
+            --bg-color: #F8FAFC; /* Slate muito claro */
+            --text-color: #0F172A; /* Slate quase preto */
+            --border-color: #1E293B; /* Contorno escuro */
+            --white: #FFFFFF;
+            
+            --theme-light: #E0E7FF; /* Índigo pastel */
+            --theme-medium: #6366F1; /* Índigo vivo */
+            --theme-dark: #4338CA; /* Índigo profundo */
+            --theme-contrast: #F59E0B; /* Âmbar (Atenção/Contraste) */
+            --theme-accent: #EC4899; /* Rosa (Vetor) */
+            --theme-text-active: #FFFFFF;
+            
+            --correct-bg: #D1FAE5;
+            --correct-border: #059669;
+            --wrong-bg: #FFE4E6;
+            --wrong-border: #BE123C;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 15px 120px 15px;
+            background-image: linear-gradient(rgba(99, 102, 241, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(99, 102, 241, 0.1) 1px, transparent 1px);
+            background-size: 25px 25px;
+        }
+
+        /* --- ANIMAÇÕES --- */
+        @keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1) rotate(-5deg); color: var(--theme-contrast); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+        .pulse-effect { animation: pulse 2s infinite; display: inline-block; }
+        .shake-effect { animation: shake 0.4s ease-in-out; }
+
+        /* --- LAYOUT PRINCIPAL --- */
+        .container { width: 100%; max-width: 650px; display: flex; flex-direction: column; gap: 25px; }
+        .logo-header { display: flex; flex-direction: column; align-items: center; padding: 15px 0 25px 0; text-align: center; }
+        .css-logo { font-size: 1.5rem; font-weight: 900; color: var(--theme-text-active); text-transform: uppercase; letter-spacing: -1px; border: 3px solid var(--border-color); padding: 8px 24px; border-radius: 12px; background: var(--theme-dark); box-shadow: 4px 4px 0px var(--theme-contrast); margin-bottom: 15px; transform: rotate(-2deg); }
+        h1 { font-size: 2rem; font-weight: 900; color: var(--text-color); text-transform: uppercase; letter-spacing: -0.5px; line-height: 1.1; }
+        .subtitle { font-size: 1rem; color: var(--white); font-weight: 700; margin-top: 5px; background: var(--theme-contrast); padding: 4px 12px; border-radius: 8px; border: 2px solid var(--border-color); }
+
+        /* --- NAVEGAÇÃO --- */
+        .toggle-container { background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 6px; display: flex; box-shadow: 4px 4px 0px var(--border-color); position: sticky; top: 15px; z-index: 50; }
+        .toggle-btn { flex: 1; border: none; background: none; padding: 12px 0; border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.05rem; color: var(--text-color); cursor: pointer; transition: all 0.2s ease; }
+        .toggle-btn.active { background-color: var(--theme-dark); color: var(--theme-text-active); border: 2px solid var(--border-color); box-shadow: 2px 2px 0px var(--border-color); }
+
+        .view-section { display: none; animation: fadeIn 0.3s ease; flex-direction: column; gap: 35px; }
+        .view-section.active { display: flex; }
+
+        /* --- PESQUISA --- */
+        .search-container { position: relative; width: 100%; }
+        .search-input { width: 100%; padding: 16px 20px 16px 55px; border: 3px solid var(--border-color); border-radius: 12px; background-color: var(--white); font-family: 'Poppins', sans-serif; font-size: 1.05rem; font-weight: 600; color: var(--text-color); box-shadow: 4px 4px 0px var(--border-color); outline: none; transition: all 0.2s ease; }
+        .search-input:focus { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--theme-contrast); border-color: var(--theme-dark); }
+        .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 1.4rem; }
+        #no-results { text-align: center; color: var(--wrong-border); font-weight: 800; display: none; background: var(--wrong-bg); padding: 15px; border: 3px solid var(--wrong-border); border-radius: 8px; }
+
+        /* --- TEORIA --- */
+        .content-group { display: flex; flex-direction: column; position: relative; padding-top: 15px; }
+        .section-badge { display: inline-flex; align-items: center; gap: 10px; background-color: var(--theme-dark); color: var(--white); font-size: 1.1rem; font-weight: 800; padding: 8px 20px; border-radius: 8px; border: 3px solid var(--border-color); box-shadow: 3px 3px 0px var(--theme-contrast); text-transform: uppercase; position: absolute; top: -5px; left: 15px; z-index: 10; transform: rotate(-1.5deg); }
+        .theory-box { display: flex; flex-direction: column; padding: 35px 25px 25px 35px; border-radius: 12px; background-color: var(--white); border: 3px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); font-weight: 500; font-size: 1rem; line-height: 1.7; position: relative; overflow: hidden; gap: 20px; border-left: 14px solid var(--theme-medium); }
+        .theory-box h3 { font-size: 1.35rem; font-weight: 900; color: var(--theme-dark); margin-bottom: 5px; display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px; }
+        .theory-box h4 { font-size: 1.1rem; font-weight: 800; color: var(--text-color); margin-top: 10px; border-bottom: 2px solid var(--theme-light); padding-bottom: 5px; }
+        
+        .inline-example { display: block; width: fit-content; max-width: 100%; margin-top: 6px; margin-bottom: 6px; padding: 6px 14px; background-color: var(--theme-light); border: 2px solid var(--border-color); border-radius: 8px; font-size: 0.85rem; color: var(--text-color); font-weight: 700; letter-spacing: 0.5px; box-shadow: 2px 2px 0px rgba(0,0,0,0.05); }
+        .visual-area { background: var(--bg-color); border: 3px dashed var(--theme-medium); border-radius: 12px; padding: 25px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; width: 100%; }
+        
+        .highlight-box { background-color: #FEF3C7; border: 3px solid var(--border-color); border-left: 8px solid var(--theme-contrast); padding: 18px 20px; border-radius: 8px; font-size: 0.95rem; color: #78350F; font-weight: 600; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); }
+        .highlight-box.pink { background-color: #FCE7F3; border-left-color: #DB2777; color: #831843; }
+
+        /* --- CARDS DE VETORES --- */
+        .v-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; width: 100%; margin-top: 10px; }
+        .v-card { flex: 1 1 calc(50% - 15px); min-width: 130px; border-radius: 12px; padding: 15px 10px; text-align: center; border: 3px solid var(--border-color); display: flex; flex-direction: column; align-items: center; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); background-color: var(--white); transition: transform 0.2s; }
+        .v-card:hover { transform: translateY(-3px); }
+        .v-card.full-width { flex: 1 1 100%; max-width: 280px; }
+        .v-icon { font-size: 2.8rem; margin-bottom: 8px; line-height: 1; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.15)); }
+        .v-title { font-size: 1.05rem; font-weight: 900; margin-bottom: 4px; text-transform: uppercase; color: var(--theme-dark); }
+        .v-unit { font-size: 1.2rem; font-weight: 800; color: var(--theme-contrast); margin-bottom: 4px; line-height: 1.2; background: var(--theme-light); padding: 2px 10px; border-radius: 6px; border: 2px solid var(--border-color); }
+        .v-traits { font-size: 0.75rem; font-style: italic; font-weight: 700; opacity: 0.9; line-height: 1.2; margin-top: 5px; color: var(--text-color); }
+
+        /* --- BOTÕES GERAIS --- */
+        .btn-action { width: 100%; padding: 20px; background-color: var(--theme-dark); color: white; border: 3px solid var(--border-color); border-radius: 12px; font-size: 1.15rem; font-weight: 900; cursor: pointer; box-shadow: 6px 6px 0px var(--theme-contrast); transition: all 0.1s; text-transform: uppercase; margin-top: 10px; }
+        .btn-action:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0px var(--theme-contrast); }
+
+        /* --- QUIZ UI --- */
+        .difficulty-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; border: 2px solid var(--border-color); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
+        .dif-facil { background: #D1FAE5; color: #065F46; }
+        .dif-medio { background: #FEF08A; color: #713F12; }
+        .dif-dificil { background: #FECACA; color: #7F1D1D; }
+
+        .question-map { display: flex; gap: 8px; overflow-x: auto; padding: 10px 5px; margin-bottom: 20px; white-space: nowrap; scroll-behavior: smooth; }
+        .question-map::-webkit-scrollbar { display: none; }
+        .map-dot { min-width: 38px; height: 38px; border: 2px solid var(--border-color); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; color: var(--theme-dark); background: white; cursor: pointer; transition: all 0.2s; }
+        .map-dot.active { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); transform: scale(1.15); }
+        .map-dot.answered-correct { background-color: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .map-dot.answered-wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .quiz-question-card { border: 4px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); padding: 30px; border-radius: 16px; background: var(--white); }
+        .quiz-question-counter { font-size: 0.85rem; font-weight: 900; color: var(--theme-dark); letter-spacing: 1px; }
+        .quiz-question-text { font-size: 1.2rem; margin-top: 8px; color: var(--text-color); font-weight: 800; line-height: 1.5; margin-bottom: 25px;}
+
+        .option-btn { display: flex; align-items: center; width: 100%; padding: 18px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.1s ease; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 600; text-align: left; color: var(--text-color); }
+        .option-btn:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px var(--theme-contrast); }
+        .opt-circle { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--border-color); margin-right: 15px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.05rem; flex-shrink: 0; background: var(--theme-light); color: var(--theme-dark); }
+        .option-btn.correct { background-color: var(--correct-bg); border-color: var(--correct-border); box-shadow: 3px 3px 0px var(--correct-border); }
+        .option-btn.correct .opt-circle { background-color: var(--correct-border); color: white; border-color: var(--correct-border); }
+        .option-btn.wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); opacity: 0.9; box-shadow: none; }
+        .option-btn.wrong .opt-circle { background-color: var(--wrong-border); color: white; border-color: var(--wrong-border); }
+        .option-btn.disabled { pointer-events: none; opacity: 0.7; }
+
+        /* --- FEEDBACK DA QUESTÃO --- */
+        .feedback-box { display: block; margin-top: 25px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 25px; animation: slideUp 0.3s ease-out; box-shadow: 5px 5px 0px rgba(0,0,0,0.1); }
+        .feedback-title { font-weight: 900; text-transform: uppercase; font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .feedback-item { margin-bottom: 10px; font-size: 0.95rem; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); line-height: 1.5; font-weight: 500; }
+        .feedback-item.correct-opt { background: var(--correct-bg); border-color: var(--correct-border); color: #064E3B; font-weight: 700; box-shadow: 3px 3px 0px var(--correct-border); }
+        .feedback-item.wrong-opt { background: #F1F5F9; border-color: #94A3B8; color: #475569; border-style: dashed; margin-top: 8px; }
+
+        /* --- RESULTADOS --- */
+        .result-card { background: white; border: 4px solid var(--border-color); border-radius: 16px; padding: 40px 20px; box-shadow: 8px 8px 0px var(--border-color); margin-bottom: 30px; text-align: center; }
+        .stars-container { font-size: 2.5rem; margin: 15px 0; letter-spacing: 5px; }
+        .percentage-big { font-size: 5rem; font-weight: 900; color: var(--theme-dark); line-height: 1; margin: 15px 0; text-shadow: 4px 4px 0px var(--theme-contrast); }
+        
+        .result-summary-box { padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 3px solid; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); }
+        .result-summary-box.success { background: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .result-summary-box.error { background: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .error-log-item { margin-bottom: 15px; padding: 20px; background: var(--bg-color); border-radius: 12px; border: 3px dashed var(--theme-medium); text-align: left;}
+
+        /* --- RODAPÉ DE NAVEGAÇÃO --- */
+        .quiz-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--white); border-top: 3px solid var(--border-color); padding: 15px 20px; display: none; justify-content: center; gap: 20px; z-index: 100; box-shadow: 0px -4px 10px rgba(0,0,0,0.05); }
+        .nav-btn { padding: 15px 30px; border-radius: 12px; font-weight: 900; border: 3px solid var(--border-color); cursor: pointer; box-shadow: 3px 3px 0px var(--border-color); font-family: 'Poppins', sans-serif; text-transform: uppercase; background: white; color: var(--text-color); font-size: 1rem; transition: transform 0.1s; }
+        .nav-btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 0px 0px 0px transparent; }
+        .btn-next { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); border-color: var(--border-color); }
+        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <header class="logo-header">
+            <div class="css-logo"><span class="pulse-effect">↗️</span> PROMOVER</div>
+            <h1>Física / 9º Ano</h1>
+            <p class="subtitle">Grandezas Físicas e Vetores</p>
+        </header>
+
+        <div class="toggle-container">
+            <button class="toggle-btn active" id="btnExp" onclick="changeApplicationView('explanation')">📘 Teoria</button>
+            <button class="toggle-btn" id="btnPrac" onclick="changeApplicationView('practice')">🧠 Prática (30)</button>
+        </div>
+
+        <!-- VISTA: TEORIA -->
+        <main id="viewExplanation" class="view-section active">
+            
+            <div class="search-container">
+                <span class="search-icon" aria-hidden="true">🔍</span>
+                <input type="text" id="searchInput" class="search-input" aria-label="Pesquisar conteúdo" placeholder="Pesquisar conceito... (ex: Escalar, Vetor, Módulo)">
+            </div>
+            <div id="no-results"><p>😕 Termo não encontrado na teoria.</p></div>
+
+            <section class="content-group">
+                <div class="section-badge">📏 1. O que é uma Grandeza?</div>
+                <article class="theory-box search-target">
+                    <h3>Tudo o que se pode medir</h3>
+                    <p>Na Física, <strong>Grandeza</strong> é absolutamente tudo aquilo que pode ser medido e quantificado numericamente. O amor e a tristeza não são grandezas físicas, mas o tempo, a temperatura, a velocidade e a força são!</p>
+                    <p>Para simplificar o estudo do universo, os cientistas dividiram as grandezas físicas em dois grandes grupos morfológicos: as <strong>Escalares</strong> e as <strong>Vetoriais</strong>.</p>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">🔢 2. Grandezas Escalares</div>
+                <article class="theory-box search-target">
+                    <h3>Simples e Diretas</h3>
+                    <p>Uma grandeza <strong>ESCALAR</strong> fica perfeitamente definida e compreendida apenas com duas coisas: o <strong>número (valor)</strong> e a <strong>unidade de medida</strong>.</p>
+                    
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li><strong>Exemplos Clássicos:</strong> Massa, Tempo, Temperatura, Área, Volume, Energia, Trabalho e Densidade.</li>
+                        <li><strong>A Lógica:</strong> Se disseres "A aula demorou 50 minutos", toda a gente entende. Não faz qualquer sentido perguntar "50 minutos para a esquerda ou para cima?". Se não precisa de direção, é escalar!</li>
+                    </ul>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">↗️ 3. Grandezas Vetoriais</div>
+                <article class="theory-box search-target">
+                    <h3>Onde a Direção Importa</h3>
+                    <p>Uma grandeza <strong>VETORIAL</strong> é mais complexa. Apenas o número e a unidade não bastam para entendermos o que está a acontecer. Ela precisa obrigatoriamente de três características anatómicas do vetor (uma seta matemática):</p>
+                    
+                    <div class="visual-area" style="background: transparent; border: none; padding: 0;">
+                        <div class="v-grid">
+                            <!-- Módulo -->
+                            <div class="v-card">
+                                <div class="v-icon">🔢</div>
+                                <div class="v-title">Módulo</div>
+                                <div class="v-traits">É o valor numérico acompanhado da unidade (ex: 50 N, 20 m/s). Representa o tamanho da seta.</div>
+                            </div>
+                            
+                            <!-- Direção -->
+                            <div class="v-card">
+                                <div class="v-icon">📏</div>
+                                <div class="v-title">Direção</div>
+                                <div class="v-traits">É a reta onde a seta está desenhada (ex: Horizontal, Vertical, ou Diagonal).</div>
+                            </div>
+                            
+                            <!-- Sentido -->
+                            <div class="v-card full-width">
+                                <div class="v-icon">➡️</div>
+                                <div class="v-title">Sentido</div>
+                                <div class="v-traits">É a ponta da seta. Indica para onde vai dentro daquela direção (ex: para a Direita, para Cima, para o Norte).</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="highlight-box pink">
+                        <strong>Exemplos Vetoriais Clássicos:</strong> Força, Velocidade, Aceleração e Deslocamento.<br>
+                        <em>Ex: "O carro move-se a 80 km/h (Módulo), na estrada horizontal (Direção), no sentido da esquerda para a direita (Sentido)."</em>
+                    </div>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">➕ 4. Soma de Vetores</div>
+                <article class="theory-box search-target">
+                    <h3>A Matemática das Setas</h3>
+                    <p>Somar vetores não é como somar laranjas. A direção muda completamente o resultado (o <strong>Vetor Resultante</strong>):</p>
+                    
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li><strong>Mesma direção e mesmo sentido:</strong> Duas pessoas empurram um carro para a frente (30N e 20N). <em>Soma-se:</em> O carro sente 50N para a frente.</li>
+                        <li><strong>Mesma direção e sentidos opostos:</strong> Jogo do cabo de guerra (Uma puxa 50N para a direita, outra 30N para a esquerda). <em>Subtrai-se:</em> O resultado é 20N para a direita.</li>
+                        <li><strong>Direções Perpendiculares (Atenção IFCE!):</strong> Formam um ângulo de 90º (L). Para descobrir o vetor resultante diagonal, usa-se o <strong>Teorema de Pitágoras</strong> (a² = b² + c²).</li>
+                    </ul>
+                </article>
+            </section>
+
+            <button class="btn-action" onclick="changeApplicationView('practice')">
+                Iniciar a Avaliação (30 Questões) ➜
+            </button>
+        </main>
+
+        <!-- VISTA: PRÁTICA (QUIZ) -->
+        <main id="viewPractice" class="view-section">
+            <div style="margin-bottom: 20px; background-color: var(--white); padding: 15px; border-radius: 12px; border: 3px solid var(--border-color); box-shadow: 4px 4px 0px var(--border-color);">
+                <h2 style="color:var(--theme-dark); font-weight:900; margin-bottom: 5px;">A Prova de Fogo - IFCE</h2>
+                <p style="color: var(--theme-contrast); font-size: 0.95rem; font-weight:600;">
+                    30 questões essenciais sobre Grandezas e Vetores. Acerta <strong>80% (24/30)</strong> para garantires a aprovação em Cinemática.
+                </p>
+            </div>
+            
+            <div class="question-map" id="qMap"></div>
+            <div id="quizContainer" style="margin-bottom: 40px;"></div>
+        </main>
+
+        <!-- VISTA: RESULTADOS -->
+        <main id="viewResult" class="view-section">
+            <div class="result-card">
+                <h2 style="font-weight:900; text-transform:uppercase;">Relatório Final</h2>
+                <div class="stars-container" id="finalStars">⭐⭐⭐</div>
+                <div class="percentage-big" id="finalPercent">0%</div>
+                <p style="font-size:1.2rem; font-weight:700; color:#555;" id="finalScoreText">Acertaste 0 de 30</p>
+                <div id="review-container" style="text-align: left; margin-top: 20px;"></div>
+            </div>
+            <div id="action-buttons"></div>
+        </main>
+
+    </div>
+
+    <!-- RODAPÉ DE NAVEGAÇÃO -->
+    <footer class="quiz-footer" id="quizFooter">
+        <button class="nav-btn btn-prev" id="btnPrev" onclick="navigateQuestion(-1)">Anterior</button>
+        <button class="nav-btn btn-next" id="btnNext" onclick="navigateQuestion(1)">Próxima</button>
+    </footer>
+
+<script>
+    /* --- ESTRUTURA DE DADOS (BASE DE QUESTÕES - NÍVEL IFCE TÉCNICO INTEGRADO) --- */
+    const questionsDatabase = [
+        { level: "Fácil", text: "Na Física, como é definido o conceito de 'Grandeza'?", options: ["É a qualidade moral de um objeto.", "É tudo aquilo que pode ser medido, contado ou quantificado numericamente.", "É a medida exclusiva do tamanho de um objeto.", "É a unidade de força do Sistema Internacional."], correctIndex: 1, explanation: { correctText: "Grandeza física é qualquer propriedade da natureza que possa ser medida e representada por um valor numérico (ex: massa, tempo, velocidade, temperatura).", otherOptions: ["Tamanho é apenas uma das grandezas (comprimento).", "Qualidades como amor ou beleza não são grandezas físicas."] } },
+        { level: "Fácil", text: "As grandezas físicas são divididas em dois grandes grupos morfológicos. Quais são eles?", options: ["Positivas e Negativas.", "Métricas e Imperiais.", "Escalares e Vetoriais.", "Derivadas e Absolutas."], correctIndex: 2, explanation: { correctText: "Para simplificar as operações matemáticas, a física divide tudo em Escalares (apenas número) e Vetoriais (número + direção).", otherOptions: ["As outras divisões existem em contextos diferentes, mas não são a classificação estrutural morfológica principal ensinada em Mecânica."] } },
+        { level: "Fácil", text: "Uma grandeza ESCALAR é aquela que fica perfeitamente descrita e compreendida quando fornecemos apenas:", options: ["O valor numérico (módulo) e a unidade de medida.", "A direção e o sentido.", "O número, a direção e o sentido.", "A direção e a unidade de medida."], correctIndex: 0, explanation: { correctText: "As grandezas escalares são simples. Se disseres '30 kg' (módulo + unidade), a informação está completa. Não precisas de dizer para onde esses 30 kg apontam.", otherOptions: ["Direção e sentido são propriedades exclusivas dos vetores."] } },
+        { level: "Fácil", text: "Qual das seguintes alternativas apresenta APENAS grandezas ESCALARES?", options: ["Velocidade, Força e Aceleração.", "Massa, Tempo e Temperatura.", "Deslocamento, Tempo e Massa.", "Força, Temperatura e Aceleração."], correctIndex: 1, explanation: { correctText: "Massa (kg), Tempo (s) e Temperatura (K ou ºC) não precisam de uma 'seta' para indicar para onde vão. Ficam definidas apenas com o seu valor.", otherOptions: ["Velocidade, Força, Aceleração e Deslocamento são sempre Vetoriais."] } },
+        { level: "Médio", text: "Uma grandeza VETORIAL precisa de informações extras para ter significado no mundo real. Além do módulo (tamanho/valor) e da unidade, o que mais é obrigatório informar?", options: ["Apenas a direção.", "A direção e o sentido.", "A cor e a direção.", "Apenas o sentido."], correctIndex: 1, explanation: { correctText: "Um vetor é representado por uma seta. Ele exige Módulo (tamanho da seta), Direção (a reta: horizontal/vertical) e Sentido (a ponta da seta: direita/esquerda).", otherOptions: ["Faltar o sentido deixa a grandeza incompleta (sabes que é horizontal, mas não sabes se vai ou se vem)."] } },
+        { level: "Médio", text: "Nas aulas do IFCE, é comum os alunos confundirem Direção e Sentido. Se um carro se move na 'Vertical', a palavra 'Vertical' refere-se:", options: ["Ao Sentido.", "Ao Módulo.", "À Direção.", "À Grandeza Escalar."], correctIndex: 2, explanation: { correctText: "A Direção é a linha reta imaginária onde o corpo se move (Horizontal, Vertical, Diagonal). O Sentido é para onde ele aponta DENTRO dessa linha (Para cima, Para baixo).", otherOptions: ["Incorreto."] } },
+        { level: "Fácil", text: "Qual das alternativas abaixo apresenta uma grandeza estritamente VETORIAL?", options: ["A energia gasta numa corrida (Joules).", "A força feita para empurrar um carro enguiçado (Newtons).", "O volume de água de uma piscina (Litros).", "A massa de um saco de cimento (Quilogramas)."], correctIndex: 1, explanation: { correctText: "A Força é vetorial. Quando fazes força, fazes força NUMA DIREÇÃO e NUM SENTIDO (ex: a empurrar para a frente ou a puxar para trás). O resultado muda totalmente dependendo da seta.", otherOptions: ["Energia, Volume e Massa são escalares."] } },
+        { level: "Médio", text: "Um professor do IFCE diz: 'A temperatura na sala de aula é de 25ºC da esquerda para a direita'. Qual é o erro físico desta frase?", options: ["A temperatura deve ser medida em Kelvin, que é um vetor.", "A temperatura é uma grandeza escalar, logo, atribuir-lhe direção e sentido é um erro de conceito.", "A unidade está errada, deveria ser graus Fahrenheit.", "Não há erro, a temperatura move-se como um vetor de calor."], correctIndex: 1, explanation: { correctText: "A temperatura é apenas o grau de agitação das moléculas (um número). Sendo estritamente escalar, atribuir 'esquerda ou direita' a 25ºC não faz sentido físico.", otherOptions: ["Kelvin também é escalar.", "Calor (energia em trânsito) é escalar, move-se de corpos quentes para frios, mas não é um vetor mecânico."] } },
+        { level: "Difícil", text: "Massa e Peso são os conceitos mais confundidos na física escolar. Assinala a afirmação correta sobre estas duas grandezas:", options: ["Ambas são grandezas vetoriais.", "Ambas são grandezas escalares medidas em Quilogramas.", "A Massa é escalar (quantidade de matéria), e o Peso é vetorial (a força da gravidade a puxar-te para o centro da Terra).", "A Massa é vetorial e o Peso é escalar."], correctIndex: 2, explanation: { correctText: "A Massa (ex: 50 kg) é apenas um número, igual em qualquer parte do universo (Escalar). O Peso (ex: 500 N) é a FORÇA com que a gravidade puxa essa massa sempre na direção vertical e no sentido para baixo (Vetorial).", otherOptions: ["Incorreto."] } },
+        { level: "Médio", text: "Um aluno empurra uma caixa pesada para a DIREITA com uma força de 40 N. Um colega dele vem ajudar e puxa a caixa também para a DIREITA com uma força de 30 N. Qual é o Vetor Força Resultante sobre a caixa?", options: ["10 N para a direita.", "70 N para a direita.", "70 N para a esquerda.", "1200 N para a direita."], correctIndex: 1, explanation: { correctText: "Quando dois vetores têm a MESMA direção e o MESMO sentido, os seus módulos simplesmente somam-se: 40 + 30 = 70 N. O sentido mantém-se para a direita.", otherOptions: ["10 N seria se estivessem em sentidos opostos (40 - 30)."] } },
+        { level: "Médio", text: "No tradicional jogo do 'Cabo de Guerra' durante os jogos intercampi do IFCE, a Equipa A puxa a corda para a ESQUERDA com 500 N. A Equipa B puxa a mesma corda para a DIREITA com 400 N. Qual é o vetor resultante?", options: ["900 N para a direita.", "900 N para a esquerda.", "100 N para a esquerda.", "100 N para a direita."], correctIndex: 2, explanation: { correctText: "Vetores na MESMA direção mas com SENTIDOS OPOSTOS subtraem-se. 500 (Esquerda) - 400 (Direita) = 100 N. A corda vai para o lado da equipa mais forte (Esquerda).", otherOptions: ["Incorreto."] } },
+        { level: "Difícil", text: "O famoso Teorema de Pitágoras (a² = b² + c²) é indispensável na cinemática vetorial. Em que situação devemos utilizar Pitágoras para somar dois vetores?", options: ["Quando eles estão na mesma direção e mesmo sentido.", "Quando eles formam um ângulo de 180º entre si (sentidos opostos).", "Quando eles formam um ângulo de 90º entre si (são perpendiculares).", "Quando um dos vetores é escalar."], correctIndex: 2, explanation: { correctText: "Se um vetor puxa para CIMA e outro puxa para a DIREITA, eles formam um 'L' (ângulo reto de 90º). A resultante será a diagonal, calculada como a hipotenusa de um triângulo retângulo.", otherOptions: ["Mesmo sentido = soma simples.", "Sentidos opostos = subtração.", "Escalar não se soma com vetor."] } },
+        { level: "Difícil", text: "Problema clássico: Um barco tenta atravessar um rio acelerando a 4 m/s perpendicularmente em direção à margem oposta. A correnteza do rio, no entanto, empurra o barco lateralmente com uma velocidade de 3 m/s. Qual é o módulo do vetor velocidade resultante do barco?", options: ["1 m/s", "7 m/s", "5 m/s", "12 m/s"], correctIndex: 2, explanation: { correctText: "Como os vetores são perpendiculares (formam um 'L'), usamos Pitágoras: V² = 4² + 3²  =>  V² = 16 + 9  =>  V² = 25. A raiz quadrada de 25 é 5 m/s. Este é o famoso triângulo pitagórico 3-4-5.", otherOptions: ["7 m/s seria se fossem no mesmo sentido.", "1 m/s seria se fossem sentidos opostos."] } },
+        { level: "Fácil", text: "O Deslocamento e a Distância Percorrida parecem a mesma coisa, mas não são. Qual deles é a grandeza VETORIAL (que representa apenas uma flecha em linha reta a unir o início ao fim)?", options: ["A Distância Percorrida.", "O Deslocamento.", "Ambos são vetoriais.", "Nenhum, ambos são escalares."], correctIndex: 1, explanation: { correctText: "O Deslocamento (ΔS) é o vetor que une o ponto de partida A ao ponto de chegada B numa linha reta direta, não importando o caminho tortuoso que a pessoa fez. A Distância Percorrida é escalar (a soma dos passos dados).", otherOptions: ["Distância percorrida não liga a direção, só acumula metros."] } },
+        { level: "Médio", text: "Se um atleta corre os 400 metros numa pista circular de atletismo e dá exatamente UMA volta completa, parando no mesmo sítio onde começou, qual foi o módulo do seu DESLOCAMENTO VETORIAL?", options: ["400 m", "800 m", "Zero (0 m)", "Depende do tempo gasto."], correctIndex: 2, explanation: { correctText: "Como o Deslocamento Vetorial é a seta em linha reta do Início até ao Fim, se ele parou exatamente no mesmo ponto de partida, não houve 'deslocamento' final no espaço. Logo, o vetor resultante é Zero.", otherOptions: ["A Distância Percorrida (escalar) foi de 400m, mas o deslocamento é zero."] } },
+        { level: "Fácil", text: "Nos velocímetros dos carros, vemos um número, por exemplo, 80 km/h. Na física rigorosa, esse painel está a medir o quê?", options: ["O vetor velocidade instantânea completo.", "Apenas o Módulo (a grandeza escalar) da velocidade, chamada de Rapidez.", "A aceleração do carro.", "O deslocamento total do veículo."], correctIndex: 1, explanation: { correctText: "O velocímetro só mostra o 'tamanho' (módulo) da velocidade. Ele não te diz se estás a ir para Norte ou para o Sul. Portanto, ele mede a grandeza escalar (Rapidez/Speed), não o vetor completo (Velocity).", otherOptions: ["Falta direção e sentido para ser o vetor completo."] } },
+        { level: "Médio", text: "A palavra 'Módulo' no estudo dos vetores serve para indicar:", options: ["A inclinação da seta em graus.", "Para onde a seta aponta.", "O valor numérico absoluto ou o comprimento da seta (tamanho/intensidade da grandeza).", "O sinal negativo do vetor."], correctIndex: 2, explanation: { correctText: "O Módulo (ou Intensidade) é a parte matemática do vetor: o seu valor absoluto seguido da unidade (ex: 50 Newtons). No desenho geométrico, é representado pelo comprimento do traço.", otherOptions: ["Inclinação = Direção.", "Para onde aponta = Sentido."] } },
+        { level: "Difícil", text: "Um avião voa 300 km para o NORTE. Em seguida, vira 90º e voa 400 km para o LESTE. Qual foi a distância total percorrida (escalar) e o módulo do deslocamento (vetorial), respetivamente?", options: ["700 km e 700 km.", "700 km e 100 km.", "500 km e 700 km.", "700 km e 500 km."], correctIndex: 3, explanation: { correctText: "Distância (escalar, soma dos passos): 300 + 400 = 700 km. Deslocamento (vetorial, formou um L de 90º): usa-se Pitágoras (R² = 300² + 400²). R² = 90.000 + 160.000 = 250.000. Raiz = 500 km. (É o triângulo 3-4-5).", otherOptions: ["Incorreto."] } },
+        { level: "Fácil", text: "Para representar grandezas vetoriais nas fórmulas e nos livros do IFCE, qual é o símbolo matemático gráfico usado pelos professores por cima da letra (ex: por cima do V de velocidade)?", options: ["Uma pequena seta a apontar para a direita.", "Um traço simples (-).", "Um asterisco (*).", "Um triângulo (Delta)."], correctIndex: 0, explanation: { correctText: "Para distinguir um número normal (escalar) de um vetor, coloca-se uma pequena seta sobre a letra representativa da grandeza (ex: v⃗, F⃗, a⃗). A seta serve apenas como aviso visual, apontando sempre para a direita no papel.", otherOptions: ["Triângulo Delta (Δ) significa variação de uma medida."] } },
+        { level: "Médio", text: "Imagina que um vetor Força (F1) aponta para a direita e vale 10 N. Existe um vetor oposto (-F1). O sinal negativo num vetor significa:", options: ["Que a força é mais fraca que zero.", "Que a força está a puxar para baixo.", "Que a Direção se inverteu em 90 graus.", "Que o Módulo e a Direção são iguais, mas o Sentido foi totalmente invertido (180 graus)."], correctIndex: 3, explanation: { correctText: "Na álgebra vetorial, o sinal menos (-) não significa um número negativo como na matemática pura, mas sim a INVERSÃO DO SENTIDO da seta.", otherOptions: ["A direção (horizontal) mantém-se, apenas a ponta vira de direita para a esquerda."] } },
+        { level: "Difícil", text: "Um drone faz um voo de patrulha numa quinta agrotécnica. Ele sobe 10 metros na VERTICAL e depois avança 10 metros na HORIZONTAL. O que podemos afirmar sobre os vetores de movimento do drone?", options: ["Têm módulos iguais e direções diferentes.", "Têm módulos diferentes e direções iguais.", "Têm o mesmo módulo, mesma direção e mesmo sentido.", "Têm módulos e sentidos iguais."], correctIndex: 0, explanation: { correctText: "Ambos os vetores medem '10 metros' (Módulos iguais). Mas um está na linha Vertical e o outro na linha Horizontal, ou seja, as retas (Direções) são totalmente diferentes.", otherOptions: ["Se a direção é diferente, o sentido é obviamente diferente também."] } },
+        { level: "Médio", text: "O Tempo é talvez a grandeza mais fundamental da física mecânica. O Tempo é uma grandeza escalar ou vetorial?", options: ["Vetorial, porque caminha sempre para a frente (do passado para o futuro).", "Escalar, porque fica totalmente definido apenas com um número e uma unidade (ex: 2 horas).", "Ambos, dependendo se o relógio é de ponteiros ou digital.", "Nenhum dos dois."], correctIndex: 1, explanation: { correctText: "Embora o tempo avance, ele não possui direção e sentido geométricos no espaço tridimensional. O tempo só precisa de módulo (ex: 15 segundos) para ser perfeitamente entendido na mecânica clássica.", otherOptions: ["Falso."] } },
+        { level: "Fácil", text: "Qual destes instrumentos mede DIRETAMENTE uma grandeza vetorial na prática de laboratório?", options: ["O Termómetro (mede Temperatura).", "O Dinamômetro (mede a Força de tração, indicando para onde está a ser puxado).", "A Balança (mede a Massa).", "O Cronómetro (mede o Tempo)."], correctIndex: 1, explanation: { correctText: "O Dinamômetro é uma mola com uma escala. Ao puxá-lo, medes não só o valor da força (Módulo em Newtons), mas vês perfeitamente a linha (Direção) e para onde a mola estica (Sentido).", otherOptions: ["Termómetros, balanças e cronómetros medem escalares isolados."] } },
+        { level: "Médio", text: "A Aceleração (a mudança da velocidade ao longo do tempo) é a chave para estudar os acidentes de viação. A aceleração é classificada como:", options: ["Uma grandeza escalar, porque depende do tempo que é escalar.", "Uma grandeza vetorial, porque herdou a característica da velocidade (que muda de direção ou sentido durante as curvas ou travagens).", "Uma grandeza derivada escalar.", "Uma ilusão ótica."], correctIndex: 1, explanation: { correctText: "A aceleração precisa de direção e sentido. Quando travas o carro, a aceleração tem sentido OPOSTO à velocidade do carro. Quando curvas, a aceleração tem uma direção perpendicular (centrípeta). Logo, é vetorial.", otherOptions: ["Incorreto."] } },
+        { level: "Difícil", text: "O que acontece ao MÓDULO (tamanho) de um vetor velocidade se um carro mantiver os exatos 60 km/h, mas fizer uma curva muito apertada para a direita?", options: ["O módulo altera-se drasticamente.", "O módulo passa a ser negativo.", "O módulo mantém-se rigorosamente igual, apenas a Direção e o Sentido do vetor sofreram alterações na curva.", "O vetor velocidade transforma-se numa grandeza escalar."], correctIndex: 2, explanation: { correctText: "Como o carro manteve o ponteiro nos 60 km/h, o 'tamanho da seta' (Módulo) não mudou. O que a curva fez foi alterar a Direção e o Sentido por onde a seta aponta no espaço geométrico.", otherOptions: ["Módulo é o valor absoluto, não muda se o condutor não travar ou acelerar o carro."] } },
+        { level: "Fácil", text: "Um aluno precisa calcular o volume de um reservatório de irrigação. Ele multiplica Comprimento × Largura × Altura, obtendo 50 m³. O Volume é uma grandeza:", options: ["Vetorial, apontando para cima.", "Vetorial, apontando para o centro da Terra.", "Escalar, pois informa apenas o espaço tridimensional ocupado, sem qualquer seta direcional.", "Derivada vetorial."], correctIndex: 2, explanation: { correctText: "Saber que uma caixa de água tem '50 m³' é informação completa. Não existe um volume que 'aponte para o Norte'. Logo, é uma grandeza estritamente escalar.", otherOptions: ["Vetores precisam de direção e sentido aplicáveis."] } },
+        { level: "Médio", text: "Se no vestibular te perguntarem 'Qual a diferença entre a Rapidez Média e a Velocidade Vetorial Média?', tu deves responder:", options: ["A Rapidez usa a Distância Escalar percorrida. A Velocidade Vetorial usa apenas o Deslocamento em linha reta do início ao fim.", "Não há diferença, são sinónimos na física.", "A rapidez mede-se em Newtons e a velocidade em m/s.", "A velocidade vetorial ignora o tempo gasto."], correctIndex: 0, explanation: { correctText: "A Rapidez (Speed) é a Distância (soma de todas as curvas feitas) a dividir pelo tempo. A Velocidade Vetorial (Velocity) é a seta do Deslocamento Final a dividir pelo tempo.", otherOptions: ["Incorreto."] } },
+        { level: "Difícil", text: "Dois vetores idênticos, ambos com módulo igual a 10 unidades, são somados. Qual das alternativas descreve o MÁXIMO e o MÍNIMO valor possível para a soma matemática (resultante) destes dois vetores?", options: ["Máximo: 100 ; Mínimo: 1", "Máximo: 20 ; Mínimo: 0", "Máximo: 20 ; Mínimo: 10", "Sempre 20, não importa a posição."], correctIndex: 1, explanation: { correctText: "O valor máximo ocorre se eles estiverem no mesmo sentido (10 + 10 = 20). O valor mínimo ocorre se estiverem em sentidos opostos, como num cabo de guerra empatado (10 - 10 = 0).", otherOptions: ["Qualquer ângulo intermédio entre eles dará um resultado entre 0 e 20."] } },
+        { level: "Médio", text: "Uma caixa está num plano inclinado (uma rampa). A força da gravidade (Peso) atua sobre ela. A direção e o sentido do vetor Peso sobre a caixa serão sempre:", options: ["Inclinados, a acompanhar a rampa.", "Horizontal e para a direita.", "Rigorosamente Vertical (Direção) e para Baixo (Sentido), apontando para o centro da Terra.", "Perpendiculares à superfície da rampa."], correctIndex: 2, explanation: { correctText: "O Peso nunca é enganado por rampas ou inclinações. A gravidade é a atração do centro de massa do planeta, logo, a seta do vetor Peso aponta sempre verticalmente para o chão.", otherOptions: ["A força que é perpendicular à rampa é a 'Força Normal', não o Peso."] } },
+        { level: "Fácil", text: "Para terminar o assunto de Grandezas: Qual das alternativas apresenta apenas as propriedades que pertencem aos VETORES (aquelas que faltam aos escalares)?", options: ["Número e Unidade de Medida.", "Direção e Sentido no espaço tridimensional.", "Massa e Tempo de observação.", "Positividade e Negatividade escalar."], correctIndex: 1, explanation: { correctText: "A alma de um vetor, que o distingue de um escalar (que já tem número e unidade), é a sua orientação espacial: possuir uma Direção (reta de atuação) e um Sentido (para onde a seta se dirige).", otherOptions: ["Número e unidade formam o Escalar."] } }
+    ];
+
+    /* --- GESTÃO DE ESTADO (STATE) --- */
+    const quizState = {
+        currentIndex: 0,
+        userAnswers: new Array(questionsDatabase.length).fill(null),
+        confettiAnimationId: null
+    };
+
+    /* --- FUNCIONALIDADES DE PESQUISA (TEORIA) --- */
+    function initializeSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const contentGroups = document.querySelectorAll('.content-group');
+        const noResultsMsg = document.getElementById('no-results');
+
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', function(event) {
+            const searchTerm = normalizeText(event.target.value);
+            let totalVisibleElements = 0;
+            
+            contentGroups.forEach(group => {
+                const groupContent = normalizeText(group.textContent);
+                const isMatch = groupContent.includes(searchTerm);
+                
+                group.style.display = isMatch ? 'flex' : 'none';
+                if (isMatch) totalVisibleElements++;
+            });
+            
+            noResultsMsg.style.display = totalVisibleElements === 0 ? 'block' : 'none';
+        });
+    }
+
+    function normalizeText(text) {
+        return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    /* --- CONTROLO DE VISTAS (VIEWS) --- */
+    function changeApplicationView(viewName) {
+        const views = ['viewExplanation', 'viewPractice', 'viewResult'];
+        
+        views.forEach(viewId => document.getElementById(viewId).classList.remove('active'));
+        
+        const quizFooter = document.getElementById('quizFooter');
+        if (quizFooter) quizFooter.style.display = 'none';
+
+        if (viewName === 'explanation') {
+            document.getElementById('viewExplanation').classList.add('active');
+            document.getElementById('btnExp').classList.add('active');
+            document.getElementById('btnPrac').classList.remove('active');
+        } else if (viewName === 'practice') {
+            document.getElementById('viewPractice').classList.add('active');
+            if (quizFooter) quizFooter.style.display = 'flex';
+            document.getElementById('btnExp').classList.remove('active');
+            document.getElementById('btnPrac').classList.add('active');
+            
+            renderCurrentQuestion();
+            renderNavigationMap();
+        } else if (viewName === 'result') {
+            document.getElementById('viewResult').classList.add('active');
+        }
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* --- GERAÇÃO DE INTERFACE DO QUIZ --- */
+    function getDifficultyBadgeClass(level) {
+        const mapping = { 'Fácil': 'dif-facil', 'Médio': 'dif-medio', 'Difícil': 'dif-dificil' };
+        return mapping[level] || 'dif-facil';
+    }
+
+    function buildOptionsHTML(question, selectedAnswerIndex) {
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        return question.options.map((optionText, optionIndex) => {
+            let cssClass = '';
+            
+            if (selectedAnswerIndex !== null) {
+                if (optionIndex === question.correctIndex) cssClass = 'correct';
+                else if (optionIndex === selectedAnswerIndex) cssClass = 'wrong';
+                else cssClass = 'disabled';
+            }
+
+            const isDisabled = selectedAnswerIndex !== null ? 'disabled' : '';
+
+            return `
+                <button class="option-btn ${cssClass}" onclick="handleOptionSelection(${optionIndex})" ${isDisabled}>
+                    <div class="opt-circle">${alphabet[optionIndex]}</div>
+                    <div>${optionText}</div>
+                </button>
+            `;
+        }).join('');
+    }
+
+    function buildFeedbackHTML(question, selectedAnswerIndex) {
+        const isCorrect = selectedAnswerIndex === question.correctIndex;
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        const titleClass = isCorrect ? 'success' : 'error';
+        const titleText = isCorrect ? '✅ Raciocínio Correto!' : '❌ Diagnóstico de Falha!';
+        
+        const distortionsHTML = question.explanation.otherOptions.map((explanationText, idx) => {
+            if (idx === question.correctIndex) return '';
+            return `<div class="feedback-item wrong-opt"><strong>${alphabet[idx]})</strong> ${explanationText}</div>`;
+        }).join('');
+
+        return `
+            <div class="feedback-box show">
+                <div class="feedback-title ${titleClass}" style="color: ${isCorrect ? 'var(--correct-border)' : 'var(--wrong-border)'}">${titleText}</div>
+                <div class="feedback-item correct-opt"><strong>O Facto Científico:</strong> ${question.options[question.correctIndex]}</div>
+                <div style="margin-top:15px;font-size:1rem;color:var(--text-color);margin-bottom:15px;font-weight:600;">${question.explanation.correctText}</div>
+                <div style="margin-top:15px;border-top:2px dashed var(--theme-medium);padding-top:15px;">
+                    <small style="color:var(--theme-dark);"><strong>Análise das Distorções:</strong></small>
+                    ${distortionsHTML}
+                </div>
+            </div>
+        `;
+    }
+
+    function renderCurrentQuestion() {
+        const container = document.getElementById('quizContainer');
+        if (!container) return;
+
+        const question = questionsDatabase[quizState.currentIndex];
+        const selectedAnswerIndex = quizState.userAnswers[quizState.currentIndex];
+        const badgeClass = getDifficultyBadgeClass(question.level);
+        
+        let feedbackHTML = selectedAnswerIndex !== null ? buildFeedbackHTML(question, selectedAnswerIndex) : '';
+
+        container.innerHTML = `
+            <div class="quiz-question-card">
+                <span class="difficulty-badge ${badgeClass}">${question.level}</span>
+                <div style="margin-bottom:25px;">
+                    <span class="quiz-question-counter">QUESTÃO ${quizState.currentIndex + 1} DE ${questionsDatabase.length}</span>
+                    <h2 class="quiz-question-text">${question.text}</h2>
+                </div>
+                <div class="options-list">
+                    ${buildOptionsHTML(question, selectedAnswerIndex)}
+                </div>
+                ${feedbackHTML}
+            </div>
+        `;
+        
+        updateNavigationButtons();
+    }
+
+    /* --- LÓGICA DO QUIZ --- */
+    function handleOptionSelection(selectedIndex) {
+        if (quizState.userAnswers[quizState.currentIndex] !== null) return;
+        
+        quizState.userAnswers[quizState.currentIndex] = selectedIndex;
+        const isCorrect = selectedIndex === questionsDatabase[quizState.currentIndex].correctIndex;
+        
+        if (isCorrect) startSuccessAnimation();
+        else triggerErrorShakeEffect();
+        
+        renderCurrentQuestion();
+        renderNavigationMap();
+    }
+
+    function triggerErrorShakeEffect() {
+        const container = document.getElementById('quizContainer');
+        if (container) { 
+            container.classList.remove('shake-effect'); 
+            void container.offsetWidth; 
+            container.classList.add('shake-effect'); 
+            setTimeout(() => container.classList.remove('shake-effect'), 500); 
+        }
+    }
+
+    /* --- ANIMAÇÕES (CONFETTI) --- */
+    function startSuccessAnimation() {
+        const duration = 1500;
+        const end = Date.now() + duration;
+        
+        stopSuccessAnimation();
+        
+        function animateFrame() {
+            if(window.confetti && typeof confetti === 'function') {
+                const config = { particleCount: 5, spread: 55, colors: ['#6366F1', '#4338CA', '#F59E0B', '#EC4899'] };
+                confetti({ ...config, angle: 60, origin: { x: 0, y: 0.6 } });
+                confetti({ ...config, angle: 120, origin: { x: 1, y: 0.6 } });
+            }
+            if (Date.now() < end) quizState.confettiAnimationId = requestAnimationFrame(animateFrame);
+        }
+        animateFrame();
+    }
+
+    function stopSuccessAnimation() {
+        if (window.confetti && typeof confetti.reset === 'function') confetti.reset(); 
+        if (quizState.confettiAnimationId) {
+            cancelAnimationFrame(quizState.confettiAnimationId);
+            quizState.confettiAnimationId = null;
+        }
+    }
+
+    /* --- NAVEGAÇÃO MAPA --- */
+    function renderNavigationMap() {
+        const mapContainer = document.getElementById('qMap');
+        if (!mapContainer) return;
+        
+        mapContainer.innerHTML = questionsDatabase.map((question, index) => {
+            const isCurrent = index === quizState.currentIndex;
+            const userAnswer = quizState.userAnswers[index];
+            const hasAnswered = userAnswer !== null;
+            const isCorrect = userAnswer === question.correctIndex;
+            
+            let cssClass = 'map-dot';
+            if (isCurrent) cssClass += ' active';
+            if (hasAnswered) cssClass += isCorrect ? ' answered-correct' : ' answered-wrong';
+            
+            return `<div class="${cssClass}" onclick="goToQuestion(${index})">${index + 1}</div>`;
+        }).join('');
+        
+        setTimeout(() => { 
+            const activeDot = mapContainer.querySelector('.map-dot.active'); 
+            if (activeDot) activeDot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); 
+        }, 50);
+    }
+
+    function goToQuestion(targetIndex) { 
+        stopSuccessAnimation();
+        quizState.currentIndex = targetIndex; 
+        renderCurrentQuestion(); 
+        renderNavigationMap(); 
+    }
+    
+    function navigateQuestion(directionOffset) { 
+        const nextIndex = quizState.currentIndex + directionOffset; 
+        if (nextIndex >= 0 && nextIndex < questionsDatabase.length) goToQuestion(nextIndex); 
+    }
+
+    function updateNavigationButtons() {
+        const btnPrev = document.getElementById('btnPrev');
+        const btnNext = document.getElementById('btnNext');
+        
+        if (btnPrev) btnPrev.disabled = (quizState.currentIndex === 0);
+        
+        if (btnNext) {
+            const isLastQuestion = quizState.currentIndex === questionsDatabase.length - 1;
+            if (isLastQuestion) { 
+                btnNext.textContent = "Finalizar Avaliação"; 
+                btnNext.onclick = finishQuiz; 
+            } else { 
+                btnNext.textContent = "Próxima ➡️"; 
+                btnNext.onclick = () => navigateQuestion(1); 
+            }
+        }
+    }
+
+    /* --- CÁLCULO DE RESULTADOS --- */
+    function calculateStars(percent) {
+        if (percent === 100) return "⭐⭐⭐⭐⭐";
+        if (percent >= 80) return "⭐⭐⭐⭐";
+        if (percent >= 60) return "⭐⭐⭐";
+        if (percent >= 40) return "⭐⭐";
+        if (percent > 0) return "⭐";
+        return "🌑"; // zero stars
+    }
+
+    function finishQuiz() {
+        const unansweredCount = quizState.userAnswers.filter(answer => answer === null).length;
+        
+        if (unansweredCount > 0) {
+            const confirmMessage = `Existem ${unansweredCount} questões por responder. Quer terminar mesmo assim (as em branco serão dadas como erradas)?`;
+            if (!confirm(confirmMessage)) return;
+        }
+
+        stopSuccessAnimation();
+
+        const correctAnswersCount = quizState.userAnswers.filter((answer, index) => answer === questionsDatabase[index].correctIndex).length;
+        const totalQuestions = questionsDatabase.length;
+        const percentageScore = Math.round((correctAnswersCount / totalQuestions) * 100);
+        const isApproved = percentageScore >= 80;
+        
+        renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved);
+        changeApplicationView('result');
+    }
+
+    function renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved) {
+        document.getElementById('finalPercent').textContent = `${percentageScore}%`;
+        document.getElementById('finalScoreText').textContent = `Acertaste ${correctAnswersCount} de ${totalQuestions}`;
+        document.getElementById('finalStars').textContent = calculateStars(percentageScore);
+        
+        const reviewContainer = document.getElementById('review-container');
+        const actionButtonsContainer = document.getElementById('action-buttons');
+        
+        let summaryHTML = '';
+
+        if (isApproved) {
+            summaryHTML += `
+                <div class="result-summary-box success">
+                    <strong>🎉 EXCELENTE DOMÍNIO!</strong> A tua base em grandezas e vetores está muito forte. Estás pronto para os exames da mecânica do IFCE!
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REPETIR PARA 100%</button>`;
+        } else {
+            summaryHTML += `
+                <div class="result-summary-box error">
+                    <strong>⚠️ ATENÇÃO!</strong> Foste avaliado abaixo da meta (80%). Revisa a diferença anatômica entre Escaladores e Vetores, e o conceito de Direção vs. Sentido.
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REFAZER AVALIAÇÃO</button>`;
+        }
+        
+        if (correctAnswersCount < totalQuestions) {
+            summaryHTML += '<h4 style="margin-bottom:15px; color:var(--text-color); font-size:1.15rem;">Revisão das Falhas:</h4>';
+            questionsDatabase.forEach((question, index) => {
+                const userAnswerIndex = quizState.userAnswers[index];
+                if (userAnswerIndex !== question.correctIndex) {
+                    const userAnswerText = userAnswerIndex === null ? "Deixaste em branco" : question.options[userAnswerIndex];
+                    const correctAnswerText = question.options[question.correctIndex];
+                    
+                    summaryHTML += `
+                        <div class="error-log-item">
+                            <strong style="color:var(--theme-dark); font-size:1.05rem; display:block; margin-bottom:8px;">Q${index + 1}: ${question.text}</strong>
+                            <span style="color:var(--wrong-border); font-weight: 600; display:block; margin-bottom:5px;">A tua resposta: ${userAnswerText}</span>
+                            <span style="color:var(--correct-border); font-weight: 700; display:block;">A Resposta Exata: ${correctAnswerText}</span>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        reviewContainer.innerHTML = summaryHTML;
+    }
+
+    function resetQuiz() { 
+        quizState.userAnswers = new Array(questionsDatabase.length).fill(null); 
+        quizState.currentIndex = 0; 
+        changeApplicationView('practice'); 
+    }
+    
+    // START APPLICATION
+    initializeSearch();
+    changeApplicationView('explanation');
+</script>
+</body>
+</html>

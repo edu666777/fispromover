@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Física: Movimento Retilíneo Uniformemente Variado (MRUV) - Promover</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* --- VARIÁVEIS DE COR E TEMA: ACELERAÇÃO & FOGUETE (MRUV) --- */
+        :root {
+            --bg-color: #FFF7ED; /* Laranja muito claro */
+            --text-color: #1E293B; /* Slate escuro */
+            --border-color: #7C2D12; /* Rústico / Laranja escuro profundo */
+            --white: #FFFFFF;
+            
+            --theme-light: #FFEDD5; /* Laranja pastel */
+            --theme-medium: #F97316; /* Laranja vivo */
+            --theme-dark: #C2410C; /* Laranja forte */
+            --theme-contrast: #4338CA; /* Índigo (Gráficos/Contraste) */
+            --theme-accent: #DC2626; /* Vermelho (Travagem/Atenção) */
+            --theme-text-active: #FFFFFF;
+            
+            --correct-bg: #D1FAE5;
+            --correct-border: #059669;
+            --wrong-bg: #FFE4E6;
+            --wrong-border: #BE123C;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 15px 120px 15px;
+            background-image: linear-gradient(rgba(249, 115, 22, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(249, 115, 22, 0.1) 1px, transparent 1px);
+            background-size: 25px 25px;
+        }
+
+        /* --- ANIMAÇÕES --- */
+        @keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1) rotate(-5deg); color: var(--theme-contrast); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+        .pulse-effect { animation: pulse 2s infinite; display: inline-block; }
+        .shake-effect { animation: shake 0.4s ease-in-out; }
+
+        /* --- LAYOUT PRINCIPAL --- */
+        .container { width: 100%; max-width: 650px; display: flex; flex-direction: column; gap: 25px; }
+        .logo-header { display: flex; flex-direction: column; align-items: center; padding: 15px 0 25px 0; text-align: center; }
+        .css-logo { font-size: 1.5rem; font-weight: 900; color: var(--theme-text-active); text-transform: uppercase; letter-spacing: -1px; border: 3px solid var(--border-color); padding: 8px 24px; border-radius: 12px; background: var(--theme-dark); box-shadow: 4px 4px 0px var(--theme-contrast); margin-bottom: 15px; transform: rotate(-2deg); }
+        h1 { font-size: 2rem; font-weight: 900; color: var(--text-color); text-transform: uppercase; letter-spacing: -0.5px; line-height: 1.1; }
+        .subtitle { font-size: 1rem; color: var(--white); font-weight: 700; margin-top: 5px; background: var(--theme-contrast); padding: 4px 12px; border-radius: 8px; border: 2px solid var(--border-color); }
+
+        /* --- NAVEGAÇÃO --- */
+        .toggle-container { background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 6px; display: flex; box-shadow: 4px 4px 0px var(--border-color); position: sticky; top: 15px; z-index: 50; }
+        .toggle-btn { flex: 1; border: none; background: none; padding: 12px 0; border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.05rem; color: var(--text-color); cursor: pointer; transition: all 0.2s ease; }
+        .toggle-btn.active { background-color: var(--theme-dark); color: var(--theme-text-active); border: 2px solid var(--border-color); box-shadow: 2px 2px 0px var(--border-color); }
+
+        .view-section { display: none; animation: fadeIn 0.3s ease; flex-direction: column; gap: 35px; }
+        .view-section.active { display: flex; }
+
+        /* --- PESQUISA --- */
+        .search-container { position: relative; width: 100%; }
+        .search-input { width: 100%; padding: 16px 20px 16px 55px; border: 3px solid var(--border-color); border-radius: 12px; background-color: var(--white); font-family: 'Poppins', sans-serif; font-size: 1.05rem; font-weight: 600; color: var(--text-color); box-shadow: 4px 4px 0px var(--border-color); outline: none; transition: all 0.2s ease; }
+        .search-input:focus { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--theme-contrast); border-color: var(--theme-dark); }
+        .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 1.4rem; }
+        #no-results { text-align: center; color: var(--wrong-border); font-weight: 800; display: none; background: var(--wrong-bg); padding: 15px; border: 3px solid var(--wrong-border); border-radius: 8px; }
+
+        /* --- TEORIA --- */
+        .content-group { display: flex; flex-direction: column; position: relative; padding-top: 15px; }
+        .section-badge { display: inline-flex; align-items: center; gap: 10px; background-color: var(--theme-dark); color: var(--white); font-size: 1.1rem; font-weight: 800; padding: 8px 20px; border-radius: 8px; border: 3px solid var(--border-color); box-shadow: 3px 3px 0px var(--theme-contrast); text-transform: uppercase; position: absolute; top: -5px; left: 15px; z-index: 10; transform: rotate(-1.5deg); }
+        .theory-box { display: flex; flex-direction: column; padding: 35px 25px 25px 35px; border-radius: 12px; background-color: var(--white); border: 3px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); font-weight: 500; font-size: 1rem; line-height: 1.7; position: relative; overflow: hidden; gap: 20px; border-left: 14px solid var(--theme-medium); }
+        .theory-box h3 { font-size: 1.35rem; font-weight: 900; color: var(--theme-dark); margin-bottom: 5px; display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px; }
+        .theory-box h4 { font-size: 1.1rem; font-weight: 800; color: var(--text-color); margin-top: 10px; border-bottom: 2px solid var(--theme-light); padding-bottom: 5px; }
+        
+        .inline-example { display: block; width: fit-content; max-width: 100%; margin-top: 6px; margin-bottom: 6px; padding: 12px 20px; background-color: var(--theme-light); border: 2px solid var(--border-color); border-radius: 8px; font-size: 1.25rem; color: var(--theme-dark); font-weight: 900; letter-spacing: 1px; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); text-align: center; }
+        .visual-area { background: var(--bg-color); border: 3px dashed var(--theme-medium); border-radius: 12px; padding: 25px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; width: 100%; }
+        
+        .highlight-box { background-color: #FEF3C7; border: 3px solid var(--border-color); border-left: 8px solid var(--theme-contrast); padding: 18px 20px; border-radius: 8px; font-size: 0.95rem; color: #78350F; font-weight: 600; box-shadow: 3px 3px 0px rgba(0,0,0,0.1); }
+        .highlight-box.red { background-color: #FEE2E2; border-left-color: #EF4444; color: #7F1D1D; }
+
+        /* --- CARDS DE FÓRMULAS --- */
+        .g-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; width: 100%; margin-top: 10px; }
+        .g-card { flex: 1 1 calc(50% - 15px); min-width: 130px; border-radius: 12px; padding: 15px 10px; text-align: center; border: 3px solid var(--border-color); display: flex; flex-direction: column; align-items: center; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); background-color: var(--white); transition: transform 0.2s; }
+        .g-card:hover { transform: translateY(-3px); }
+        .g-card.full-width { flex: 1 1 100%; max-width: 280px; }
+        .g-icon { font-size: 2.5rem; margin-bottom: 8px; line-height: 1; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.15)); }
+        .g-title { font-size: 1rem; font-weight: 900; margin-bottom: 4px; text-transform: uppercase; color: var(--theme-dark); }
+        .g-formula { font-size: 1.15rem; font-weight: 800; color: var(--theme-contrast); margin-bottom: 4px; line-height: 1.2; background: var(--bg-color); padding: 4px 10px; border-radius: 6px; border: 2px solid var(--border-color); }
+        .g-desc { font-size: 0.8rem; font-weight: 600; color: var(--text-color); margin-top: 6px; line-height: 1.3; }
+
+        /* --- BOTÕES GERAIS --- */
+        .btn-action { width: 100%; padding: 20px; background-color: var(--theme-dark); color: white; border: 3px solid var(--border-color); border-radius: 12px; font-size: 1.15rem; font-weight: 900; cursor: pointer; box-shadow: 6px 6px 0px var(--theme-contrast); transition: all 0.1s; text-transform: uppercase; margin-top: 10px; }
+        .btn-action:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0px var(--theme-contrast); }
+
+        /* --- QUIZ UI --- */
+        .difficulty-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; border: 2px solid var(--border-color); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
+        .dif-facil { background: #D1FAE5; color: #065F46; }
+        .dif-medio { background: #FEF08A; color: #713F12; }
+        .dif-dificil { background: #FECACA; color: #7F1D1D; }
+
+        .question-map { display: flex; gap: 8px; overflow-x: auto; padding: 10px 5px; margin-bottom: 20px; white-space: nowrap; scroll-behavior: smooth; }
+        .question-map::-webkit-scrollbar { display: none; }
+        .map-dot { min-width: 38px; height: 38px; border: 2px solid var(--border-color); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; color: var(--theme-dark); background: white; cursor: pointer; transition: all 0.2s; }
+        .map-dot.active { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); transform: scale(1.15); }
+        .map-dot.answered-correct { background-color: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .map-dot.answered-wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .quiz-question-card { border: 4px solid var(--border-color); box-shadow: 6px 6px 0px var(--border-color); padding: 30px; border-radius: 16px; background: var(--white); }
+        .quiz-question-counter { font-size: 0.85rem; font-weight: 900; color: var(--theme-dark); letter-spacing: 1px; }
+        .quiz-question-text { font-size: 1.2rem; margin-top: 8px; color: var(--text-color); font-weight: 800; line-height: 1.5; margin-bottom: 25px;}
+
+        .option-btn { display: flex; align-items: center; width: 100%; padding: 18px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.1s ease; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 600; text-align: left; color: var(--text-color); }
+        .option-btn:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px var(--theme-contrast); }
+        .opt-circle { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--border-color); margin-right: 15px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.05rem; flex-shrink: 0; background: var(--theme-light); color: var(--theme-dark); }
+        .option-btn.correct { background-color: var(--correct-bg); border-color: var(--correct-border); box-shadow: 3px 3px 0px var(--correct-border); }
+        .option-btn.correct .opt-circle { background-color: var(--correct-border); color: white; border-color: var(--correct-border); }
+        .option-btn.wrong { background-color: var(--wrong-bg); border-color: var(--wrong-border); opacity: 0.9; box-shadow: none; }
+        .option-btn.wrong .opt-circle { background-color: var(--wrong-border); color: white; border-color: var(--wrong-border); }
+        .option-btn.disabled { pointer-events: none; opacity: 0.7; }
+
+        /* --- FEEDBACK DA QUESTÃO --- */
+        .feedback-box { display: block; margin-top: 25px; background-color: var(--white); border: 3px solid var(--border-color); border-radius: 12px; padding: 25px; animation: slideUp 0.3s ease-out; box-shadow: 5px 5px 0px rgba(0,0,0,0.1); }
+        .feedback-title { font-weight: 900; text-transform: uppercase; font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .feedback-item { margin-bottom: 10px; font-size: 0.95rem; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); line-height: 1.5; font-weight: 500; }
+        .feedback-item.correct-opt { background: var(--correct-bg); border-color: var(--correct-border); color: #064E3B; font-weight: 700; box-shadow: 3px 3px 0px var(--correct-border); }
+        .feedback-item.wrong-opt { background: #F1F5F9; border-color: #94A3B8; color: #475569; border-style: dashed; margin-top: 8px; }
+
+        /* --- RESULTADOS --- */
+        .result-card { background: white; border: 4px solid var(--border-color); border-radius: 16px; padding: 40px 20px; box-shadow: 8px 8px 0px var(--border-color); margin-bottom: 30px; text-align: center; }
+        .stars-container { font-size: 2.5rem; margin: 15px 0; letter-spacing: 5px; }
+        .percentage-big { font-size: 5rem; font-weight: 900; color: var(--theme-dark); line-height: 1; margin: 15px 0; text-shadow: 4px 4px 0px var(--theme-contrast); }
+        
+        .result-summary-box { padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 3px solid; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); }
+        .result-summary-box.success { background: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-border); }
+        .result-summary-box.error { background: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong-border); }
+
+        .error-log-item { margin-bottom: 15px; padding: 20px; background: var(--bg-color); border-radius: 12px; border: 3px dashed var(--theme-medium); text-align: left;}
+
+        /* --- RODAPÉ DE NAVEGAÇÃO --- */
+        .quiz-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--white); border-top: 3px solid var(--border-color); padding: 15px 20px; display: none; justify-content: center; gap: 20px; z-index: 100; box-shadow: 0px -4px 10px rgba(0,0,0,0.05); }
+        .nav-btn { padding: 15px 30px; border-radius: 12px; font-weight: 900; border: 3px solid var(--border-color); cursor: pointer; box-shadow: 3px 3px 0px var(--border-color); font-family: 'Poppins', sans-serif; text-transform: uppercase; background: white; color: var(--text-color); font-size: 1rem; transition: transform 0.1s; }
+        .nav-btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 0px 0px 0px transparent; }
+        .btn-next { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); border-color: var(--border-color); }
+        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <header class="logo-header">
+            <div class="css-logo"><span class="pulse-effect">🚀</span> PROMOVER</div>
+            <h1>Física / 9º Ano</h1>
+            <p class="subtitle">Movimento Variado (MRUV) & Queda Livre</p>
+        </header>
+
+        <div class="toggle-container">
+            <button class="toggle-btn active" id="btnExp" onclick="changeApplicationView('explanation')">📘 Teoria</button>
+            <button class="toggle-btn" id="btnPrac" onclick="changeApplicationView('practice')">🧠 Prática (30)</button>
+        </div>
+
+        <!-- VISTA: TEORIA -->
+        <main id="viewExplanation" class="view-section active">
+            
+            <div class="search-container">
+                <span class="search-icon" aria-hidden="true">🔍</span>
+                <input type="text" id="searchInput" class="search-input" aria-label="Pesquisar conteúdo" placeholder="Pesquisar conceito... (ex: Torricelli, Sorvetão, Queda Livre)">
+            </div>
+            <div id="no-results"><p>😕 Termo não encontrado na teoria do MRUV.</p></div>
+
+            <section class="content-group">
+                <div class="section-badge">🚀 1. Acelerar e Travar</div>
+                <article class="theory-box search-target">
+                    <h3>O que é o MRUV?</h3>
+                    <p>Ao contrário do MRU (onde a velocidade nunca muda), no <strong>Movimento Retilíneo Uniformemente Variado (MRUV)</strong>, o ponteiro do velocímetro está sempre a subir ou a descer.</p>
+                    
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li><strong>Aceleração Constante (a ≠ 0):</strong> O ritmo de mudança da velocidade é constante. Se a aceleração for de 2 m/s², significa que a velocidade aumenta 2 m/s a cada segundo que passa.</li>
+                        <li><strong>Acelerado vs. Retardado:</strong><br>
+                        👉 <em>Acelerado:</em> Velocidade (v) e Aceleração (a) têm o MESMO sinal. O carro está a ir mais depressa.<br>
+                        🛑 <em>Retardado:</em> Velocidade e Aceleração têm sinais OPOSTOS. O carro está a travar!</li>
+                    </ul>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">🧮 2. O Arsenal Matemático</div>
+                <article class="theory-box search-target">
+                    <h3>As 3 Fórmulas Sagradas</h3>
+                    <p>No MRUV, dependendo dos dados que o problema de exame te dá, deves escolher a fórmula certa:</p>
+                    
+                    <div class="visual-area" style="background: transparent; border: none; padding: 0;">
+                        <div class="g-grid">
+                            <!-- Velocidade -->
+                            <div class="g-card">
+                                <div class="g-icon">⏱️</div>
+                                <div class="g-title">Eq. da Velocidade</div>
+                                <div class="g-formula">V = V₀ + a.t</div>
+                                <div class="g-desc">Usas quando o problema te dá (ou pede) o <strong>Tempo</strong> e a <strong>Velocidade</strong>. ("Vovô Atleta").</div>
+                            </div>
+                            
+                            <!-- Torricelli -->
+                            <div class="g-card">
+                                <div class="g-icon">🚫⌚</div>
+                                <div class="g-title">Eq. de Torricelli</div>
+                                <div class="g-formula">V² = V₀² + 2.a.ΔS</div>
+                                <div class="g-desc"><strong>A Salvadora!</strong> Usas quando o problema <strong>NÃO DÁ</strong> nem pede o tempo.</div>
+                            </div>
+                            
+                            <!-- Posição -->
+                            <div class="g-card full-width">
+                                <div class="g-icon">📏</div>
+                                <div class="g-title">Eq. da Posição (Sorvetão)</div>
+                                <div class="g-formula">S = S₀ + V₀.t + (a.t²)/2</div>
+                                <div class="g-desc">Usas para encontrar a <strong>Distância (S)</strong> quando tens o tempo, mas não tens a velocidade final.</div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">📉 3. Lendo os Gráficos</div>
+                <article class="theory-box search-target">
+                    <h3>A Parábola do Espaço</h3>
+                    <p>Os gráficos do MRUV são muito fáceis de identificar:</p>
+                    
+                    <ul style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+                        <li><strong>Gráfico a x t (Aceleração):</strong> É uma linha <strong>horizontal</strong> (porque a aceleração é constante).</li>
+                        <li><strong>Gráfico V x t (Velocidade):</strong> É uma <strong>reta inclinada</strong> (a subir se a>0, a descer se a<0). A ÁREA continua a ser igual ao deslocamento (ΔS).</li>
+                        <li><strong>Gráfico S x t (Posição):</strong> É uma <strong>PARÁBOLA</strong> (curva em U). O vértice da parábola é exatamente o momento em que o carro pára (V=0) e inverte o sentido!</li>
+                    </ul>
+                </article>
+            </section>
+
+            <section class="content-group">
+                <div class="section-badge">🍎 4. Queda Livre</div>
+                <article class="theory-box search-target">
+                    <h3>A Maçã de Newton</h3>
+                    <p>A Queda Livre é apenas um caso especial de MRUV na vertical!</p>
+                    
+                    <div class="highlight-box red">
+                        <strong>Truques para Queda Livre (ignorando o ar):</strong><br>
+                        1. Se o objeto foi <em>abandonado/largado</em>, a Velocidade Inicial é zero (<strong>V₀ = 0</strong>).<br>
+                        2. A aceleração é a da Gravidade da Terra (<strong>g ≈ 10 m/s²</strong>).<br>
+                        3. Todos os objetos (uma pena ou uma bola de bowling) caem exatamente com a mesma aceleração e chegam ao chão ao mesmo tempo (no vácuo)!
+                    </div>
+                </article>
+            </section>
+
+            <button class="btn-action" onclick="changeApplicationView('practice')">
+                Iniciar a Avaliação (30 Questões) ➜
+            </button>
+        </main>
+
+        <!-- VISTA: PRÁTICA (QUIZ) -->
+        <main id="viewPractice" class="view-section">
+            <div style="margin-bottom: 20px; background-color: var(--white); padding: 15px; border-radius: 12px; border: 3px solid var(--border-color); box-shadow: 4px 4px 0px var(--border-color);">
+                <h2 style="color:var(--theme-dark); font-weight:900; margin-bottom: 5px;">A Prova de Fogo - IFCE</h2>
+                <p style="color: var(--theme-contrast); font-size: 0.95rem; font-weight:600;">
+                    30 questões de MRUV, Torricelli e Queda Livre. Tem papel e caneta para os cálculos. Acerta <strong>80% (24/30)</strong>.
+                </p>
+            </div>
+            
+            <div class="question-map" id="qMap"></div>
+            <div id="quizContainer" style="margin-bottom: 40px;"></div>
+        </main>
+
+        <!-- VISTA: RESULTADOS -->
+        <main id="viewResult" class="view-section">
+            <div class="result-card">
+                <h2 style="font-weight:900; text-transform:uppercase;">Relatório Final</h2>
+                <div class="stars-container" id="finalStars">⭐⭐⭐</div>
+                <div class="percentage-big" id="finalPercent">0%</div>
+                <p style="font-size:1.2rem; font-weight:700; color:#555;" id="finalScoreText">Acertaste 0 de 30</p>
+                <div id="review-container" style="text-align: left; margin-top: 20px;"></div>
+            </div>
+            <div id="action-buttons"></div>
+        </main>
+
+    </div>
+
+    <!-- RODAPÉ DE NAVEGAÇÃO -->
+    <footer class="quiz-footer" id="quizFooter">
+        <button class="nav-btn btn-prev" id="btnPrev" onclick="navigateQuestion(-1)">Anterior</button>
+        <button class="nav-btn btn-next" id="btnNext" onclick="navigateQuestion(1)">Próxima</button>
+    </footer>
+
+<script>
+    /* --- ESTRUTURA DE DADOS (BASE DE QUESTÕES - MRUV NÍVEL IFCE) --- */
+    const questionsDatabase = [
+        { level: "Fácil", text: "Ao contrário do MRU, no Movimento Retilíneo Uniformemente Variado (MRUV) existe uma grandeza que faz a velocidade mudar ao longo do tempo. Como se chama essa grandeza e qual é a sua principal característica no MRUV?", options: ["Velocidade Inicial; ela é sempre zero.", "Inércia; ela varia com o tempo.", "Aceleração; no MRUV ela é CONSTANTE e diferente de zero.", "Gravidade; ela é sempre negativa."], correctIndex: 2, explanation: { correctText: "A Aceleração (a) é a taxa de mudança da velocidade. No MRUV, a palavra 'Uniformemente' significa que a aceleração tem um valor fixo (ex: sempre 2 m/s²), o que faz a velocidade subir como uma escadinha regular.", otherOptions: ["As outras definições estão incorretas ou misturam conceitos."] } },
+        { level: "Fácil", text: "No Sistema Internacional (SI), a aceleração é medida numa unidade que indica 'quantos metros por segundo a velocidade muda a cada segundo'. Qual é essa unidade?", options: ["m/s (metros por segundo)", "m/s² (metros por segundo ao quadrado)", "N/kg (Newtons por quilograma)", "km/h²"], correctIndex: 1, explanation: { correctText: "A unidade oficial de aceleração no SI é o m/s² (metros por segundo ao quadrado). Isto deriva da divisão da velocidade (m/s) pelo tempo (s).", otherOptions: ["m/s é para velocidade.", "km/h² não é SI."] } },
+        { level: "Médio", text: "Para efeitos de prova, classificar o movimento é vital. Se um carro possui uma Velocidade Positiva (+20 m/s) e uma Aceleração Positiva (+2 m/s²), dizemos que o seu movimento é:", options: ["Acelerado e Retrógrado.", "Retardado e Progressivo.", "Acelerado e Progressivo.", "Uniforme."], correctIndex: 2, explanation: { correctText: "Velocidade Positiva significa que ele anda a favor da estrada (Progressivo). Como a Velocidade e a Aceleração têm o MESMO SINAL (+ e +), o carro ganha velocidade, logo é Acelerado.", otherOptions: ["Sinais opostos seriam Retardado."] } },
+        { level: "Médio", text: "Imagina que um carro viaja com Velocidade Negativa (-15 m/s) e a sua Aceleração também é Negativa (-3 m/s²). Qual é a classificação correta deste movimento?", options: ["Acelerado e Retrógrado.", "Retardado e Retrógrado.", "Uniforme e Progressivo.", "Retardado e Progressivo."], correctIndex: 0, explanation: { correctText: "Velocidade negativa significa que ele anda contra a orientação da via (Retrógrado). Como a Aceleração TEM O MESMO SINAL da Velocidade (- e -), as duas flechas apontam juntas, logo o carro ESTÁ A AUMENTAR A RAPIDEZ. É Acelerado!", otherOptions: ["Muitos alunos acham que aceleração negativa é sempre travagem, o que é um ERRO fatal."] } },
+        { level: "Médio", text: "Uma mota viaja a 30 m/s (v > 0) e avista um obstáculo, aplicando os travões. O condutor impõe uma aceleração de -5 m/s². Como se classifica o movimento durante a travagem?", options: ["Acelerado e Retrógrado.", "Retardado e Progressivo.", "Uniforme e Retardado.", "Retardado e Retrógrado."], correctIndex: 1, explanation: { correctText: "A mota ainda avança para a frente (V é positivo, Progressivo), mas a aceleração está a 'puxar' para trás (a é negativo). Sinais OPOSTOS significam travagem, logo, movimento Retardado.", otherOptions: ["Incorreto."] } },
+        { level: "Fácil", text: "A função horária da velocidade no MRUV é V = V₀ + a.t. Um carro parte do repouso e acelera a 4 m/s². Qual será a sua velocidade após 5 segundos?", options: ["10 m/s", "20 m/s", "40 m/s", "100 m/s"], correctIndex: 1, explanation: { correctText: "Partir do repouso significa que a velocidade inicial V₀ = 0. Usando a fórmula: V = 0 + (4 × 5) => V = 20 m/s.", otherOptions: ["Matemática simples de substituição."] } },
+        { level: "Médio", text: "Dada a equação horária da velocidade de um móvel no SI: V = 10 - 2.t. Qual é a velocidade inicial (V₀) e a aceleração (a) deste corpo?", options: ["V₀ = -2 m/s ; a = 10 m/s²", "V₀ = 10 m/s ; a = -2 m/s²", "V₀ = 0 m/s ; a = 8 m/s²", "V₀ = 10 m/s ; a = 2 m/s²"], correctIndex: 1, explanation: { correctText: "Comparando V = 10 - 2.t com a fórmula V = V₀ + a.t, vemos que o termo sozinho é o V₀ (10 m/s) e o termo colado ao tempo (t) é a aceleração (-2 m/s²).", otherOptions: ["Cuidado para não esquecer o sinal negativo da aceleração."] } },
+        { level: "Difícil", text: "Ainda usando a equação V = 10 - 2.t (SI). Em que instante de tempo (t) o corpo VAI PARAR (mesmo que seja só por um instante para inverter o sentido)?", options: ["10 s", "2 s", "5 s", "8 s"], correctIndex: 2, explanation: { correctText: "Para parar, a velocidade final (V) deve ser Zero. Substitui V por 0: 0 = 10 - 2t => 2t = 10 => t = 5 segundos.", otherOptions: ["Erro ao resolver a equação do 1º grau."] } },
+        { level: "Fácil", text: "O que diz a famosa 'Equação de Torricelli' e em que momento prático da resolução de uma prova de Física ela deve ser a tua primeira escolha?", options: ["Calcula o tempo exato de queda. Usa-se quando não sabemos a distância.", "V² = V₀² + 2.a.ΔS. Usa-se quando o problema NÃO nos dá (nem pede) o TEMPO (t).", "S = S₀ + V₀.t. Usa-se para movimento uniforme apenas.", "Calcula a força. Usa-se quando temos a massa."], correctIndex: 1, explanation: { correctText: "Torricelli é a única equação da cinemática que resolve o movimento variado sem a variável do tempo (t). Se o problema não fala em segundos, usa Torricelli!", otherOptions: ["As outras afirmações estão incorretas e referem-se a outras fórmulas."] } },
+        { level: "Difícil", text: "Cálculo com Torricelli: Um carro viaja a 20 m/s e vê um cão na estrada. Ele pisa nos travões, sofrendo uma desaceleração de -2 m/s² até PARAR completamente. Qual foi a distância total (ΔS) de travagem?", options: ["40 m", "50 m", "100 m", "200 m"], correctIndex: 2, explanation: { correctText: "O problema não dá o tempo! Usa Torricelli: V² = V₀² + 2.a.ΔS. Como ele vai parar, V=0. O V₀=20. E a=-2. Então: 0² = 20² + 2(-2)ΔS => 0 = 400 - 4ΔS => 4ΔS = 400 => ΔS = 100 metros.", otherOptions: ["Atenção aos sinais na álgebra."] } },
+        { level: "Médio", text: "Se um corpo é lançado para CIMA com velocidade de 30 m/s, num local onde a gravidade (g) atua para baixo com 10 m/s². Qual será a sua velocidade no ponto mais ALTO da trajetória?", options: ["10 m/s", "0 m/s", "-30 m/s", "100 m/s"], correctIndex: 1, explanation: { correctText: "No ponto de altura máxima, o corpo perdeu toda a sua velocidade por causa da gravidade que o puxou contra o movimento. Nesse milésimo de segundo, a velocidade é ZERO, antes de começar a cair.", otherOptions: ["-30 m/s será a velocidade com que ele vai bater de volta no chão."] } },
+        { level: "Difícil", text: "No mesmo lançamento vertical (V₀ = 30 m/s para cima; g = -10 m/s²). Quanto TEMPO demora o corpo a atingir a altura máxima (onde para)?", options: ["1 s", "2 s", "3 s", "6 s"], correctIndex: 2, explanation: { correctText: "Usa a equação da velocidade: V = V₀ + a.t. Na altura máxima V=0. Fica: 0 = 30 - 10t => 10t = 30 => t = 3 segundos.", otherOptions: ["6s seria o tempo total de voo (3s para subir + 3s para descer)."] } },
+        { level: "Médio", text: "A função horária da posição do MRUV (o 'Sorvetão') tem a forma S = S₀ + V₀.t + (a.t²)/2. Observa a equação de um carro: S = 5 + 10.t + 3.t² (SI). Qual é a ACELERAÇÃO (a) deste carro?", options: ["3 m/s²", "6 m/s²", "10 m/s²", "1,5 m/s²"], correctIndex: 1, explanation: { correctText: "Armadilha Clássica do IFCE! O número que multiplica o t² na fórmula é (a/2). Ou seja, Metade da Aceleração = 3. Logo, a Aceleração real inteira é o dobro: 2 × 3 = 6 m/s².", otherOptions: ["Muitos alunos respondem '3', esquecendo que o termo já está dividido por 2 na fórmula base."] } },
+        { level: "Fácil", text: "Num gráfico de Velocidade x Tempo (V x t) para o MRUV, qual é o aspeto da linha desenhada?", options: ["Uma parábola em forma de U.", "Uma linha reta horizontal constante.", "Uma reta inclinada (oblíqua), subindo ou descendo.", "Uma linha ziguezague."], correctIndex: 2, explanation: { correctText: "No MRUV a velocidade muda de forma constante (como uma escada reta). O gráfico V x t é uma reta inclinada. A inclinação dessa reta indica exatamente o valor da Aceleração.", otherOptions: ["Reta horizontal seria no MRU (velocidade não muda).", "Parábola é no gráfico da Posição (S x t)."] } },
+        { level: "Médio", text: "Ainda no gráfico de Velocidade x Tempo (V x t), o que descobrimos se calcularmos a ÁREA geométrica desenhada debaixo da reta (geralmente um triângulo ou trapézio)?", options: ["O tempo final.", "A posição inicial (S₀).", "A aceleração do corpo.", "O Deslocamento Total (ΔS)."], correctIndex: 3, explanation: { correctText: "Regra suprema dos gráficos na Cinemática: A 'Área' num gráfico de V x t é sempre numericamente igual ao espaço percorrido (Deslocamento ΔS), quer seja MRU ou MRUV.", otherOptions: ["A aceleração descobre-se calculando o declive (tangente) da reta."] } },
+        { level: "Difícil", text: "Num gráfico de Posição x Tempo (S x t) de um corpo em MRUV, a linha que se forma é uma PARÁBOLA (curva). O que representa fisicamente o 'Vértice' dessa parábola (a ponta da curva antes de virar)?", options: ["O momento da velocidade máxima.", "O momento em que o corpo inverte o sentido (onde a Velocidade é igual a ZERO).", "O momento em que a aceleração é máxima.", "A posição inicial do corpo."], correctIndex: 1, explanation: { correctText: "O vértice é a ponta da curva de U. Ali, o corpo parou de ir numa direção e começou a voltar. Nesse instante preciso, como ele parou para virar, a velocidade V = 0.", otherOptions: ["No MRUV a aceleração nunca muda, logo não há 'aceleração máxima'."] } },
+        { level: "Médio", text: "O famoso cientista Galileu Galilei provou (e os astronautas na Lua confirmaram) que, numa Queda Livre sem a resistência do ar (no vácuo), se largarmos uma bola de chumbo de 10 kg e uma pena de galinha da mesma altura, o que acontece?", options: ["A bola de chumbo chega ao chão muito primeiro por ser mais pesada.", "A pena flutua e não cai no vácuo.", "Ambas chegam ao chão EXATAMENTE ao mesmo tempo.", "A bola de chumbo cai mais devagar devido à inércia da sua massa."], correctIndex: 2, explanation: { correctText: "A gravidade (g) aplica a MESMA aceleração a todos os corpos, independentemente da sua massa. Sem o atrito do ar para segurar a pena, ambos caem lado a lado a 9,8 m/s².", otherOptions: ["O peso só afeta a queda na Terra por causa do choque com o ar (aerodinâmica)."] } },
+        { level: "Fácil", text: "A expressão 'Queda Livre' na física escolar assume duas condições importantes para as fórmulas. Quais são?", options: ["Velocidade Inicial (V₀) é zero e a resistência do ar é ignorada.", "Velocidade Inicial (V₀) é muito alta e atira-se o objeto para baixo.", "A gravidade é zero.", "O objeto voa para cima livremente."], correctIndex: 0, explanation: { correctText: "Queda Livre implica 'abandonar' ou 'largar' o corpo do repouso, ou seja, V₀ = 0. E ignora-se a travagem do ar para os cálculos funcionarem com a aceleração pura da gravidade (g).", otherOptions: ["Atirar para baixo com força seria um Lançamento Vertical para Baixo, não queda livre pura."] } },
+        { level: "Difícil", text: "Cálculo de Queda Livre: Um tijolo é largado (V₀=0) do topo de um edifício. Ele demora 4 segundos a bater no chão. Considerando a gravidade g = 10 m/s², qual é a altura (ΔS) do edifício?", options: ["40 metros", "80 metros", "160 metros", "20 metros"], correctIndex: 1, explanation: { correctText: "Usando a fórmula do Sorvetão reduzida para queda (ΔS = V₀t + gt²/2). Como V₀=0, a parte inicial some. Fica: Altura = (10 × 4²) / 2 => H = (10 × 16) / 2 => H = 160 / 2 = 80 metros.", otherOptions: ["40m seria apenas g × t, que dá a velocidade, não a altura."] } },
+        { level: "Médio", text: "Uma carrinha a 20 m/s acelera a 2 m/s² para realizar uma ultrapassagem. Se esta aceleração for mantida durante 5 segundos, qual será a distância (ΔS) que a carrinha avançou nesses 5 segundos?", options: ["100 m", "125 m", "50 m", "25 m"], correctIndex: 1, explanation: { correctText: "Usa a equação do Sorvetão: ΔS = V₀.t + (a.t²)/2. Temos V₀=20, a=2 e t=5. Então: ΔS = (20×5) + (2 × 5²)/2 => ΔS = 100 + (2×25)/2 => ΔS = 100 + 25 = 125 metros.", otherOptions: ["100m seria a resposta se ele não tivesse acelerado (se fosse MRU puro)."] } },
+        { level: "Fácil", text: "Um corpo é lançado verticalmente para CIMA. Durante a subida, a gravidade está a puxar o corpo para baixo. Como classificamos este movimento de subida?", options: ["Acelerado, porque a gravidade é uma força forte.", "Uniforme, pois a gravidade é constante.", "Retardado, porque a velocidade diminui ao longo da subida.", "Retrógrado, pois vai contra o chão."], correctIndex: 2, explanation: { correctText: "A velocidade aponta para cima (V>0), mas a aceleração da gravidade aponta para baixo (g<0). Sinais opostos = movimento Retardado (a travar até parar no topo).", otherOptions: ["Quando o corpo começar a descer, a sua velocidade será negativa e a gravidade também, tornando o movimento de descida Acelerado."] } },
+        { level: "Médio", text: "Um comboio partindo do repouso acelera a 1 m/s². Qual a distância que o comboio precisará de percorrer para que o seu velocímetro chegue à marca dos 30 m/s?", options: ["30 m", "450 m", "900 m", "15 m"], correctIndex: 1, explanation: { correctText: "O problema não dá o tempo! Usa Torricelli: V² = V₀² + 2.a.ΔS. Fica: 30² = 0² + 2(1)ΔS => 900 = 2ΔS => ΔS = 900 / 2 = 450 metros.", otherOptions: ["Erro na divisão final de Torricelli."] } },
+        { level: "Difícil", text: "Uma bola é largada do 10º andar. Uma segunda bola é atirada PARA BAIXO, no mesmo instante, com muita força (V₀ = 15 m/s). O que acontecerá na corrida até ao chão (ignorando o ar)?", options: ["A bola largada chega primeiro, pois a gravidade tem mais efeito sobre ela.", "Ambas chegam exatamente ao mesmo tempo, pois a gravidade atua igualmente.", "A bola atirada com força chega primeiro, pois além da aceleração da gravidade, já partiu com uma velocidade a seu favor.", "A bola atirada com força levanta voo."], correctIndex: 2, explanation: { correctText: "A regra de caírem juntas no mesmo tempo SÓ se aplica se AMBAS forem abandonadas do repouso (V₀=0). Como a segunda foi arremessada com força, ela já tinha vantagem de velocidade inicial, batendo no chão primeiro.", otherOptions: ["Atenção à leitura do enunciado de física!"] } },
+        { level: "Médio", text: "Um guepardo avista a presa e vai do repouso (0 m/s) até aos 30 m/s num tempo espantoso de apenas 3 segundos. Qual foi a sua aceleração média durante este ataque?", options: ["3 m/s²", "10 m/s²", "30 m/s²", "90 m/s²"], correctIndex: 1, explanation: { correctText: "A fórmula básica de aceleração é a = ΔV / Δt. A variação de velocidade foi de 30 m/s. O tempo foi 3s. a = 30 / 3 = 10 m/s² (Uma aceleração idêntica à da queda livre da gravidade!).", otherOptions: ["Matemática simples de divisão."] } },
+        { level: "Fácil", text: "Para efeitos de prova escolar e do exame do IFCE, qual é o valor aproximado da aceleração da gravidade (g) próximo à superfície da Terra que os alunos são instruídos a utilizar nos cálculos?", options: ["98 m/s²", "10 m/s²", "1 m/s²", "300.000 m/s²"], correctIndex: 1, explanation: { correctText: "O valor real varia ligeiramente dependendo do pólo ou equador, mas é aproximadamente 9,8 m/s². Para facilitar as contas escolares e de exames sem calculadora, as bancas arredondam sempre para 10 m/s².", otherOptions: ["98 é um erro de casa decimal."] } },
+        { level: "Médio", text: "Num gráfico de Aceleração x Tempo (a x t) de um movimento MRUV, a área debaixo da linha formada diz-nos um dado importante. A área do gráfico a x t equivale a:", options: ["Ao Espaço Total Percorrido.", "À Variação da Velocidade (ΔV).", "Ao Tempo de Viagem.", "À Posição Inicial."], correctIndex: 1, explanation: { correctText: "No gráfico axt, a área é a Base (t) × Altura (a). Como a × t = ΔV (da fórmula a = ΔV/t), a área dá-nos exatamente os m/s que o carro ganhou ou perdeu.", otherOptions: ["O Espaço é a área do gráfico V x t, cuidado com a troca de gráficos!"] } },
+        { level: "Difícil", text: "Considera a equação S = 10 - 2t + t² (SI). Em que momento (t) o corpo INVERTE O SENTIDO do seu movimento?", options: ["t = 2 s", "t = 1 s", "t = 10 s", "Nunca inverte."], correctIndex: 1, explanation: { correctText: "Para inverter o sentido, o corpo tem de parar (V=0). 1º: Acha a equação da velocidade (V = V₀ + at). Pela equação de S: S₀=10, V₀=-2 e a=2 (pois at²/2 deu 1t², logo a=2). A eq da velocidade é V = -2 + 2t. Para V=0 => 0 = -2 + 2t => 2t = 2 => t = 1 segundo.", otherOptions: ["Este é o nível máximo de exigência algébrica do secundário!"] } },
+        { level: "Fácil", text: "Na Física, uma Travagem Perfeita implica que a força dos travões atue sobre o carro até ele imobilizar-se. Na equação matemática (V = V₀ + at), o que colocamos no 'V' final do carro no fim da travagem?", options: ["Colocamos o peso do carro.", "Colocamos o tempo negativo.", "Colocamos o valor Zero (V = 0), pois parar significa velocidade final nula.", "Colocamos a mesma velocidade inicial com sinal negativo."], correctIndex: 2, explanation: { correctText: "A palavra 'parou' ou 'travou completamente' num texto de física deve ser traduzida matematicamente pelo aluno para V = 0 na fórmula.", otherOptions: ["Sinal negativo de velocidade inicial seria bater e ressaltar de costas na mesma velocidade."] } },
+        { level: "Médio", text: "Um objeto é atirado para baixo de uma ponte com velocidade de 5 m/s (Lançamento Vertical para Baixo). Qual a equação da velocidade deste objeto em função do tempo (assumindo g = 10 m/s² e o eixo apontando para baixo)?", options: ["V = 0 + 10t", "V = 5 + 10t", "V = 5 - 10t", "V = 10 + 5t"], correctIndex: 1, explanation: { correctText: "Usando V = V₀ + at. A velocidade inicial não é zero, foi empurrado a 5 m/s. Como o movimento e a gravidade apontam juntos para o chão (acelerando), ambos são positivos no nosso referencial. Fica V = 5 + 10t.", otherOptions: ["Se a origem for o chão apontando para cima, ambos seriam negativos (V = -5 - 10t). A opção B respeita o referencial de topo."] } },
+        { level: "Difícil", text: "Resumo Dourado: Se um corpo em MRUV tiver a sua equação das posições dada por S = -20 + 8t - 2t², como será a PARÁBOLA do seu gráfico de posições no papel?", options: ["Uma linha reta a subir.", "Uma parábola em formato de 'U' (concavidade voltada para cima).", "Uma parábola em formato de 'sino/arco' (concavidade voltada para baixo).", "Um ziguezague."], correctIndex: 2, explanation: { correctText: "Na matemática, o formato da parábola depende do termo ao quadrado. Aqui, o t² está multiplicado por um número NEGATIVO (-2). Assim como na matemática (função quadrática de a<0), a concavidade é voltada para baixo (carinha triste).", otherOptions: ["Concavidade para cima seria se a aceleração fosse positiva."] } }
+    ];
+
+    /* --- GESTÃO DE ESTADO (STATE) --- */
+    const quizState = {
+        currentIndex: 0,
+        userAnswers: new Array(questionsDatabase.length).fill(null),
+        confettiAnimationId: null
+    };
+
+    /* --- FUNCIONALIDADES DE PESQUISA (TEORIA) --- */
+    function initializeSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const contentGroups = document.querySelectorAll('.content-group');
+        const noResultsMsg = document.getElementById('no-results');
+
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', function(event) {
+            const searchTerm = normalizeText(event.target.value);
+            let totalVisibleElements = 0;
+            
+            contentGroups.forEach(group => {
+                const groupContent = normalizeText(group.textContent);
+                const isMatch = groupContent.includes(searchTerm);
+                
+                group.style.display = isMatch ? 'flex' : 'none';
+                if (isMatch) totalVisibleElements++;
+            });
+            
+            noResultsMsg.style.display = totalVisibleElements === 0 ? 'block' : 'none';
+        });
+    }
+
+    function normalizeText(text) {
+        return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    /* --- CONTROLO DE VISTAS (VIEWS) --- */
+    function changeApplicationView(viewName) {
+        const views = ['viewExplanation', 'viewPractice', 'viewResult'];
+        
+        views.forEach(viewId => document.getElementById(viewId).classList.remove('active'));
+        
+        const quizFooter = document.getElementById('quizFooter');
+        if (quizFooter) quizFooter.style.display = 'none';
+
+        if (viewName === 'explanation') {
+            document.getElementById('viewExplanation').classList.add('active');
+            document.getElementById('btnExp').classList.add('active');
+            document.getElementById('btnPrac').classList.remove('active');
+        } else if (viewName === 'practice') {
+            document.getElementById('viewPractice').classList.add('active');
+            if (quizFooter) quizFooter.style.display = 'flex';
+            document.getElementById('btnExp').classList.remove('active');
+            document.getElementById('btnPrac').classList.add('active');
+            
+            renderCurrentQuestion();
+            renderNavigationMap();
+        } else if (viewName === 'result') {
+            document.getElementById('viewResult').classList.add('active');
+        }
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* --- GERAÇÃO INTERFACE DO QUIZ --- */
+    function getDifficultyBadgeClass(level) {
+        const mapping = { 'Fácil': 'dif-facil', 'Médio': 'dif-medio', 'Difícil': 'dif-dificil' };
+        return mapping[level] || 'dif-facil';
+    }
+
+    function buildOptionsHTML(question, selectedAnswerIndex) {
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        return question.options.map((optionText, optionIndex) => {
+            let cssClass = '';
+            
+            if (selectedAnswerIndex !== null) {
+                if (optionIndex === question.correctIndex) cssClass = 'correct';
+                else if (optionIndex === selectedAnswerIndex) cssClass = 'wrong';
+                else cssClass = 'disabled';
+            }
+
+            const isDisabled = selectedAnswerIndex !== null ? 'disabled' : '';
+
+            return `
+                <button class="option-btn ${cssClass}" onclick="handleOptionSelection(${optionIndex})" ${isDisabled}>
+                    <div class="opt-circle">${alphabet[optionIndex]}</div>
+                    <div>${optionText}</div>
+                </button>
+            `;
+        }).join('');
+    }
+
+    function buildFeedbackHTML(question, selectedAnswerIndex) {
+        const isCorrect = selectedAnswerIndex === question.correctIndex;
+        const alphabet = ['A', 'B', 'C', 'D'];
+        
+        const titleClass = isCorrect ? 'success' : 'error';
+        const titleText = isCorrect ? '✅ Raciocínio Correto!' : '❌ Diagnóstico de Falha!';
+        
+        const distortionsHTML = question.explanation.otherOptions.map((explanationText, idx) => {
+            if (idx === question.correctIndex) return '';
+            return `<div class="feedback-item wrong-opt"><strong>${alphabet[idx]})</strong> ${explanationText}</div>`;
+        }).join('');
+
+        return `
+            <div class="feedback-box show">
+                <div class="feedback-title ${titleClass}" style="color: ${isCorrect ? 'var(--correct-border)' : 'var(--wrong-border)'}">${titleText}</div>
+                <div class="feedback-item correct-opt"><strong>O Fato Numérico:</strong> ${question.options[question.correctIndex]}</div>
+                <div style="margin-top:15px;font-size:1rem;color:var(--text-color);margin-bottom:15px;font-weight:600;">${question.explanation.correctText}</div>
+                <div style="margin-top:15px;border-top:2px dashed var(--theme-dark);padding-top:15px;">
+                    <small style="color:var(--text-color);"><strong>Análise das Distorções:</strong></small>
+                    ${distortionsHTML}
+                </div>
+            </div>
+        `;
+    }
+
+    function renderCurrentQuestion() {
+        const container = document.getElementById('quizContainer');
+        if (!container) return;
+
+        const question = questionsDatabase[quizState.currentIndex];
+        const selectedAnswerIndex = quizState.userAnswers[quizState.currentIndex];
+        const badgeClass = getDifficultyBadgeClass(question.level);
+        
+        let feedbackHTML = selectedAnswerIndex !== null ? buildFeedbackHTML(question, selectedAnswerIndex) : '';
+
+        container.innerHTML = `
+            <div class="quiz-question-card">
+                <span class="difficulty-badge ${badgeClass}">${question.level}</span>
+                <div style="margin-bottom:25px;">
+                    <span class="quiz-question-counter">QUESTÃO ${quizState.currentIndex + 1} DE ${questionsDatabase.length}</span>
+                    <h2 class="quiz-question-text">${question.text}</h2>
+                </div>
+                <div class="options-list">
+                    ${buildOptionsHTML(question, selectedAnswerIndex)}
+                </div>
+                ${feedbackHTML}
+            </div>
+        `;
+        
+        updateNavigationButtons();
+    }
+
+    /* --- LÓGICA DO QUIZ --- */
+    function handleOptionSelection(selectedIndex) {
+        if (quizState.userAnswers[quizState.currentIndex] !== null) return;
+        
+        quizState.userAnswers[quizState.currentIndex] = selectedIndex;
+        const isCorrect = selectedIndex === questionsDatabase[quizState.currentIndex].correctIndex;
+        
+        if (isCorrect) startSuccessAnimation();
+        else triggerErrorShakeEffect();
+        
+        renderCurrentQuestion();
+        renderNavigationMap();
+    }
+
+    function triggerErrorShakeEffect() {
+        const container = document.getElementById('quizContainer');
+        if (container) { 
+            container.classList.remove('shake-effect'); 
+            void container.offsetWidth; 
+            container.classList.add('shake-effect'); 
+            setTimeout(() => container.classList.remove('shake-effect'), 500); 
+        }
+    }
+
+    /* --- ANIMAÇÕES (CONFETTI) --- */
+    function startSuccessAnimation() {
+        const duration = 1500;
+        const end = Date.now() + duration;
+        
+        stopSuccessAnimation();
+        
+        function animateFrame() {
+            if(window.confetti && typeof confetti === 'function') {
+                const config = { particleCount: 5, spread: 55, colors: ['#F97316', '#DC2626', '#4338CA', '#C2410C'] };
+                confetti({ ...config, angle: 60, origin: { x: 0, y: 0.6 } });
+                confetti({ ...config, angle: 120, origin: { x: 1, y: 0.6 } });
+            }
+            if (Date.now() < end) quizState.confettiAnimationId = requestAnimationFrame(animateFrame);
+        }
+        animateFrame();
+    }
+
+    function stopSuccessAnimation() {
+        if (window.confetti && typeof confetti.reset === 'function') confetti.reset(); 
+        if (quizState.confettiAnimationId) {
+            cancelAnimationFrame(quizState.confettiAnimationId);
+            quizState.confettiAnimationId = null;
+        }
+    }
+
+    /* --- NAVEGAÇÃO MAPA --- */
+    function renderNavigationMap() {
+        const mapContainer = document.getElementById('qMap');
+        if (!mapContainer) return;
+        
+        mapContainer.innerHTML = questionsDatabase.map((question, index) => {
+            const isCurrent = index === quizState.currentIndex;
+            const userAnswer = quizState.userAnswers[index];
+            const hasAnswered = userAnswer !== null;
+            const isCorrect = userAnswer === question.correctIndex;
+            
+            let cssClass = 'map-dot';
+            if (isCurrent) cssClass += ' active';
+            if (hasAnswered) cssClass += isCorrect ? ' answered-correct' : ' answered-wrong';
+            
+            return `<div class="${cssClass}" onclick="goToQuestion(${index})">${index + 1}</div>`;
+        }).join('');
+        
+        setTimeout(() => { 
+            const activeDot = mapContainer.querySelector('.map-dot.active'); 
+            if (activeDot) activeDot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); 
+        }, 50);
+    }
+
+    function goToQuestion(targetIndex) { 
+        stopSuccessAnimation();
+        quizState.currentIndex = targetIndex; 
+        renderCurrentQuestion(); 
+        renderNavigationMap(); 
+    }
+    
+    function navigateQuestion(directionOffset) { 
+        const nextIndex = quizState.currentIndex + directionOffset; 
+        if (nextIndex >= 0 && nextIndex < questionsDatabase.length) goToQuestion(nextIndex); 
+    }
+
+    function updateNavigationButtons() {
+        const btnPrev = document.getElementById('btnPrev');
+        const btnNext = document.getElementById('btnNext');
+        
+        if (btnPrev) btnPrev.disabled = (quizState.currentIndex === 0);
+        
+        if (btnNext) {
+            const isLastQuestion = quizState.currentIndex === questionsDatabase.length - 1;
+            if (isLastQuestion) { 
+                btnNext.textContent = "Finalizar Avaliação"; 
+                btnNext.onclick = finishQuiz; 
+            } else { 
+                btnNext.textContent = "Próxima ➡️"; 
+                btnNext.onclick = () => navigateQuestion(1); 
+            }
+        }
+    }
+
+    /* --- CÁLCULO DE RESULTADOS --- */
+    function calculateStars(percent) {
+        if (percent === 100) return "⭐⭐⭐⭐⭐";
+        if (percent >= 80) return "⭐⭐⭐⭐";
+        if (percent >= 60) return "⭐⭐⭐";
+        if (percent >= 40) return "⭐⭐";
+        if (percent > 0) return "⭐";
+        return "🌑"; // zero stars
+    }
+
+    function finishQuiz() {
+        const unansweredCount = quizState.userAnswers.filter(answer => answer === null).length;
+        
+        if (unansweredCount > 0) {
+            const confirmMessage = `Existem ${unansweredCount} questões por responder. Quer terminar mesmo assim (as em branco serão dadas como erradas)?`;
+            if (!confirm(confirmMessage)) return;
+        }
+
+        stopSuccessAnimation();
+
+        const correctAnswersCount = quizState.userAnswers.filter((answer, index) => answer === questionsDatabase[index].correctIndex).length;
+        const totalQuestions = questionsDatabase.length;
+        const percentageScore = Math.round((correctAnswersCount / totalQuestions) * 100);
+        const isApproved = percentageScore >= 80;
+        
+        renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved);
+        changeApplicationView('result');
+    }
+
+    function renderResultsView(percentageScore, correctAnswersCount, totalQuestions, isApproved) {
+        document.getElementById('finalPercent').textContent = `${percentageScore}%`;
+        document.getElementById('finalScoreText').textContent = `Acertaste ${correctAnswersCount} de ${totalQuestions}`;
+        document.getElementById('finalStars').textContent = calculateStars(percentageScore);
+        
+        const reviewContainer = document.getElementById('review-container');
+        const actionButtonsContainer = document.getElementById('action-buttons');
+        
+        let summaryHTML = '';
+
+        if (isApproved) {
+            summaryHTML += `
+                <div class="result-summary-box success">
+                    <strong>🎉 VELOCIDADE MÁXIMA ALCANÇADA!</strong> Dominas o raciocínio das acelerações e as armadilhas dos sinais e da Equação de Torricelli.
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REPETIR PARA 100%</button>`;
+        } else {
+            summaryHTML += `
+                <div class="result-summary-box error">
+                    <strong>⚠️ TRAVAGEM DE EMERGÊNCIA!</strong> Foste avaliado abaixo da meta (80%). Revisa a Equação de Torricelli e como os sinais (+ e -) funcionam num movimento Retardado.
+                </div>
+            `;
+            actionButtonsContainer.innerHTML = `<button class="btn-action" onclick="resetQuiz()">🔄 REFAZER AVALIAÇÃO</button>`;
+        }
+        
+        if (correctAnswersCount < totalQuestions) {
+            summaryHTML += '<h4 style="margin-bottom:15px; color:var(--text-color); font-size:1.15rem;">Revisão das Falhas Físicas e Algébricas:</h4>';
+            questionsDatabase.forEach((question, index) => {
+                const userAnswerIndex = quizState.userAnswers[index];
+                if (userAnswerIndex !== question.correctIndex) {
+                    const userAnswerText = userAnswerIndex === null ? "Deixaste em branco" : question.options[userAnswerIndex];
+                    const correctAnswerText = question.options[question.correctIndex];
+                    
+                    summaryHTML += `
+                        <div class="error-log-item">
+                            <strong style="color:var(--theme-dark); font-size:1.05rem; display:block; margin-bottom:8px;">Q${index + 1}: ${question.text}</strong>
+                            <span style="color:var(--wrong-border); font-weight: 600; display:block; margin-bottom:5px;">A tua matemática: ${userAnswerText}</span>
+                            <span style="color:var(--correct-border); font-weight: 700; display:block;">O Resultado Exato: ${correctAnswerText}</span>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        reviewContainer.innerHTML = summaryHTML;
+    }
+
+    function resetQuiz() { 
+        quizState.userAnswers = new Array(questionsDatabase.length).fill(null); 
+        quizState.currentIndex = 0; 
+        changeApplicationView('practice'); 
+    }
+    
+    // START APPLICATION
+    initializeSearch();
+    changeApplicationView('explanation');
+</script>
+</body>
+</html>
