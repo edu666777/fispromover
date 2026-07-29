@@ -152,6 +152,17 @@
         .nav-btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 0px 0px 0px transparent; }
         .btn-next { background-color: var(--theme-dark); color: white; box-shadow: 3px 3px 0px var(--theme-contrast); border-color: var(--border-color); }
         .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+
+        /* --- MODAL DE CONFIRMAÇÃO --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(8, 51, 68, 0.6); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(3px); animation: fadeIn 0.2s ease; }
+        .modal-box { background: var(--white); padding: 30px; border-radius: 16px; border: 4px solid var(--border-color); box-shadow: 8px 8px 0px var(--border-color); max-width: 90%; width: 400px; text-align: center; }
+        .modal-title { font-size: 1.3rem; font-weight: 900; color: var(--theme-contrast); margin-bottom: 15px; text-transform: uppercase; }
+        .modal-text { font-size: 1rem; color: var(--text-color); margin-bottom: 25px; font-weight: 600; line-height: 1.5; }
+        .modal-buttons { display: flex; gap: 15px; justify-content: center; }
+        .btn-modal { padding: 12px 20px; font-weight: 800; border-radius: 8px; border: 3px solid var(--border-color); cursor: pointer; transition: transform 0.1s; font-family: 'Poppins', sans-serif; font-size: 1rem;}
+        .btn-modal:active { transform: translate(2px, 2px); box-shadow: none; }
+        .btn-cancel { background: var(--white); color: var(--text-color); box-shadow: 3px 3px 0px var(--border-color); }
+        .btn-confirm { background: var(--theme-dark); color: var(--white); box-shadow: 3px 3px 0px var(--theme-contrast); }
     </style>
 </head>
 <body>
@@ -257,7 +268,7 @@
             <div style="margin-bottom: 20px; background-color: var(--white); padding: 15px; border-radius: 12px; border: 3px solid var(--border-color); box-shadow: 4px 4px 0px var(--border-color);">
                 <h2 style="color:var(--theme-dark); font-weight:900; margin-bottom: 5px;">A Prova de Fogo - IFCE</h2>
                 <p style="color: var(--theme-contrast); font-size: 0.95rem; font-weight:600;">
-                    30 questões de cálculo de velocidade. Atenção máxima às conversões (km/h para m/s). Acerta <strong>80% (24/30)</strong>.
+                    30 questões de cálculo de velocidade. Atenção máxima às conversões (km/h para m/s). Acerta <strong>80% (24/30)</strong>. O seu progresso será salvo automaticamente!
                 </p>
             </div>
             
@@ -284,6 +295,18 @@
         <button class="nav-btn btn-prev" id="btnPrev" onclick="navigateQuestion(-1)">Anterior</button>
         <button class="nav-btn btn-next" id="btnNext" onclick="navigateQuestion(1)">Próxima</button>
     </footer>
+
+    <!-- MODAL CUSTOMIZADO (SUBSTITUI O ALERTA NATIVO) -->
+    <div class="modal-overlay" id="customModal">
+        <div class="modal-box">
+            <div class="modal-title">⚠️ Atenção!</div>
+            <div class="modal-text" id="modalMessage">Existem questões por responder. Quer terminar mesmo assim (as em branco serão dadas como erradas)?</div>
+            <div class="modal-buttons">
+                <button class="btn-modal btn-cancel" onclick="closeModal()">Voltar</button>
+                <button class="btn-modal btn-confirm" id="btnConfirmModal">Terminar Prova</button>
+            </div>
+        </div>
+    </div>
 
 <script>
     /* --- ESTRUTURA DE DADOS (BASE DE QUESTÕES - NÍVEL IFCE TÉCNICO INTEGRADO) --- */
@@ -326,6 +349,32 @@
         userAnswers: new Array(questionsDatabase.length).fill(null),
         confettiAnimationId: null
     };
+
+    /* --- ARMAZENAMENTO LOCAL (LOCALSTORAGE) --- */
+    const STORAGE_KEY = 'promoverFisicaQuizProgress';
+
+    function saveProgressLocal() {
+        const stateToSave = {
+            currentIndex: quizState.currentIndex,
+            userAnswers: quizState.userAnswers
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
+    }
+
+    function loadProgressLocal() {
+        const savedData = localStorage.getItem(STORAGE_KEY);
+        if (savedData) {
+            try {
+                const parsed = JSON.parse(savedData);
+                if (parsed.userAnswers && parsed.userAnswers.length === questionsDatabase.length) {
+                    quizState.userAnswers = parsed.userAnswers;
+                    quizState.currentIndex = parsed.currentIndex || 0;
+                }
+            } catch (e) {
+                console.error("Erro ao ler os dados guardados:", e);
+            }
+        }
+    }
 
     /* --- FUNCIONALIDADES DE PESQUISA (TEORIA) --- */
     function initializeSearch() {
@@ -474,6 +523,8 @@
         if (isCorrect) startSuccessAnimation();
         else triggerErrorShakeEffect();
         
+        saveProgressLocal(); // Guarda o progresso sempre que responde
+        
         renderCurrentQuestion();
         renderNavigationMap();
     }
@@ -541,6 +592,7 @@
     function goToQuestion(targetIndex) { 
         stopSuccessAnimation();
         quizState.currentIndex = targetIndex; 
+        saveProgressLocal(); // Guarda sempre que muda de questão para restaurar a aba certa
         renderCurrentQuestion(); 
         renderNavigationMap(); 
     }
@@ -568,7 +620,7 @@
         }
     }
 
-    /* --- CÁLCULO DE RESULTADOS --- */
+    /* --- CÁLCULO DE RESULTADOS E MODAL --- */
     function calculateStars(percent) {
         if (percent === 100) return "⭐⭐⭐⭐⭐";
         if (percent >= 80) return "⭐⭐⭐⭐";
@@ -578,14 +630,30 @@
         return "🌑"; // zero stars
     }
 
+    function showModal(message, confirmCallback) {
+        document.getElementById('modalMessage').textContent = message;
+        document.getElementById('customModal').style.display = 'flex';
+        document.getElementById('btnConfirmModal').onclick = confirmCallback;
+    }
+
+    function closeModal() {
+        document.getElementById('customModal').style.display = 'none';
+    }
+
     function finishQuiz() {
         const unansweredCount = quizState.userAnswers.filter(answer => answer === null).length;
         
         if (unansweredCount > 0) {
             const confirmMessage = `Existem ${unansweredCount} questões por responder. Quer terminar mesmo assim (as em branco serão dadas como erradas)?`;
-            if (!confirm(confirmMessage)) return;
+            showModal(confirmMessage, processFinishQuiz);
+            return;
         }
 
+        processFinishQuiz();
+    }
+
+    function processFinishQuiz() {
+        closeModal();
         stopSuccessAnimation();
 
         const correctAnswersCount = quizState.userAnswers.filter((answer, index) => answer === questionsDatabase[index].correctIndex).length;
@@ -648,10 +716,12 @@
     function resetQuiz() { 
         quizState.userAnswers = new Array(questionsDatabase.length).fill(null); 
         quizState.currentIndex = 0; 
+        localStorage.removeItem(STORAGE_KEY); // Limpa o save state ao reiniciar
         changeApplicationView('practice'); 
     }
     
     // START APPLICATION
+    loadProgressLocal(); // Carrega progresso anterior (se houver)
     initializeSearch();
     changeApplicationView('explanation');
 </script>
